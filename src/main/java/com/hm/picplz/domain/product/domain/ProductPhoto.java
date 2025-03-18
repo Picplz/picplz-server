@@ -1,6 +1,7 @@
 package com.hm.picplz.domain.product.domain;
 
 import com.hm.picplz.domain.photographer.domain.Photographer;
+import com.hm.picplz.domain.product.dto.ProductDto;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,13 +36,24 @@ public class ProductPhoto extends BaseEntity {
     @JoinColumn(name = "photographer_id")
     private Photographer photographer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shoot_product")
+    private ShootProduct shootProduct;
+
     @Builder
-    public ProductPhoto(Long id, String imageData, int photoOrder, Photographer photographer) {
+    private ProductPhoto(Long id, String imageData, int photoOrder, ShootProduct shootProduct) {
         this.id = id;
         this.imageData = imageData;
         this.photoOrder = photoOrder;
-        this.photographer = photographer;
+        this.shootProduct = shootProduct;
     }
 
     // factory method
+    public static ProductPhoto of(String photo, int photoOrder, ShootProduct shootProduct) {
+        return ProductPhoto.builder()
+                .imageData(photo)
+                .photoOrder(photoOrder)
+                .shootProduct(shootProduct)
+                .build();
+    }
 }

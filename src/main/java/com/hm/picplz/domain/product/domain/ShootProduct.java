@@ -1,6 +1,7 @@
 package com.hm.picplz.domain.product.domain;
 
 import com.hm.picplz.domain.photographer.domain.Photographer;
+import com.hm.picplz.domain.product.dto.ProductDto;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import com.hm.picplz.global.common.entity.YesNo;
 import jakarta.persistence.Column;
@@ -71,5 +72,19 @@ public class ShootProduct extends BaseEntity {
         this.editPrice = editPrice;
         this.otherDetails = otherDetails;
         this.photographer = photographer;
+    }
+
+    public static ShootProduct of(ProductDto.Create request, Photographer photographer) {
+        return ShootProduct.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .shootPrice(request.getShootPrice())
+                .shootDuration(request.getShootDuration())
+                .amount(request.getAmount())
+                .editedYn(YesNo.parse(request.getEditedYn()))
+                .editPrice(request.getEditPrice())
+                .otherDetails(request.getOtherDetails())
+                .photographer(photographer)
+                .build();
     }
 }
