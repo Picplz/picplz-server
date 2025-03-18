@@ -32,6 +32,7 @@ build/
 !**/src/test/**
 /src/main/resources/application*
 docker-compose.yml
+Dockerfile.dev
 
 ### STS ###
 .apt_generated

@@ -45,4 +45,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         return null;
     }
+
+    // 개발용 토큰 무시
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return true;    // 모든 요청에 대해 필터를 적용하지 않음
+    }
 }
