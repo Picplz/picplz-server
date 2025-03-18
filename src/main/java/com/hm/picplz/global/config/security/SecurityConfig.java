@@ -38,7 +38,8 @@ public class SecurityConfig {
             "/swagger-resources/",
             "/v3/api-docs/",
             "/webjars/",
-            "/members/test"
+            "/members/test",
+            "/**"
      };
 
      /* Admin 접근 권한 */

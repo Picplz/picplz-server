@@ -2,6 +2,7 @@ package com.hm.picplz.domain.photographer.helper;
 
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
+import com.hm.picplz.domain.photographer.exception.PhotographerNotFound;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +24,10 @@ public class PhotographerHelper {
         return results.stream()
                 .map(result -> {
                     Long memberId = Long.parseLong(result.getContent().getName().toString());
-                    Photographer photographer = photographerRepository.findByMemberId(memberId);
+                    Photographer photographer = photographerRepository.findByMemberId(memberId)
+                            .orElseThrow(() -> {
+                                throw PhotographerNotFound.EXCEPTION;
+                            });
                     return photographer != null ? PhotographerDto.Card.of(photographer, result.getDistance().getValue()) : null;
                 })
                 .filter(Objects::nonNull)
