@@ -2,6 +2,7 @@ package com.hm.picplz.global.common.response;
 
 import com.hm.picplz.global.error.ErrorReason;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,7 +14,7 @@ public class CommonResponse {
     private String message;
 
     private CommonResponse(int statusCode, String message) {
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.statusCode = statusCode;
         this.message = message;
     }
