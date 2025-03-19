@@ -1,14 +1,8 @@
 package com.hm.picplz.domain.member.service;
 
-import com.hm.picplz.domain.member.MemberRepository;
-import com.hm.picplz.domain.member.domain.Member;
-import com.hm.picplz.domain.member.dto.request.CreateMemberRequest;
-import com.hm.picplz.domain.member.dto.request.UpdateMemberInfoRequest;
-import com.hm.picplz.domain.member.dto.request.UpdateMemberLocationRequest;
-import com.hm.picplz.domain.member.dto.response.MemberInfoResponse;
-import com.hm.picplz.domain.photographer.dto.PhotographerDto;
-import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.geo.Point;
@@ -18,13 +12,25 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.hm.picplz.domain.member.MemberRepository;
+import com.hm.picplz.domain.member.domain.Member;
+import com.hm.picplz.domain.member.dto.request.CreateMemberRequest;
+import com.hm.picplz.domain.member.dto.request.UpdateMemberInfoRequest;
+import com.hm.picplz.domain.member.dto.request.UpdateMemberLocationRequest;
+import com.hm.picplz.domain.member.dto.response.MemberInfoResponse;
+import com.hm.picplz.domain.member.exception.DuplicateNickname;
+import com.hm.picplz.domain.member.exception.MemberNotFound;
+import com.hm.picplz.domain.member.exception.NotValidNickname;
+import com.hm.picplz.domain.photographer.dto.PhotographerDto;
+import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
-
-    private final String GEO_KEY = "members:locations";
+    private static final Pattern NICKNAME_PATTERN = Pattern.compile("^(?!\\s)(?!.*\\s$)[a-zA-Z0-9가-힣]{2,15}$");
+    private static final String GEO_KEY = "members:locations";
 
     private final MemberRepository memberRepository;
     private final PhotographerHelper photographerHelper;
@@ -88,5 +94,27 @@ public class MemberService {
         memberRepository.save(member);
 
         return new MemberInfoResponse(member);
+    }
+
+
+    public void checkNickname(String nickname) {
+        /*
+        * - 닉네임의 처음과 마지막 부분 공백 사용 불가
+        * - 한글, 영문, 숫자 입력 가능 (2-15자)
+        * - 이모티콘, 특수문자 사용 불가
+        * - 중복 닉네임 불가
+        * */
+        if (!NICKNAME_PATTERN.matcher(nickname).matches()) throw NotValidNickname.EXCEPTION;
+        if (memberRepository.existsByNicknameIs(nickname)) {
+            throw DuplicateNickname.EXCEPTION;
+        }
+    }
+
+    public MemberInfoResponse getMemberInfo(Long id) {
+        return new MemberInfoResponse(getMemberById(id));
+    }
+
+    private Member getMemberById(Long id) {
+        return memberRepository.findById(id).orElseThrow(() -> MemberNotFound.EXCEPTION);
     }
 }

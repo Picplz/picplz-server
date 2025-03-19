@@ -16,7 +16,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     @Transactional
-    public Long createPhotographer(Long memberId) {
+    public Long createCustomer(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(IllegalArgumentException::new);
 
         Customer customer = Customer.builder()
