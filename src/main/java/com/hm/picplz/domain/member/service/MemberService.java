@@ -18,11 +18,10 @@ import com.hm.picplz.domain.member.dto.request.CreateMemberRequest;
 import com.hm.picplz.domain.member.dto.request.UpdateMemberInfoRequest;
 import com.hm.picplz.domain.member.dto.request.UpdateMemberLocationRequest;
 import com.hm.picplz.domain.member.dto.response.MemberInfoResponse;
-import com.hm.picplz.domain.member.exception.DuplicateNickname;
-import com.hm.picplz.domain.member.exception.MemberNotFound;
-import com.hm.picplz.domain.member.exception.NotValidNickname;
+import com.hm.picplz.domain.member.exception.MemberErrorCode;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
+import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +38,7 @@ public class MemberService {
     @Transactional
     public MemberInfoResponse updateMemberInfo(UpdateMemberInfoRequest updateMemberInfoRequest) {
         Member member = memberRepository.findById(updateMemberInfoRequest.getId())
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
 
         member.updateNickname(updateMemberInfoRequest.getNickname());
         member.updateProfileImage(updateMemberInfoRequest.getProfileImage());
@@ -104,9 +103,9 @@ public class MemberService {
         * - 이모티콘, 특수문자 사용 불가
         * - 중복 닉네임 불가
         * */
-        if (!NICKNAME_PATTERN.matcher(nickname).matches()) throw NotValidNickname.EXCEPTION;
+        if (!NICKNAME_PATTERN.matcher(nickname).matches()) throw ExceptionFactory.of(MemberErrorCode.NOT_VALID_NICKNAME);
         if (memberRepository.existsByNicknameIs(nickname)) {
-            throw DuplicateNickname.EXCEPTION;
+            throw ExceptionFactory.of(MemberErrorCode.DUPLICATE_NICKNAME);
         }
     }
 
@@ -115,6 +114,6 @@ public class MemberService {
     }
 
     private Member getMemberById(Long id) {
-        return memberRepository.findById(id).orElseThrow(() -> MemberNotFound.EXCEPTION);
+        return memberRepository.findById(id).orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 }
