@@ -36,7 +36,9 @@ public class Photographer extends BaseEntity {
 
     private YesNo active;  // Y/N
 
-    private String instagram;
+    private String instagram; // 인스타그램 아이디
+
+    private String introduction; // 소갯말
 
     @OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<ShootProduct> shootProducts = new ArrayList<>();
@@ -51,12 +53,14 @@ public class Photographer extends BaseEntity {
     private List<Career> careers = new ArrayList<>();
 
     @Builder
-    private Photographer(Long id, Member member, String area,int period, YesNo active, String instagram) {
+    private Photographer(Long id, Member member, String area,int period, YesNo active,
+        String instagram, String introduction) {
         this.id = id;
         this.member = member;
         this.area = area;
         this.period = period;
         this.active = active;
         this.instagram = instagram;
+        this.introduction = introduction;
     }
 }

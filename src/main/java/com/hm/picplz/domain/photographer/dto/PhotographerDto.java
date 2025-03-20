@@ -1,15 +1,16 @@
 package com.hm.picplz.domain.photographer.dto;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.global.common.entity.YesNo;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -66,11 +67,36 @@ public class PhotographerDto {
             detail.instagram = photographer.getInstagram();
             detail.photoMoods = photographer.getPhotoMoods().stream()
                     .map(PhotoMood::getContent)
-                    .collect(Collectors.toList());
+                    .toList();
             detail.followers = followers;
             detail.isFollowing = isFollowing;
 
             return detail;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class Create {
+        private String area;
+
+        private int period;
+
+        private String instagram;
+
+        private String introduction;
+
+        private List<String> photoMoods;
+
+        public static Create of (String area, int period, String instagram, String introduction, List<String> photoMoods) {
+            Create create = new Create();
+            create.area = area;
+            create.period = period;
+            create.instagram = instagram;
+            create.introduction = introduction;
+            create.photoMoods = photoMoods;
+
+            return create;
         }
     }
 }
