@@ -67,14 +67,8 @@ jobs:
       run: |
         mkdir -p ./src/main/resources
         cd ./src/main/resources
-        touch ./application.yml
-        touch ./application-jwt.yml
-        touch ./application-db.yml
-        touch ./application-oauth.yml
-        echo "${{ secrets.APPLICATION }}" > ./application.yml
-        echo "${{ secrets.JWT }}" > ./application-jwt.yml
-        echo "${{ secrets.DB }}" > ./application-db.yml
-        echo "${{ secrets.OAUTH }}" > ./application-oauth.yml
+        touch ./application-dev.yml
+        echo "${{ secrets.DEV }}" > ./application-dev.yml
 
       # gradle을 통해 소스를 빌드.
     - name: Build with Gradle
