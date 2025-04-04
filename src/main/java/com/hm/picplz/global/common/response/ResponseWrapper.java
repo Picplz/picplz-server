@@ -3,6 +3,7 @@ package com.hm.picplz.global.common.response;
 import com.hm.picplz.global.error.ErrorReason;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -17,6 +18,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @Slf4j
 @RestControllerAdvice
 public class ResponseWrapper implements ResponseBodyAdvice<Object> {
+
+    private static final List<String> SWAGGER_EXCLUDED_PATHS = List.of(
+            "/api/v1/v3/api-docs",
+            "/swagger-ui",
+            "/swagger-resources",
+            "/webjars"
+    );
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -35,6 +43,12 @@ public class ResponseWrapper implements ResponseBodyAdvice<Object> {
         HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
         HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
         int statusCode = servletResponse.getStatus();
+        String uri = servletRequest.getRequestURI();
+
+        // Swagger 및 OpenAPI 관련 엔드포인트는 래핑하지 않고 그대로 반환
+        if (isSwaggerRequest(uri)) {
+            return body;
+        }
 
         // response fail
         if (statusCode >= 400) {
@@ -55,6 +69,10 @@ public class ResponseWrapper implements ResponseBodyAdvice<Object> {
                 .message("success")
                 .data(body)
                 .build();
+    }
+
+    private boolean isSwaggerRequest(String uri) {
+        return SWAGGER_EXCLUDED_PATHS.stream().anyMatch(uri::startsWith);
     }
 
 }

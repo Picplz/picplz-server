@@ -30,7 +30,6 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
 !**/src/test/**
-/src/main/resources/application*
 docker-compose.yml
 Dockerfile.dev
 
