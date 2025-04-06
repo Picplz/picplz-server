@@ -1,15 +1,16 @@
 package com.hm.picplz.domain.photographer.dto;
 
+import java.util.List;
+
+import com.hm.picplz.domain.photographer.domain.CareerType;
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.global.common.entity.YesNo;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -35,7 +36,7 @@ public class PhotographerDto {
             card.distance = distance;
             card.photoMoods = photographer.getPhotoMoods().stream()
                     .map(PhotoMood::getContent)
-                    .collect(Collectors.toList());
+                    .toList();
 
             return card;
         }
@@ -66,11 +67,59 @@ public class PhotographerDto {
             detail.instagram = photographer.getInstagram();
             detail.photoMoods = photographer.getPhotoMoods().stream()
                     .map(PhotoMood::getContent)
-                    .collect(Collectors.toList());
+                    .toList();
             detail.followers = followers;
             detail.isFollowing = isFollowing;
 
             return detail;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class Create {
+        private String area;
+        private int year;
+        private int month;
+        private String instagram;
+        private String introduction;
+        private List<String> photoMoods;
+
+        public static Create of (String area, int year, int month, String instagram, String introduction, List<String> photoMoods) {
+            Create create = new Create();
+            create.area = area;
+            create.year = year;
+            create.month = month;
+            create.instagram = instagram;
+            create.introduction = introduction;
+            create.photoMoods = photoMoods;
+
+            return create;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor()
+    public static class AddCareer {
+        private List<CareerType> careers;
+
+        public static AddCareer of(List<CareerType> careers) {
+            AddCareer addCareer = new AddCareer();
+            addCareer.careers = careers;
+            return addCareer;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class UpdateCareerPeriod {
+        private int year;
+        private int month;
+        public static UpdateCareerPeriod of(int year, int month) {
+            UpdateCareerPeriod updateCareerPeriod = new UpdateCareerPeriod();
+            updateCareerPeriod.year = year;
+            updateCareerPeriod.month = month;
+            return updateCareerPeriod;
         }
     }
 }

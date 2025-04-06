@@ -3,6 +3,8 @@ package com.hm.picplz.domain.photographer.domain;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,16 +28,17 @@ public class Career extends BaseEntity {
     private Long id;
 
     @NotNull
-    private String content;
+    @Enumerated(EnumType.STRING)
+    private CareerType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "photographer_id", nullable = false)
     private Photographer photographer;
 
     @Builder
-    private Career(Long id, String content, Photographer photographer) {
+    private Career(Long id, CareerType type, Photographer photographer) {
         this.id = id;
-        this.content = content;
+        this.type = type;
         this.photographer = photographer;
     }
 }
