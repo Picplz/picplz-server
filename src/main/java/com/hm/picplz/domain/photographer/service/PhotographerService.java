@@ -123,7 +123,7 @@ public class PhotographerService {
 	}
 
 	@Transactional
-	public List<PhotoMoodDto.PhotoMoodRes> addPhotoMoods(PhotoMoodDto.AddPhotoMood addPhotoMoodDto, Long memberId) {
+	public PhotoMoodDto.PhotoMoodRes addPhotoMoods(PhotoMoodDto.AddPhotoMood addPhotoMoodDto, Long memberId) {
 		Photographer photographer = getPhotographerByMemberId(memberId);
 		return photoMoodService.createPhotoMood(addPhotoMoodDto.getPhotoMoods(), photographer);
 	}

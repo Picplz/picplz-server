@@ -69,7 +69,7 @@ public class PhotographerController {
     @PhotographerOnly
     @Operation(summary = "사진 감성 해시 태그 생성")
     @PostMapping("/photo-mood")
-    public List<PhotoMoodDto.PhotoMoodRes> addPhotoMood(
+    public PhotoMoodDto.PhotoMoodRes addPhotoMood(
         @AuthenticationPrincipal Long memberId,
         @RequestBody PhotoMoodDto.AddPhotoMood addPhotoMoodRequestDto) {
         return photographerService.addPhotoMoods(addPhotoMoodRequestDto, memberId);

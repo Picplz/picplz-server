@@ -28,11 +28,11 @@ public class PhotoMoodDto {
 	@Data
 	@NoArgsConstructor
 	public static class PhotoMoodRes {
-		private String photoMoodContent;
+		private List<String> photoMoods;
 
-		public static PhotoMoodRes of(PhotoMood photoMood) {
+		public static PhotoMoodRes of(List<PhotoMood> photoMoods) {
 			PhotoMoodRes photoMoodDto = new PhotoMoodRes();
-			photoMoodDto.photoMoodContent = photoMood.getContent();
+			photoMoodDto.photoMoods = photoMoods.stream().map(PhotoMood::getContent).toList();
 			return photoMoodDto;
 		}
 	}

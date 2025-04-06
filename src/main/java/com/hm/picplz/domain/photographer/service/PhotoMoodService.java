@@ -19,7 +19,7 @@ public class PhotoMoodService {
     private final PhotoMoodRepository photoMoodRepository;
 
     @Transactional
-    public List<PhotoMoodDto.PhotoMoodRes> createPhotoMood(List<String> photoMoodContents, Photographer photographer) {
+    public PhotoMoodDto.PhotoMoodRes createPhotoMood(List<String> photoMoodContents, Photographer photographer) {
         List<PhotoMood> photoMoods = photoMoodContents.stream()
                 .map(photoMood ->
                         PhotoMood.builder()
@@ -29,6 +29,6 @@ public class PhotoMoodService {
                 .toList();
 
         photoMoodRepository.saveAll(photoMoods);
-        return photoMoods.stream().map(PhotoMoodDto.PhotoMoodRes::of).toList();
+        return PhotoMoodDto.PhotoMoodRes.of(photoMoods);
     }
 }
