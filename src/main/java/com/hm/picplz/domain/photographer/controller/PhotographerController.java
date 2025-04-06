@@ -35,7 +35,7 @@ public class PhotographerController {
 
     @Operation(summary = "회원가입 시 작가 생성 api")
     @PostMapping
-    public void createMemberTest(
+    public void createPhotographer(
         @AuthenticationPrincipal Long memberId,
         @RequestBody PhotographerDto.Create createPhotographerRequestDto) {
         photographerService.createPhotographer(memberId, createPhotographerRequestDto);
