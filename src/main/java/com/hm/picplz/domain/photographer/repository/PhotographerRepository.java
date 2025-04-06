@@ -16,4 +16,6 @@ public interface PhotographerRepository extends JpaRepository<Photographer, Long
 
     @Query("SELECT p FROM Photographer p JOIN FETCH p.member LEFT JOIN FETCH p.photoMoods WHERE p.id = :photographerId")
     Optional<Photographer> findPhotographerWithMoods(@Param("photographerId") Long photographerId);
+
+    Boolean existsByMemberId(@Param("memberId") Long memberId);
 }

@@ -63,4 +63,8 @@ public class Photographer extends BaseEntity {
         this.instagram = instagram;
         this.introduction = introduction;
     }
+
+    public void updatePeriod(int period) {
+        this.period = period;
+    }
 }

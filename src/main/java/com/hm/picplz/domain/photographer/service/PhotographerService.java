@@ -1,5 +1,9 @@
 package com.hm.picplz.domain.photographer.service;
 
+import java.time.Duration;
+import java.util.List;
+
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,62 +11,121 @@ import com.hm.picplz.domain.following.repository.FollowingRepository;
 import com.hm.picplz.domain.member.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
+import com.hm.picplz.domain.photographer.domain.Career;
 import com.hm.picplz.domain.photographer.domain.Photographer;
+import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
+import com.hm.picplz.domain.photographer.repository.CareerRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.global.common.entity.YesNo;
 import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
 
-
 @Service
 @RequiredArgsConstructor
 public class PhotographerService {
 
-    private final PhotographerRepository photographerRepository;
-    private final MemberRepository memberRepository;
-    private final PhotoMoodService photoMoodService;
-    private final FollowingRepository followingRepository;
+	private final PhotoMoodService photoMoodService;
 
-    @Transactional
-    public void createPhotographer(Long memberId, PhotographerDto.Create createPhotographerRequestDto) {
-        Member member = memberRepository.findById(memberId).orElseThrow(()-> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
+	private final CareerRepository careerRepository;
+	private final PhotographerRepository photographerRepository;
+	private final MemberRepository memberRepository;
+	private final FollowingRepository followingRepository;
 
-        Photographer photographer = Photographer.builder()
-                .member(member)
-                .area(createPhotographerRequestDto.getArea())
-                .period(createPhotographerRequestDto.getPeriod())
-                .active(YesNo.N)
-                .instagram(createPhotographerRequestDto.getInstagram())
-                .introduction(createPhotographerRequestDto.getIntroduction())
-                .build();
+	private final RedisTemplate<String, Object> redisTemplate;
 
-        photographerRepository.save(photographer);
+	private static final String PHOTOGRAPHER_REDIS_KEY = "photographer:";
 
-        photoMoodService.createPhotoMood(createPhotographerRequestDto.getPhotoMoods(), photographer);
-    }
+	@Transactional
+	public void createPhotographer(Long memberId, PhotographerDto.Create createPhotographerRequestDto) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
 
-    public PhotographerDto.Detail getPhotographerDetail(Long photographerId, Long memberId) {
-        Photographer photographer = getPhotographer(photographerId);
-        int followersCount = getFollowers(photographer);
-        YesNo isFollowing = isFollowing(photographer, memberId);
-        return PhotographerDto.Detail.of(photographer, followersCount, isFollowing);
-    }
+		Photographer photographer = Photographer.builder()
+			.member(member)
+			.area(createPhotographerRequestDto.getArea())
+			.period(createPhotographerRequestDto.getYear() * 12 + createPhotographerRequestDto.getMonth())
+			.active(YesNo.N)
+			.instagram(createPhotographerRequestDto.getInstagram())
+			.introduction(createPhotographerRequestDto.getIntroduction())
+			.build();
 
-    private Photographer getPhotographer(Long photographerId) {
-        return photographerRepository.findPhotographerWithMoods(photographerId)
-            .orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
-    }
+		photographerRepository.save(photographer);
+		photoMoodService.createPhotoMood(createPhotographerRequestDto.getPhotoMoods(), photographer);
+	}
 
-    private int getFollowers(Photographer photographer) {
-        return Math.toIntExact(followingRepository.countByFollowingId(photographer.getMember().getId()));
-    }
+	public PhotographerDto.Detail getPhotographerDetail(Long photographerId, Long memberId) {
+		Photographer photographer = getPhotographerByPhotographerId(photographerId);
+		int followersCount = getFollowers(photographer);
+		YesNo isFollowing = isFollowing(photographer, memberId);
+		return PhotographerDto.Detail.of(photographer, followersCount, isFollowing);
+	}
 
-    private YesNo isFollowing(Photographer photographer, Long memberId) {
-        return Boolean.TRUE.equals(
-            followingRepository.existsByFollowingIdAndFollowerId(photographer.getMember().getId(), memberId)) ?
-            YesNo.Y : YesNo.N;
-    }
+	private Photographer getPhotographerByPhotographerId(Long photographerId) {
+		return photographerRepository.findPhotographerWithMoods(photographerId)
+			.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+	}
+
+	private Photographer getPhotographerByMemberId(Long memberId) {
+		return photographerRepository.findByMemberId(memberId)
+			.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+	}
+
+	public Boolean getCachedPhotographerExistence(Long memberId) {
+		return (Boolean)redisTemplate.opsForValue().get(PHOTOGRAPHER_REDIS_KEY + memberId);
+	}
+
+	public boolean cachePhotographerExistence(Long memberId) {
+		boolean exists = photographerRepository.existsByMemberId(memberId);
+		redisTemplate.opsForValue().set(PHOTOGRAPHER_REDIS_KEY + memberId, exists, Duration.ofMinutes(30));
+		return exists;
+	}
+
+	public boolean checkAndCachePhotographer(Long memberId) {
+		Boolean cached = getCachedPhotographerExistence(memberId);
+		if (cached != null) {
+			return cached;
+		}
+		return cachePhotographerExistence(memberId);
+	}
+
+	private int getFollowers(Photographer photographer) {
+		return Math.toIntExact(followingRepository.countByFollowingId(photographer.getMember().getId()));
+	}
+
+	private YesNo isFollowing(Photographer photographer, Long memberId) {
+		return Boolean.TRUE.equals(
+			followingRepository.existsByFollowingIdAndFollowerId(photographer.getMember().getId(), memberId)) ?
+			YesNo.Y : YesNo.N;
+	}
+
+	@Transactional
+	public void addCareer(PhotographerDto.AddCareer addCareerRequestDto, Long memberId) {
+		Photographer photographer = getPhotographerByMemberId(memberId);
+		List<Career> careers = addCareerRequestDto.getCareers()
+			.stream()
+			.map(career ->
+				Career.builder()
+					.type(career)
+					.photographer(photographer)
+				.build())
+			.toList();
+		careerRepository.saveAll(careers);
+	}
+
+	@Transactional
+	public void updateCareerPeriod(PhotographerDto.UpdateCareerPeriod updateCareerPeriodRequestDto, Long memberId) {
+		Photographer photographer = getPhotographerByMemberId(memberId);
+		photographer.updatePeriod(
+			updateCareerPeriodRequestDto.getYear() * 12 + updateCareerPeriodRequestDto.getMonth());
+	}
+
+	@Transactional
+	public List<PhotoMoodDto.PhotoMoodRes> addPhotoMoods(PhotoMoodDto.AddPhotoMood addPhotoMoodDto, Long memberId) {
+		Photographer photographer = getPhotographerByMemberId(memberId);
+		return photoMoodService.createPhotoMood(addPhotoMoodDto.getPhotoMoods(), photographer);
+	}
+
 }
