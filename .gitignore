@@ -64,3 +64,4 @@ out/
 
 ### Spring properties ###
 application-local.yml
+application-dev.yml
