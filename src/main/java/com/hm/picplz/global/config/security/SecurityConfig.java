@@ -36,6 +36,7 @@ public class SecurityConfig {
 		"/v3/api-docs/**",      // 하위 경로 모두 포함
 		"/webjars/**",
 		"/members/test",
+		"/auth/**",
 		"/**"
 	};
 
