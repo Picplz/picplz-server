@@ -123,9 +123,15 @@ public class PhotographerService {
 	}
 
 	@Transactional
-	public PhotoMoodDto.PhotoMoodRes addPhotoMoods(PhotoMoodDto.AddPhotoMood addPhotoMoodDto, Long memberId) {
+	public void addPhotoMood(PhotoMoodDto.PhotoMoodReq addPhotoMoodDto, Long memberId) {
 		Photographer photographer = getPhotographerByMemberId(memberId);
-		return photoMoodService.createPhotoMood(addPhotoMoodDto.getPhotoMoods(), photographer);
+		photoMoodService.addPhotoMood(addPhotoMoodDto.getPhotoMood(), photographer);
+	}
+
+	@Transactional
+	public void deletePhotoMood(PhotoMoodDto.PhotoMoodReq deletePhotoMoodDto, Long memberId) {
+		Photographer photographer = getPhotographerByMemberId(memberId);
+		photoMoodService.deletePhotoMood(deletePhotoMoodDto.getPhotoMood(), photographer);
 	}
 
 }
