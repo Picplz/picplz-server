@@ -69,12 +69,19 @@ public class PhotographerController {
     @PhotographerOnly
     @Operation(summary = "사진 감성 해시 태그 생성")
     @PostMapping("/photo-mood")
-    public PhotoMoodDto.PhotoMoodRes addPhotoMood(
+    public void addPhotoMood(
         @AuthenticationPrincipal Long memberId,
-        @RequestBody PhotoMoodDto.AddPhotoMood addPhotoMoodRequestDto) {
-        return photographerService.addPhotoMoods(addPhotoMoodRequestDto, memberId);
+        @RequestBody PhotoMoodDto.PhotoMoodReq addPhotoMoodRequestDto) {
+        photographerService.addPhotoMood(addPhotoMoodRequestDto, memberId);
     }
 
+    @PhotographerOnly
+    @Operation(summary = "사진 감성 해시 태그 삭제")
+    @DeleteMapping("/photo-mood")
+    public void deletePhotoMood(@AuthenticationPrincipal Long memberId,
+        @RequestBody PhotoMoodDto.PhotoMoodReq deletePhotoMoodRequestDto) {
+        photographerService.deletePhotoMood(deletePhotoMoodRequestDto, memberId);
+    }
 
     @Operation(summary = "작가 한명 정보 불러오기")
     @GetMapping("/{photographerId}/info")

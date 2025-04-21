@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -15,14 +16,9 @@ public class PhotoMoodDto {
 
 	@Data
 	@NoArgsConstructor
-	public static class AddPhotoMood {
-		private List<String> photoMoods;
-
-		public static AddPhotoMood of(List<String> photoMoods) {
-			AddPhotoMood addPhotoMood = new AddPhotoMood();
-			addPhotoMood.photoMoods = photoMoods;
-			return addPhotoMood;
-		}
+	public static class PhotoMoodReq {
+		@NotBlank
+		private String photoMood;
 	}
 
 	@Data
