@@ -7,15 +7,19 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hm.picplz.domain.area.domain.Area;
 import com.hm.picplz.domain.following.repository.FollowingRepository;
 import com.hm.picplz.domain.member.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
+import com.hm.picplz.domain.photographer.domain.ActiveArea;
 import com.hm.picplz.domain.photographer.domain.Career;
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
+import com.hm.picplz.domain.photographer.repository.ActiveAreaRepository;
+import com.hm.picplz.domain.photographer.repository.AreaRepoisotry;
 import com.hm.picplz.domain.photographer.repository.CareerRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.global.common.entity.YesNo;
@@ -33,6 +37,8 @@ public class PhotographerService {
 	private final PhotographerRepository photographerRepository;
 	private final MemberRepository memberRepository;
 	private final FollowingRepository followingRepository;
+	private final ActiveAreaRepository activeAreaRepository;
+	private final AreaRepoisotry areaRepoisotry;
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
@@ -45,7 +51,6 @@ public class PhotographerService {
 
 		Photographer photographer = Photographer.builder()
 			.member(member)
-			.area(createPhotographerRequestDto.getArea())
 			.period(createPhotographerRequestDto.getYear() * 12 + createPhotographerRequestDto.getMonth())
 			.active(YesNo.N)
 			.instagram(createPhotographerRequestDto.getInstagram())
@@ -53,7 +58,28 @@ public class PhotographerService {
 			.build();
 
 		photographerRepository.save(photographer);
-		photoMoodService.createPhotoMood(createPhotographerRequestDto.getPhotoMoods(), photographer);
+		photoMoodService.createPhotoMoods(createPhotographerRequestDto.getPhotoMoods(), photographer);
+		createActiveAreas(createPhotographerRequestDto.getActiveAreas(), photographer);
+	}
+
+	private void createActiveAreas(List<PhotographerDto.ActiveAreaReq> areaDtos, Photographer photographer) {
+		for (PhotographerDto.ActiveAreaReq dto : areaDtos) {
+			Area area = areaRepoisotry.findById(dto.getCode())
+				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.WRONG_AREA_CODE));
+
+			ActiveArea activeArea = ActiveArea.builder()
+				.photographer(photographer)
+				.area(area)
+				.sido(area.getSido())
+				.sigungu(area.getSigungu())
+				.eupmyeondong(area.getEupmyeondong())
+				.ri(area.getRi())
+				.name(area.getName())
+				.priority(dto.getPriority())
+				.build();
+
+			activeAreaRepository.save(activeArea);
+		}
 	}
 
 	public PhotographerDto.Detail getPhotographerDetail(Long photographerId, Long memberId) {
