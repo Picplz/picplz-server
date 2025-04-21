@@ -1,7 +1,9 @@
 package com.hm.picplz.domain.photographer.dto;
 
+import java.util.Comparator;
 import java.util.List;
 
+import com.hm.picplz.domain.photographer.domain.ActiveArea;
 import com.hm.picplz.domain.photographer.domain.CareerType;
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.domain.photographer.domain.Photographer;
@@ -49,7 +51,7 @@ public class PhotographerDto {
         private Long photographerId;
         private String nickname;
         private String profileImage;
-        private String area;
+        private List<ActiveAreaRes> area;
         private String introduction;
         private YesNo active;
         private String instagram;
@@ -62,7 +64,10 @@ public class PhotographerDto {
             detail.photographerId = photographer.getId();
             detail.nickname = photographer.getMember().getNickname();
             detail.profileImage = photographer.getMember().getProfileImage();
-            detail.area = photographer.getArea();
+            detail.area = photographer.getActiveAreas().stream()
+                .map(ActiveAreaRes::of)
+                .sorted(Comparator.comparingInt(ActiveAreaRes::getPriority))
+                .toList();
             detail.active = photographer.getActive();
             detail.instagram = photographer.getInstagram();
             detail.photoMoods = photographer.getPhotoMoods().stream()
@@ -77,29 +82,53 @@ public class PhotographerDto {
 
     @Data
     @NoArgsConstructor
+    public static class ActiveAreaRes {
+        private Long code;
+        private String name;
+        private Integer priority;
+
+        public static ActiveAreaRes of(ActiveArea activeArea) {
+            ActiveAreaRes activeAreaRes = new ActiveAreaRes();
+            activeAreaRes.code     = activeArea.getArea().getId();
+            activeAreaRes.name     = activeArea.getName();
+            activeAreaRes.priority = activeArea.getPriority();
+            return activeAreaRes;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
     public static class Create {
-        private String area;
         private int year;
         private int month;
         private String instagram;
         private String introduction;
         private List<String> photoMoods;
+        private List<ActiveAreaReq> activeAreas;
 
-        public static Create of (String area, int year, int month, String instagram, String introduction, List<String> photoMoods) {
+        public static Create of (int year, int month, String instagram, String introduction, List<String> photoMoods,
+            List<ActiveAreaReq> activeAreas) {
             Create create = new Create();
-            create.area = area;
             create.year = year;
             create.month = month;
             create.instagram = instagram;
             create.introduction = introduction;
             create.photoMoods = photoMoods;
+            create.activeAreas = activeAreas;
 
             return create;
         }
     }
 
     @Data
-    @NoArgsConstructor()
+    @NoArgsConstructor
+    public static class ActiveAreaReq {
+        private Long code;
+        private Integer priority;
+    }
+
+    @Data
+    @NoArgsConstructor
     public static class AddCareer {
         private List<CareerType> careers;
 

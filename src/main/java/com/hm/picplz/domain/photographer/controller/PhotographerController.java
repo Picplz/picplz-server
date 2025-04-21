@@ -3,8 +3,8 @@ package com.hm.picplz.domain.photographer.controller;
 import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,23 +48,23 @@ public class PhotographerController {
     }
 
 
-    @PhotographerOnly
-    @Operation(summary = "작가 경력 추가")
-    @PostMapping("/career")
-    public void updatePhotographerCareer(
-        @AuthenticationPrincipal Long memberId,
-        @RequestBody PhotographerDto.AddCareer addCareerRequestDto) {
-        photographerService.addCareer(addCareerRequestDto, memberId);
-    }
-
-    @PhotographerOnly
-    @Operation(summary = "작가 경력 기간 수정")
-    @PatchMapping("/period")
-    public void updatePhotographerCareerPeriod(
-        @AuthenticationPrincipal Long memberId,
-        @RequestBody PhotographerDto.UpdateCareerPeriod updateCareerPeriodRequestDto) {
-        photographerService.updateCareerPeriod(updateCareerPeriodRequestDto, memberId);
-    }
+    // @PhotographerOnly
+    // @Operation(summary = "작가 경력 추가")
+    // @PostMapping("/career")
+    // public void updatePhotographerCareer(
+    //     @AuthenticationPrincipal Long memberId,
+    //     @RequestBody PhotographerDto.AddCareer addCareerRequestDto) {
+    //     photographerService.addCareer(addCareerRequestDto, memberId);
+    // }
+    //
+    // @PhotographerOnly
+    // @Operation(summary = "작가 경력 기간 수정")
+    // @PatchMapping("/period")
+    // public void updatePhotographerCareerPeriod(
+    //     @AuthenticationPrincipal Long memberId,
+    //     @RequestBody PhotographerDto.UpdateCareerPeriod updateCareerPeriodRequestDto) {
+    //     photographerService.updateCareerPeriod(updateCareerPeriodRequestDto, memberId);
+    // }
 
     @PhotographerOnly
     @Operation(summary = "사진 감성 해시 태그 생성")
@@ -84,7 +84,7 @@ public class PhotographerController {
         return photographerService.getPhotographerDetail(photographerId, memberId);
     }
 
-    @Operation(summary = "활영 상품 리스트 조회")
+    @Operation(summary = "촬영 상품 리스트 조회")
     @GetMapping("/{photographerId}/products")
     public List<Detail> loadProductsByPhotographerId(
             @PathVariable(name = "photographerId") Long photographerId
