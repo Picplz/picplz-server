@@ -27,7 +27,6 @@ public class Member extends BaseEntity {
     @Size(max = 30)
     private String name;
 
-    @NotNull
     @Size(max = 30)
     private String nickname;
 
@@ -37,7 +36,6 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
-    @NotNull
     private String kakaoEmail;
 
     private String profileImage;

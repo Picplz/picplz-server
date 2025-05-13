@@ -1,5 +1,6 @@
 package com.hm.picplz.domain.auth.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,11 +41,15 @@ public class AuthService {
 			.retrieve()
 			.body(Map.class);
 
-		Long id = ((Number) body.get("id")).longValue();
-		Map<String, Object> account = (Map<String, Object>) body.get("kakao_account");
-		Map<String, Object> profile = (Map<String, Object>) account.get("profile");
+		Long id = ((Number) body.get("id")).longValue(); // 필수 값
+		// 필수가 아닌 값들
+		Map<String, Object> account = Optional.ofNullable((Map<String, Object>) body.get("kakao_account"))
+			.orElse(Collections.emptyMap());
 
-		String email = Optional.ofNullable((String) account.get("email")).orElse("no-email");
+		Map<String, Object> profile = Optional.ofNullable((Map<String, Object>) account.get("profile"))
+			.orElse(Collections.emptyMap());
+		// kakao email은 not null이어야하는데 카카오 앱이 비즈앱이 아니라 email, 닉네임을 강제로 받을 수 없음
+		String email = Optional.ofNullable((String) account.get("email")).orElse(null);
 		String nickname = Optional.ofNullable((String) profile.get("nickname")).orElse("게스트");
 
 		return AuthDto.KakaoUserInfo.of(id, email, nickname);
