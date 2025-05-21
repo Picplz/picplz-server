@@ -33,6 +33,20 @@ public class MemberService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
+    public Member createMember(MemberDto.CreateMemberRequest createMemberRequest) {
+        Member member = Member.builder()
+            .nickname(createMemberRequest.getNickname())
+            .socialEmail(createMemberRequest.getSocialEmail())
+            .role(createMemberRequest.getRole())
+            .socialProvider(createMemberRequest.getSocialProvider())
+            .attributeCode(createMemberRequest.getAttributeCode())
+            .profileImage(createMemberRequest.getProfileImage())
+            .build();
+
+        return memberRepository.save(member);
+    }
+
+    @Transactional
     public MemberDto.MemberInfoResponse updateMemberInfo(MemberDto.UpdateMemberInfoRequest updateMemberInfoRequest) {
         Member member = memberRepository.findById(updateMemberInfoRequest.getId())
                 .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
