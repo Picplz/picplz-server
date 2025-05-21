@@ -81,10 +81,9 @@ public class MemberService {
     public MemberInfoResponse createMemberTest(CreateMemberRequest createMemberRequest) {
         Member member = Member.builder()
                 .birth(createMemberRequest.getBirth())
-                .name(createMemberRequest.getName())
                 .nickname(createMemberRequest.getNickname())
                 .role(createMemberRequest.getRole())
-                .kakaoEmail(createMemberRequest.getKakaoEmail())
+                .socialEmail(createMemberRequest.getSocialEmail())
                 .profileImage(createMemberRequest.getProfileImage())
                 .attributeCode(null)
                 .provider(null)
