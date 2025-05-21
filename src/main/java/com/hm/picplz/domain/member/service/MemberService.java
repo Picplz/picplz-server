@@ -14,10 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hm.picplz.domain.member.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
-import com.hm.picplz.domain.member.dto.request.CreateMemberRequest;
-import com.hm.picplz.domain.member.dto.request.UpdateMemberInfoRequest;
-import com.hm.picplz.domain.member.dto.request.UpdateMemberLocationRequest;
-import com.hm.picplz.domain.member.dto.response.MemberInfoResponse;
+import com.hm.picplz.domain.member.dto.MemberDto;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
@@ -36,17 +33,17 @@ public class MemberService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
-    public MemberInfoResponse updateMemberInfo(UpdateMemberInfoRequest updateMemberInfoRequest) {
+    public MemberDto.MemberInfoResponse updateMemberInfo(MemberDto.UpdateMemberInfoRequest updateMemberInfoRequest) {
         Member member = memberRepository.findById(updateMemberInfoRequest.getId())
                 .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
 
         member.updateNickname(updateMemberInfoRequest.getNickname());
         member.updateProfileImage(updateMemberInfoRequest.getProfileImage());
 
-        return new MemberInfoResponse(member);
+        return MemberDto.MemberInfoResponse.of(member);
     }
 
-    public void updateLocation(UpdateMemberLocationRequest request) {
+    public void updateLocation(MemberDto.UpdateMemberLocationRequest request) {
         redisTemplate.opsForGeo().add(GEO_KEY, new RedisGeoCommands.GeoLocation<>(
                 request.getMemberId(), new Point(request.getLongitude(), request.getLatitude())));
 
@@ -78,7 +75,7 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberInfoResponse createMemberTest(CreateMemberRequest createMemberRequest) {
+    public MemberDto.MemberInfoResponse createMemberTest(MemberDto.CreateMemberTestRequest createMemberRequest) {
         Member member = Member.builder()
                 .birth(createMemberRequest.getBirth())
                 .nickname(createMemberRequest.getNickname())
@@ -91,7 +88,7 @@ public class MemberService {
 
         memberRepository.save(member);
 
-        return new MemberInfoResponse(member);
+        return MemberDto.MemberInfoResponse.of(member);
     }
 
 
@@ -108,8 +105,8 @@ public class MemberService {
         }
     }
 
-    public MemberInfoResponse getMemberInfo(Long id) {
-        return new MemberInfoResponse(getMemberById(id));
+    public MemberDto.MemberInfoResponse getMemberInfo(Long id) {
+        return MemberDto.MemberInfoResponse.of(getMemberById(id));
     }
 
     private Member getMemberById(Long id) {
