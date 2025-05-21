@@ -23,7 +23,7 @@ public class AuthController {
 
 	@Operation(summary = "회원인 경우 픽플즈 토큰 반환, 아닐 경우 ")
 	@PostMapping("/kakao")
-	public AuthDto.LoginResult kakaoLogin(@RequestBody AuthDto.KakaoTokenRequest request) {
+	public AuthDto.LoginResponse kakaoLogin(@RequestBody AuthDto.KakaoTokenRequest request) {
 		return authService.checkUserKakao(request.getAccessToken());
 	}
 }

@@ -33,12 +33,10 @@ public class PhotographerController {
     private final PhotographerService photographerService;
     private final ProductService productService;
 
-    @Operation(summary = "회원가입 시 작가 생성 api")
+    @Operation(summary = "작가 회원가입")
     @PostMapping
-    public void createPhotographer(
-        @AuthenticationPrincipal Long memberId,
-        @RequestBody PhotographerDto.Create createPhotographerRequestDto) {
-        photographerService.createPhotographer(memberId, createPhotographerRequestDto);
+    public void createPhotographer(@RequestBody PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
+        photographerService.createPhotographer(createPhotographerRequest);
     }
 
     @Operation(summary = "작가 로그인")
@@ -71,7 +69,7 @@ public class PhotographerController {
     @PostMapping("/photo-mood")
     public void addPhotoMood(
         @AuthenticationPrincipal Long memberId,
-        @RequestBody PhotoMoodDto.PhotoMoodReq addPhotoMoodRequestDto) {
+        @RequestBody PhotoMoodDto.PhotoMoodRequest addPhotoMoodRequestDto) {
         photographerService.addPhotoMood(addPhotoMoodRequestDto, memberId);
     }
 
@@ -79,7 +77,7 @@ public class PhotographerController {
     @Operation(summary = "사진 감성 해시 태그 삭제")
     @DeleteMapping("/photo-mood")
     public void deletePhotoMood(@AuthenticationPrincipal Long memberId,
-        @RequestBody PhotoMoodDto.PhotoMoodReq deletePhotoMoodRequestDto) {
+        @RequestBody PhotoMoodDto.PhotoMoodRequest deletePhotoMoodRequestDto) {
         photographerService.deletePhotoMood(deletePhotoMoodRequestDto, memberId);
     }
 

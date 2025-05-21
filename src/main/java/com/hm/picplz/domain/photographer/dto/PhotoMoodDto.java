@@ -16,18 +16,18 @@ public class PhotoMoodDto {
 
 	@Data
 	@NoArgsConstructor
-	public static class PhotoMoodReq {
+	public static class PhotoMoodRequest {
 		@NotBlank
 		private String photoMood;
 	}
 
 	@Data
 	@NoArgsConstructor
-	public static class PhotoMoodRes {
+	public static class PhotoMoodResponse {
 		private List<String> photoMoods;
 
-		public static PhotoMoodRes of(List<PhotoMood> photoMoods) {
-			PhotoMoodRes photoMoodDto = new PhotoMoodRes();
+		public static PhotoMoodResponse of(List<PhotoMood> photoMoods) {
+			PhotoMoodResponse photoMoodDto = new PhotoMoodResponse();
 			photoMoodDto.photoMoods = photoMoods.stream().map(PhotoMood::getContent).toList();
 			return photoMoodDto;
 		}

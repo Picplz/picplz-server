@@ -37,7 +37,7 @@ public class MemberController {
 
     @Operation(summary = "카카오 로그인 거치지 않는 테스트용 회원 생성 api", tags = "test")
     @PostMapping(value = "/test")
-    public MemberDto.MemberInfoResponse createMemberTest(@RequestBody MemberDto.CreateMemberTestRequest createMemberRequest) {
+    public MemberDto.MemberInfoResponse createMemberTest(@RequestBody MemberDto.CreateMemberTest createMemberRequest) {
         return memberService.createMemberTest(createMemberRequest);
     }
 

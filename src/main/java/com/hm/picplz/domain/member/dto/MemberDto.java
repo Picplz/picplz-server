@@ -4,12 +4,12 @@ import java.time.LocalDate;
 
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.domain.Role;
+import com.hm.picplz.domain.member.domain.SocialProvider;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,13 +20,27 @@ public class MemberDto {
 
 	@Data
 	@NoArgsConstructor
-	public static class CreateMemberTestRequest {
+	public static class CreateMemberRequest {
 		private String nickname;
-		private LocalDate birth;
-		private Role role;
 		private String socialEmail;
+		private Role role;
+		private SocialProvider socialProvider;
+		private String attributeCode;
 		private String profileImage;
+
+		public static CreateMemberRequest of(MemberSignupInfo member, Role role) {
+			CreateMemberRequest createMemberRequest = new CreateMemberRequest();
+			createMemberRequest.nickname = member.getNickname();
+			createMemberRequest.socialEmail = member.getSocialEmail();
+			createMemberRequest.role = role;
+			createMemberRequest.socialProvider = member.getSocialProvider();
+			createMemberRequest.attributeCode = member.getAttributeCode();
+			createMemberRequest.profileImage = member.getProfileImage();
+			return createMemberRequest;
+		}
+
 	}
+
 
 	@Data
 	@NoArgsConstructor
@@ -63,10 +77,9 @@ public class MemberDto {
 		private Role role;
 		private String socialEmail;
 		private String profileImage;
-		private String provider;
+		private SocialProvider socialProvider;
 		private String attributeCode;
 
-		@Builder
 		public static MemberInfoResponse of(Member member) {
 			MemberInfoResponse memberInfoResponse = new MemberInfoResponse();
 			memberInfoResponse.id = member.getId();
@@ -75,9 +88,20 @@ public class MemberDto {
 			memberInfoResponse.role = member.getRole();
 			memberInfoResponse.socialEmail = member.getSocialEmail();
 			memberInfoResponse.profileImage = member.getProfileImage();
-			memberInfoResponse.provider = member.getProvider();
+			memberInfoResponse.socialProvider = member.getSocialProvider();
 			memberInfoResponse.attributeCode = member.getAttributeCode();
 			return memberInfoResponse;
 		}
+	}
+
+
+	@Data
+	@NoArgsConstructor
+	public static class CreateMemberTest {
+		private String nickname;
+		private LocalDate birth;
+		private Role role;
+		private String socialEmail;
+		private String profileImage;
 	}
 }
