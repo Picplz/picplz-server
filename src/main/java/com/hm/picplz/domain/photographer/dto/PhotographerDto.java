@@ -71,7 +71,7 @@ public class PhotographerDto {
                 .sorted(Comparator.comparingInt(ActiveAreaResponse::getPriority))
                 .toList();
             detail.active = photographer.getActive();
-            detail.instagram = photographer.getInstagram();
+            detail.instagram = photographer.getMember().getInstagram();
             detail.photoMoods = photographer.getPhotoMoods().stream()
                     .map(PhotoMood::getContent)
                     .toList();
@@ -95,7 +95,6 @@ public class PhotographerDto {
         private List<String> photoMoods;
         private List<ActiveAreaRequest> activeAreas;
         private List<PhotographerCameraRequest> cameras;
-        // TODO: 자기소개, 인스타그램 작성할 수 있는 API 필요
 
         public static CreatePhotographerRequest of (String nickname, String socialEmail, SocialProvider socialProvider,
             String attributeCode, String profileImage, List<String> photoMoods, List<ActiveAreaRequest> activeAreas,

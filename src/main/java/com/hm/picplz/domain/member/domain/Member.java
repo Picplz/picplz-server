@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+import org.springframework.util.StringUtils;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -49,6 +51,10 @@ public class Member extends BaseEntity {
     @NotNull
     private String attributeCode;
 
+    private String instagram; // 인스타그램 아이디
+
+    private String introduction; // 소갯말
+
     @OneToOne(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Photographer photographer;
 
@@ -72,11 +78,15 @@ public class Member extends BaseEntity {
     }
 
     public void updateNickname(String nickname) {
-        this.nickname = nickname;
+        if (StringUtils.hasText(nickname)) this.nickname = nickname;
     }
 
     public void updateProfileImage(String profileImage) {
-        this.profileImage = profileImage;
+        if (StringUtils.hasText(profileImage)) this.profileImage = profileImage;
     }
-    // factory method
+
+    public void updateInstagram(String instagram) { if (StringUtils.hasText(instagram)) this.instagram = instagram; }
+
+    public void updateIntroduction(String introduction) {
+        if (StringUtils.hasText(introduction)) this.introduction = introduction; }
 }

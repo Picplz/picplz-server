@@ -8,7 +8,6 @@ import com.hm.picplz.domain.member.domain.SocialProvider;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -45,11 +44,12 @@ public class MemberDto {
 	@Data
 	@NoArgsConstructor
 	public static class UpdateMemberInfoRequest {
-		private Long id;
 		@NotNull
-		@Size(max = 30)
+		private Long id;
 		private String nickname;
 		private String profileImage;
+		private String introduction;
+		private String instagram;
 	}
 
 	@Data

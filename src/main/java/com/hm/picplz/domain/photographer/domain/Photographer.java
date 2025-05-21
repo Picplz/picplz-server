@@ -40,10 +40,6 @@ public class Photographer extends BaseEntity {
 
 	private YesNo active;  // Y/N
 
-	private String instagram; // 인스타그램 아이디
-
-	private String introduction; // 소갯말
-
 	// 패키지
 	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<ShootProduct> shootProducts = new ArrayList<>();
