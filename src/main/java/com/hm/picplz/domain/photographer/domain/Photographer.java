@@ -56,9 +56,6 @@ public class Photographer extends BaseEntity {
 	private List<PhotoMood> photoMoods = new ArrayList<>();
 
 	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-	private List<Career> careers = new ArrayList<>();
-
-	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<ActiveArea> activeAreas = new ArrayList<>();
 
 	@Builder

@@ -133,29 +133,4 @@ public class PhotographerDto {
         private Long code;
         private Integer priority;
     }
-
-    @Data
-    @NoArgsConstructor
-    public static class AddCareer {
-        private List<CareerType> careers;
-
-        public static AddCareer of(List<CareerType> careers) {
-            AddCareer addCareer = new AddCareer();
-            addCareer.careers = careers;
-            return addCareer;
-        }
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class UpdateCareerPeriod {
-        private int year;
-        private int month;
-        public static UpdateCareerPeriod of(int year, int month) {
-            UpdateCareerPeriod updateCareerPeriod = new UpdateCareerPeriod();
-            updateCareerPeriod.year = year;
-            updateCareerPeriod.month = month;
-            return updateCareerPeriod;
-        }
-    }
 }

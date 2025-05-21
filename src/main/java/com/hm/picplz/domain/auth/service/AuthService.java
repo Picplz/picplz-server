@@ -52,7 +52,7 @@ public class AuthService {
 	}
 
 	private Optional<Member> findByCodeAndProvider(String code, SocialProvider socialProvider) {
-		return memberRepository.findByAttributeCodeAndProvider(code, socialProvider.getName());
+		return memberRepository.findByAttributeCodeAndSocialProvider(code, socialProvider);
 	}
 
 	private JwtTokenResponseDto generateTokenForMember(Member member) {

@@ -13,14 +13,12 @@ import com.hm.picplz.domain.member.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
 import com.hm.picplz.domain.photographer.domain.ActiveArea;
-import com.hm.picplz.domain.photographer.domain.Career;
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
 import com.hm.picplz.domain.photographer.repository.ActiveAreaRepository;
 import com.hm.picplz.domain.photographer.repository.AreaRepoisotry;
-import com.hm.picplz.domain.photographer.repository.CareerRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.global.common.entity.YesNo;
 import com.hm.picplz.global.error.ExceptionFactory;
@@ -32,10 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class PhotographerService {
 
 	private final PhotoMoodService photoMoodService;
-
-	private final CareerRepository careerRepository;
 	private final PhotographerRepository photographerRepository;
-	private final MemberRepository memberRepository;
 	private final FollowingRepository followingRepository;
 	private final ActiveAreaRepository activeAreaRepository;
 	private final AreaRepoisotry areaRepoisotry;
@@ -128,34 +123,13 @@ public class PhotographerService {
 	}
 
 	@Transactional
-	public void addCareer(PhotographerDto.AddCareer addCareerRequestDto, Long memberId) {
-		Photographer photographer = getPhotographerByMemberId(memberId);
-		List<Career> careers = addCareerRequestDto.getCareers()
-			.stream()
-			.map(career ->
-				Career.builder()
-					.type(career)
-					.photographer(photographer)
-				.build())
-			.toList();
-		careerRepository.saveAll(careers);
-	}
-
-	@Transactional
-	public void updateCareerPeriod(PhotographerDto.UpdateCareerPeriod updateCareerPeriodRequestDto, Long memberId) {
-		Photographer photographer = getPhotographerByMemberId(memberId);
-		photographer.updatePeriod(
-			updateCareerPeriodRequestDto.getYear() * 12 + updateCareerPeriodRequestDto.getMonth());
-	}
-
-	@Transactional
-	public void addPhotoMood(PhotoMoodDto.PhotoMoodReq addPhotoMoodDto, Long memberId) {
+	public void addPhotoMood(PhotoMoodDto.PhotoMoodRequest addPhotoMoodDto, Long memberId) {
 		Photographer photographer = getPhotographerByMemberId(memberId);
 		photoMoodService.addPhotoMood(addPhotoMoodDto.getPhotoMood(), photographer);
 	}
 
 	@Transactional
-	public void deletePhotoMood(PhotoMoodDto.PhotoMoodReq deletePhotoMoodDto, Long memberId) {
+	public void deletePhotoMood(PhotoMoodDto.PhotoMoodRequest deletePhotoMoodDto, Long memberId) {
 		Photographer photographer = getPhotographerByMemberId(memberId);
 		photoMoodService.deletePhotoMood(deletePhotoMoodDto.getPhotoMood(), photographer);
 	}

@@ -75,7 +75,7 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberDto.MemberInfoResponse createMemberTest(MemberDto.CreateMemberTestRequest createMemberRequest) {
+    public MemberDto.MemberInfoResponse createMemberTest(MemberDto.CreateMemberTest createMemberRequest) {
         Member member = Member.builder()
                 .birth(createMemberRequest.getBirth())
                 .nickname(createMemberRequest.getNickname())
@@ -83,7 +83,7 @@ public class MemberService {
                 .socialEmail(createMemberRequest.getSocialEmail())
                 .profileImage(createMemberRequest.getProfileImage())
                 .attributeCode(null)
-                .provider(null)
+                .socialProvider(null)
                 .build();
 
         memberRepository.save(member);
