@@ -13,11 +13,10 @@ import java.time.LocalDate;
 public class MemberInfoResponse {
 
     private Long id;
-    private String name;
     private String nickname;
     private LocalDate birth;
     private Role role;
-    private String kakaoEmail;
+    private String socialEmail;
     private String profileImage;
     private String provider;
     private String attributeCode;
@@ -25,11 +24,10 @@ public class MemberInfoResponse {
     @Builder
     public MemberInfoResponse(Member member) {
         this.id = member.getId();
-        this.name = member.getName();
         this.nickname = member.getNickname();
         this.birth = member.getBirth();
         this.role = member.getRole();
-        this.kakaoEmail = member.getKakaoEmail();
+        this.socialEmail = member.getSocialEmail();
         this.profileImage = member.getProfileImage();
         this.provider = member.getProvider();
         this.attributeCode = member.getAttributeCode();
