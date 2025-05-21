@@ -25,9 +25,7 @@ public class Member extends BaseEntity {
 
     @NotNull
     @Size(max = 30)
-    private String name;
-
-    @Size(max = 30)
+    @Column(unique = true)
     private String nickname;
 
     private LocalDate birth;
