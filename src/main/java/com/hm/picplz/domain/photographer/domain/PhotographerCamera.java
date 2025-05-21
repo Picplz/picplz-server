@@ -1,11 +1,9 @@
 package com.hm.picplz.domain.photographer.domain;
 
-import com.hm.picplz.domain.area.domain.Area;
 import com.hm.picplz.global.common.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,28 +17,29 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ActiveArea extends BaseEntity {
+public class PhotographerCamera extends BaseEntity {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "active_area_id", updatable = false)
+	@Column(name = "photographer_camera_id", updatable = false)
 	private Long id;
 
-	// Photographer와의 다대일 관계
-	@ManyToOne(fetch = FetchType.LAZY)
+	private String type; // 핸드폰, 카메라
+	private String brand; // 직접 입력 가능, 애플, 삼성, 소니
+	private String name; // 직접 입력 가능, 모델명
+	private String cameraBrand; // DSLR, 필름 등등...
+
+	@ManyToOne
 	@JoinColumn(name = "photographer_id")
 	private Photographer photographer;
 
-	// Area와의 다대일 관계
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "area_id")
-	private Area area;
-
-	private Integer priority; // 작가 활동 지역 우선순위
-
 	@Builder
-	public ActiveArea(Photographer photographer, Area area, Integer priority) {
+	public PhotographerCamera(Long id, String type, String brand, String name, String cameraBrand, Photographer photographer) {
+		this.id = id;
+		this.type = type;
+		this.brand = brand;
+		this.name = name;
+		this.cameraBrand = cameraBrand;
 		this.photographer = photographer;
-		this.area = area;
-		this.priority = priority;
 	}
 }

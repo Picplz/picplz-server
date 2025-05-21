@@ -84,22 +84,6 @@ public class PhotographerDto {
 
     @Data
     @NoArgsConstructor
-    public static class ActiveAreaResponse {
-        private Long code;
-        private String name;
-        private Integer priority;
-
-        public static ActiveAreaResponse of(ActiveArea activeArea) {
-            ActiveAreaResponse activeAreaResponse = new ActiveAreaResponse();
-            activeAreaResponse.code     = activeArea.getArea().getId();
-            activeAreaResponse.name     = activeArea.getName();
-            activeAreaResponse.priority = activeArea.getPriority();
-            return activeAreaResponse;
-        }
-    }
-
-    @Data
-    @NoArgsConstructor
     public static class CreatePhotographerRequest implements MemberSignupInfo {
         @NotBlank
         private String nickname;
@@ -110,11 +94,12 @@ public class PhotographerDto {
 
         private List<String> photoMoods;
         private List<ActiveAreaRequest> activeAreas;
-        // TODO: 촬영 기기 추가
+        private List<PhotographerCameraRequest> cameras;
         // TODO: 자기소개, 인스타그램 작성할 수 있는 API 필요
 
         public static CreatePhotographerRequest of (String nickname, String socialEmail, SocialProvider socialProvider,
-            String attributeCode, String profileImage, List<String> photoMoods, List<ActiveAreaRequest> activeAreas) {
+            String attributeCode, String profileImage, List<String> photoMoods, List<ActiveAreaRequest> activeAreas,
+            List<PhotographerCameraRequest> cameras) {
             CreatePhotographerRequest createPhotographerRequest = new CreatePhotographerRequest();
             createPhotographerRequest.nickname = nickname;
             createPhotographerRequest.socialEmail = socialEmail;
@@ -123,6 +108,7 @@ public class PhotographerDto {
             createPhotographerRequest.profileImage = profileImage;
             createPhotographerRequest.photoMoods = photoMoods;
             createPhotographerRequest.activeAreas = activeAreas;
+            createPhotographerRequest.cameras = cameras;
             return createPhotographerRequest;
         }
     }
@@ -132,5 +118,31 @@ public class PhotographerDto {
     public static class ActiveAreaRequest {
         private Long code;
         private Integer priority;
+    }
+
+
+    @Data
+    @NoArgsConstructor
+    public static class ActiveAreaResponse {
+        private Long code;
+        private String name;
+        private Integer priority;
+
+        public static ActiveAreaResponse of(ActiveArea activeArea) {
+            ActiveAreaResponse activeAreaResponse = new ActiveAreaResponse();
+            activeAreaResponse.code     = activeArea.getArea().getId();
+            activeAreaResponse.name     = activeArea.getArea().getName();
+            activeAreaResponse.priority = activeArea.getPriority();
+            return activeAreaResponse;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class PhotographerCameraRequest {
+        private String type; // 핸드폰, 카메라
+        private String brand; // 직접 입력 가능, 애플, 삼성, 소니
+        private String name; // 직접 입력 가능, 모델명
+        private String cameraBrand; // DSLR, 필름 등등...
     }
 }

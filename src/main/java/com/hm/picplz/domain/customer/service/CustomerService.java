@@ -21,6 +21,8 @@ public class CustomerService {
 
     @Transactional
     public void createCustomer(CustomerDto.CreateCustomerRequest createCustomerRequest) {
+        // 마지막 닉네임 중복 확인
+        memberService.checkNickname(createCustomerRequest.getNickname());
         Member member = memberService.createMember(MemberDto.CreateMemberRequest.of(createCustomerRequest, Role.CUSTOMER));
         Customer customer = Customer.builder()
                 .member(member)

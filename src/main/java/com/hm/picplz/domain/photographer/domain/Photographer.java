@@ -38,37 +38,36 @@ public class Photographer extends BaseEntity {
 	@JoinColumn(name = "member_id")
 	private Member member;
 
-	private int period; // 1년 3개월 -> 15개월
-
 	private YesNo active;  // Y/N
 
 	private String instagram; // 인스타그램 아이디
 
 	private String introduction; // 소갯말
 
+	// 패키지
 	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<ShootProduct> shootProducts = new ArrayList<>();
 
 	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<Review> reviews = new ArrayList<>();
 
+	// 분위기 키워드
 	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<PhotoMood> photoMoods = new ArrayList<>();
 
+	// 주 촬영지
 	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<ActiveArea> activeAreas = new ArrayList<>();
 
-	@Builder
-	private Photographer(Long id, Member member, int period, YesNo active, String instagram, String introduction) {
-		this.id = id;
-		this.member = member;
-		this.period = period;
-		this.active = active;
-		this.instagram = instagram;
-		this.introduction = introduction;
-	}
+	// 촬영 기기
+	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	private List<PhotographerCamera> cameras = new ArrayList<>();
 
-	public void updatePeriod(int period) {
-		this.period = period;
+	@Builder
+	public static Photographer from (Member member) {
+		Photographer photographer = new Photographer();
+		photographer.member = member;
+		photographer.active = YesNo.N;
+		return photographer;
 	}
 }
