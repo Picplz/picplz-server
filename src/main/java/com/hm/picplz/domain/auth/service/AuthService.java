@@ -16,7 +16,7 @@ import com.hm.picplz.domain.auth.jwt.JwtTokenProvider;
 import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
 import com.hm.picplz.domain.member.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
-import com.hm.picplz.domain.member.domain.Role;
+import com.hm.picplz.domain.member.domain.SocialProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,10 +28,12 @@ public class AuthService {
 	private final MemberRepository memberRepository;
 	private final RestClient restClient = RestClient.create();
 
-	public JwtTokenResponseDto getUserInfo(String accessToken) {
+	public AuthDto.LoginResult checkUserKakao(String accessToken) {
 		AuthDto.KakaoUserInfo userInfo = fetchKakaoUserInfo(accessToken);
-		Member member = findOrCreateMember(userInfo);
-		return generateTokenForMember(member);
+		Optional<Member> member = findByCodeAndProvider(String.valueOf(userInfo.getId()), SocialProvider.KAKAO);
+		return member.map(
+				value -> AuthDto.LoginResult.of(true, SocialProvider.KAKAO.getName(), generateTokenForMember(value)))
+			.orElseGet(() -> AuthDto.LoginResult.of(false, SocialProvider.KAKAO.getName(), null));
 	}
 
 	private AuthDto.KakaoUserInfo fetchKakaoUserInfo(String accessToken) {
@@ -42,28 +44,15 @@ public class AuthService {
 			.body(Map.class);
 
 		Long id = ((Number) body.get("id")).longValue(); // 필수 값
-		// 필수가 아닌 값들
+		// kakao email은 not null이어야하는데 카카오 앱이 비즈앱이 아니라 email을 강제로 받을 수 없음
 		Map<String, Object> account = Optional.ofNullable((Map<String, Object>) body.get("kakao_account"))
 			.orElse(Collections.emptyMap());
-
-		Map<String, Object> profile = Optional.ofNullable((Map<String, Object>) account.get("profile"))
-			.orElse(Collections.emptyMap());
-		// kakao email은 not null이어야하는데 카카오 앱이 비즈앱이 아니라 email, 닉네임을 강제로 받을 수 없음
-		String email = Optional.ofNullable((String) account.get("email")).orElse(null);
-		String nickname = Optional.ofNullable((String) profile.get("nickname")).orElse("게스트");
-
-		return AuthDto.KakaoUserInfo.of(id, email, nickname);
+		String email = (String) account.get("email");
+		return AuthDto.KakaoUserInfo.of(id, email);
 	}
 
-	private Member findOrCreateMember(AuthDto.KakaoUserInfo userInfo) {
-		return memberRepository.findByAttributeCode(String.valueOf(userInfo.getId()))
-			.orElseGet(() -> memberRepository.save(Member.builder()
-				.name(userInfo.getNickname())
-				.kakaoEmail(userInfo.getEmail())
-				.attributeCode(String.valueOf(userInfo.getId()))
-				.provider("kakao")
-				.role(Role.GENERAL)
-				.build()));
+	private Optional<Member> findByCodeAndProvider(String code, SocialProvider socialProvider) {
+		return memberRepository.findByAttributeCodeAndProvider(code, socialProvider.getName());
 	}
 
 	private JwtTokenResponseDto generateTokenForMember(Member member) {

@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hm.picplz.domain.auth.dto.AuthDto;
-import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
 import com.hm.picplz.domain.auth.service.AuthService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 	private final AuthService authService;
 
+	@Operation(summary = "회원인 경우 픽플즈 토큰 반환, 아닐 경우 ")
 	@PostMapping("/kakao")
-	public JwtTokenResponseDto kakaoLogin(@RequestBody AuthDto.KakaoTokenRequest request) {
-		return authService.getUserInfo(request.getAccessToken());
+	public AuthDto.LoginResult kakaoLogin(@RequestBody AuthDto.KakaoTokenRequest request) {
+		return authService.checkUserKakao(request.getAccessToken());
 	}
 }

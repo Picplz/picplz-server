@@ -25,9 +25,7 @@ public class Member extends BaseEntity {
 
     @NotNull
     @Size(max = 30)
-    private String name;
-
-    @Size(max = 30)
+    @Column(unique = true)
     private String nickname;
 
     private LocalDate birth;
@@ -36,7 +34,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
-    private String kakaoEmail;
+    private String socialEmail;
 
     private String profileImage;
 
@@ -51,13 +49,12 @@ public class Member extends BaseEntity {
     private Customer customer;
 
     @Builder
-    private Member(Long id, String name, String nickname, LocalDate birth, Role role, String kakaoEmail, String profileImage, String provider, String attributeCode) {
+    private Member(Long id, String nickname, LocalDate birth, Role role, String socialEmail, String profileImage, String provider, String attributeCode) {
         this.id = id;
-        this.name = name;
         this.nickname = nickname;
         this.birth = birth;
         this.role = role;
-        this.kakaoEmail = kakaoEmail;
+        this.socialEmail = socialEmail;
         this.profileImage = profileImage;
         this.provider = provider;
         this.attributeCode = attributeCode;
@@ -73,12 +70,6 @@ public class Member extends BaseEntity {
 
     public void updateProfileImage(String profileImage) {
         this.profileImage = profileImage;
-    }
-
-    public Member oAuthInfoUpdate(String memberName, String memberProvider) {
-        this.name = memberName;
-        this.provider = memberProvider;
-        return this;
     }
     // factory method
 }
