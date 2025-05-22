@@ -67,7 +67,7 @@ public class PhotographerDto {
             detail.nickname = photographer.getMember().getNickname();
             detail.profileImage = photographer.getMember().getProfileImage();
             detail.area = photographer.getActiveAreas().stream()
-                .map(ActiveAreaResponse::of)
+                .map(ActiveAreaResponse::from)
                 .sorted(Comparator.comparingInt(ActiveAreaResponse::getPriority))
                 .toList();
             detail.active = photographer.getActive();
@@ -127,7 +127,7 @@ public class PhotographerDto {
         private String name;
         private Integer priority;
 
-        public static ActiveAreaResponse of(ActiveArea activeArea) {
+        public static ActiveAreaResponse from(ActiveArea activeArea) {
             ActiveAreaResponse activeAreaResponse = new ActiveAreaResponse();
             activeAreaResponse.code     = activeArea.getArea().getId();
             activeAreaResponse.name     = activeArea.getArea().getName();

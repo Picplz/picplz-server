@@ -80,7 +80,7 @@ public class MemberDto {
 		private SocialProvider socialProvider;
 		private String attributeCode;
 
-		public static MemberInfoResponse of(Member member) {
+		public static MemberInfoResponse from(Member member) {
 			MemberInfoResponse memberInfoResponse = new MemberInfoResponse();
 			memberInfoResponse.id = member.getId();
 			memberInfoResponse.nickname = member.getNickname();

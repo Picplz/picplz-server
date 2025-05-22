@@ -1,9 +1,8 @@
 package com.hm.picplz.domain.customer.repository;
 
-import com.hm.picplz.domain.customer.domain.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
+import com.hm.picplz.domain.customer.domain.Customer;
+
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 }

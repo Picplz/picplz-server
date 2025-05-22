@@ -1,11 +1,11 @@
 package com.hm.picplz.domain.product.repository;
 
-import com.hm.picplz.domain.product.domain.ProductPhoto;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.hm.picplz.domain.product.domain.ProductPhoto;
+
 public interface ProductPhotoRepository extends JpaRepository<ProductPhoto, Long> {
     List<ProductPhoto> findByShootProductIdOrderByPhotoOrderAsc(Long shootProductId);
 }

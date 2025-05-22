@@ -14,7 +14,7 @@ import org.springframework.web.client.RestClient;
 import com.hm.picplz.domain.auth.dto.AuthDto;
 import com.hm.picplz.domain.auth.jwt.JwtTokenProvider;
 import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
-import com.hm.picplz.domain.member.MemberRepository;
+import com.hm.picplz.domain.member.repository.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.domain.SocialProvider;
 

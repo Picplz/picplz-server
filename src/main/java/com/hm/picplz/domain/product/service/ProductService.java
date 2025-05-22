@@ -1,5 +1,11 @@
 package com.hm.picplz.domain.product.service;
 
+import java.util.List;
+import java.util.stream.IntStream;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.domain.photographer.exception.PhotographerNotFound;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
@@ -9,12 +15,8 @@ import com.hm.picplz.domain.product.dto.ProductDto;
 import com.hm.picplz.domain.product.exception.ProductNotFound;
 import com.hm.picplz.domain.product.repository.ProductPhotoRepository;
 import com.hm.picplz.domain.product.repository.ProductRepository;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class ProductService {
         IntStream.range(0, request.getProductPhotos().size())
                 .mapToObj(i -> ProductPhoto.of(request.getProductPhotos().get(i), i+1, savedProduct))
                 .forEach(productPhotoRepository::save);
-        return ProductDto.ProductId.from(savedProduct.getId());
+        return ProductDto.ProductId.of(savedProduct.getId());
     }
 
     public ProductDto.Detail findProductDetailById(Long productId) {
@@ -55,6 +57,6 @@ public class ProductService {
                     List<ProductPhoto> photos = productPhotoRepository.findByShootProductIdOrderByPhotoOrderAsc(product.getId());
                     return ProductDto.Detail.of(product, photos);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }

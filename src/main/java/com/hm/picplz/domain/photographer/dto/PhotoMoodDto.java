@@ -26,7 +26,7 @@ public class PhotoMoodDto {
 	public static class PhotoMoodResponse {
 		private List<String> photoMoods;
 
-		public static PhotoMoodResponse of(List<PhotoMood> photoMoods) {
+		public static PhotoMoodResponse from(List<PhotoMood> photoMoods) {
 			PhotoMoodResponse photoMoodDto = new PhotoMoodResponse();
 			photoMoodDto.photoMoods = photoMoods.stream().map(PhotoMood::getContent).toList();
 			return photoMoodDto;
