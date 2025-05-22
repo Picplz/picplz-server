@@ -116,8 +116,8 @@ public class MemberService {
                 .role(createMemberRequest.getRole())
                 .socialEmail(createMemberRequest.getSocialEmail())
                 .profileImage(createMemberRequest.getProfileImage())
-                .attributeCode(null)
-                .socialProvider(null)
+                .attributeCode("aaa")
+                .socialProvider(SocialProvider.KAKAO)
                 .build();
 
         memberRepository.save(member);
