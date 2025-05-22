@@ -67,6 +67,12 @@ public class MemberController {
 		memberService.checkNickname(nickname);
 	}
 
+    @Operation(summary = "회원 닉네임 변경")
+    @PatchMapping("/nickname")
+    public MemberDto.UpdateNicknameResponse updateNickname(@RequestBody MemberDto.UpdateNicknameRequest updateNicknameRequest) {
+        return memberService.updateNickname(updateNicknameRequest);
+    }
+
     @Operation(summary = "유저 정보 하나 얻기")
     @GetMapping("/{memberId}/info")
     public MemberDto.MemberInfoResponse getMemberInfo(@PathVariable Long memberId) {

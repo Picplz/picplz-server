@@ -7,11 +7,9 @@ import com.hm.picplz.domain.member.domain.Role;
 import com.hm.picplz.domain.member.domain.SocialProvider;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -103,5 +101,30 @@ public class MemberDto {
 		private Role role;
 		private String socialEmail;
 		private String profileImage;
+	}
+
+	@Data
+	@NoArgsConstructor
+	public static class UpdateNicknameRequest {
+		@Schema(defaultValue = "1", description = "회원 아이디")
+		@NotNull(message = "회원 아이디를 입력해주세요")
+		private Long memberId;
+		@Schema(description = "회원 닉네임")
+		@NotBlank(message = "회원 닉네임을 입력해주세요")
+		private String nickname;
+	}
+
+	@Data
+	@NoArgsConstructor
+	public static class UpdateNicknameResponse {
+		private Long memberId;
+		private String nickname;
+
+		public static UpdateNicknameResponse of(Member member) {
+			UpdateNicknameResponse updateNicknameResponse = new UpdateNicknameResponse();
+			updateNicknameResponse.memberId = member.getId();
+			updateNicknameResponse.nickname = member.getNickname();
+			return updateNicknameResponse;
+		}
 	}
 }

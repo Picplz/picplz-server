@@ -3,6 +3,7 @@ package com.hm.picplz.domain.member.service;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.hm.picplz.domain.member.domain.SocialProvider;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.geo.Point;
@@ -139,6 +140,16 @@ public class MemberService {
         if (memberRepository.existsByNicknameIs(nickname)) {
             throw ExceptionFactory.of(MemberErrorCode.DUPLICATE_NICKNAME);
         }
+    }
+
+    @Transactional
+    public MemberDto.UpdateNicknameResponse updateNickname(MemberDto.UpdateNicknameRequest updateNicknameRequest) {
+        Member member = memberRepository.findById(updateNicknameRequest.getMemberId())
+                .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
+        checkNickname(updateNicknameRequest.getNickname());
+        member.updateNickname(updateNicknameRequest.getNickname());
+
+        return MemberDto.UpdateNicknameResponse.of(member);
     }
 
     /**
