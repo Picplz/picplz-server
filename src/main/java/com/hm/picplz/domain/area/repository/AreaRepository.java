@@ -17,7 +17,7 @@ public interface AreaRepository extends JpaRepository<Area, Long> {
 			"LIMIT 10",
 		nativeQuery = true
 	)
-	List<Area> findAreaInMBR(double minLng, double minLat, double maxLng, double maxLat);
+	List<Area> findAreaInMBR(double minLat, double minLng, double maxLat, double maxLng);
 
 	@Query(
 		value = "SELECT * FROM area " +

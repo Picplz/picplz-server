@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class AreaService {
 	private final AreaRepository areaRepository;
 
-	static final double EARTH_RADIUS = 111_000;
+	static final double EARTH_RADIUS = 111;
 
 	/**
 	 * 사용자의 현재 위치 근처의 법정동을 반환합니다.
@@ -35,8 +35,7 @@ public class AreaService {
 		double lngDiff = radius / (EARTH_RADIUS * Math.cos(Math.toRadians(lat)));
 
 		List<Area> nearAreas = areaRepository.findAreaInMBR(
-			lng - lngDiff, lat - latDiff,
-			lng + lngDiff, lat + latDiff
+			lat-latDiff, lng-lngDiff, lat+latDiff, lng+lngDiff
 		);
 
 		return nearAreas.stream()
