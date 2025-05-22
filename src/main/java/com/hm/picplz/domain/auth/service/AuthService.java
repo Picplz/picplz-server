@@ -28,12 +28,12 @@ public class AuthService {
 	private final MemberRepository memberRepository;
 	private final RestClient restClient = RestClient.create();
 
-	public AuthDto.LoginResult checkUserKakao(String accessToken) {
+	public AuthDto.LoginResponse checkUserKakao(String accessToken) {
 		AuthDto.KakaoUserInfo userInfo = fetchKakaoUserInfo(accessToken);
 		Optional<Member> member = findByCodeAndProvider(String.valueOf(userInfo.getId()), SocialProvider.KAKAO);
 		return member.map(
-				value -> AuthDto.LoginResult.of(true, SocialProvider.KAKAO.getName(), generateTokenForMember(value)))
-			.orElseGet(() -> AuthDto.LoginResult.of(false, SocialProvider.KAKAO.getName(), null));
+				value -> AuthDto.LoginResponse.of(true, SocialProvider.KAKAO.getName(), generateTokenForMember(value)))
+			.orElseGet(() -> AuthDto.LoginResponse.of(false, SocialProvider.KAKAO.getName(), null));
 	}
 
 	private AuthDto.KakaoUserInfo fetchKakaoUserInfo(String accessToken) {
@@ -52,7 +52,7 @@ public class AuthService {
 	}
 
 	private Optional<Member> findByCodeAndProvider(String code, SocialProvider socialProvider) {
-		return memberRepository.findByAttributeCodeAndProvider(code, socialProvider.getName());
+		return memberRepository.findByAttributeCodeAndSocialProvider(code, socialProvider);
 	}
 
 	private JwtTokenResponseDto generateTokenForMember(Member member) {

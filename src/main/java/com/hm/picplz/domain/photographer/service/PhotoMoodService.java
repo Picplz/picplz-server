@@ -24,7 +24,7 @@ public class PhotoMoodService {
 	private final PhotoMoodRepository photoMoodRepository;
 
 	@Transactional
-	public PhotoMoodDto.PhotoMoodRes createPhotoMoods(List<String> photoMoodContents, Photographer photographer) {
+	public PhotoMoodDto.PhotoMoodResponse createPhotoMoods(List<String> photoMoodContents, Photographer photographer) {
 		// 1. null·빈 문자열 제거 & trim 후 중복 제거
 		List<String> distinctContents = photoMoodContents.stream()
 			.filter(Objects::nonNull)
@@ -44,7 +44,7 @@ public class PhotoMoodService {
 		// 3. 저장
 		photoMoodRepository.saveAll(photoMoods);
 
-		return PhotoMoodDto.PhotoMoodRes.of(photoMoods);
+		return PhotoMoodDto.PhotoMoodResponse.of(photoMoods);
 	}
 
 	@Transactional

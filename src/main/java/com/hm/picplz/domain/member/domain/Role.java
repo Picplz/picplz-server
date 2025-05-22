@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Role {
 
-    GENERAL("ROLE_GENERAL", "일반"),
     CUSTOMER("ROLE_GUEST", "고객"),
     PHOTOGRAPHER("ROLE_USER", "작가");
 

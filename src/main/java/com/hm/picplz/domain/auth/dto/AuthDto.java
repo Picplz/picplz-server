@@ -20,7 +20,7 @@ public class AuthDto {
 
 	@Data
 	@NoArgsConstructor
-	public static class LoginResult {
+	public static class LoginResponse {
 		@Schema(description = "회원 가입 여부", example = "true / false")
 		private boolean isRegistered;
 		@Schema(description = "간편 로그인 제공 업체", example = "kakao / apple")
@@ -28,12 +28,12 @@ public class AuthDto {
 		@Schema(description = "픽플즈 accessToken")
 		private JwtTokenResponseDto token;
 
-		public static LoginResult of(boolean isRegistered, String provider, JwtTokenResponseDto token) {
-			LoginResult loginResult = new LoginResult();
-			loginResult.isRegistered = isRegistered;
-			loginResult.provider = provider;
-			loginResult.token = token;
-			return loginResult;
+		public static LoginResponse of(boolean isRegistered, String provider, JwtTokenResponseDto token) {
+			LoginResponse loginResponse = new LoginResponse();
+			loginResponse.isRegistered = isRegistered;
+			loginResponse.provider = provider;
+			loginResponse.token = token;
+			return loginResponse;
 		}
 	}
 

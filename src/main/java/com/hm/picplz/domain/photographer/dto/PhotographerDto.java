@@ -3,12 +3,14 @@ package com.hm.picplz.domain.photographer.dto;
 import java.util.Comparator;
 import java.util.List;
 
+import com.hm.picplz.domain.member.domain.SocialProvider;
+import com.hm.picplz.domain.member.dto.MemberSignupInfo;
 import com.hm.picplz.domain.photographer.domain.ActiveArea;
-import com.hm.picplz.domain.photographer.domain.CareerType;
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.global.common.entity.YesNo;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -51,7 +53,7 @@ public class PhotographerDto {
         private Long photographerId;
         private String nickname;
         private String profileImage;
-        private List<ActiveAreaRes> area;
+        private List<ActiveAreaResponse> area;
         private String introduction;
         private YesNo active;
         private String instagram;
@@ -65,11 +67,11 @@ public class PhotographerDto {
             detail.nickname = photographer.getMember().getNickname();
             detail.profileImage = photographer.getMember().getProfileImage();
             detail.area = photographer.getActiveAreas().stream()
-                .map(ActiveAreaRes::of)
-                .sorted(Comparator.comparingInt(ActiveAreaRes::getPriority))
+                .map(ActiveAreaResponse::of)
+                .sorted(Comparator.comparingInt(ActiveAreaResponse::getPriority))
                 .toList();
             detail.active = photographer.getActive();
-            detail.instagram = photographer.getInstagram();
+            detail.instagram = photographer.getMember().getInstagram();
             detail.photoMoods = photographer.getPhotoMoods().stream()
                     .map(PhotoMood::getContent)
                     .toList();
@@ -82,73 +84,64 @@ public class PhotographerDto {
 
     @Data
     @NoArgsConstructor
-    public static class ActiveAreaRes {
+    public static class CreatePhotographerRequest implements MemberSignupInfo {
+        @NotBlank
+        private String nickname;
+        private String socialEmail;
+        private SocialProvider socialProvider;
+        private String attributeCode;
+        private String profileImage;
+
+        private List<String> photoMoods;
+        private List<ActiveAreaRequest> activeAreas;
+        private List<PhotographerCameraRequest> cameras;
+
+        public static CreatePhotographerRequest of (String nickname, String socialEmail, SocialProvider socialProvider,
+            String attributeCode, String profileImage, List<String> photoMoods, List<ActiveAreaRequest> activeAreas,
+            List<PhotographerCameraRequest> cameras) {
+            CreatePhotographerRequest createPhotographerRequest = new CreatePhotographerRequest();
+            createPhotographerRequest.nickname = nickname;
+            createPhotographerRequest.socialEmail = socialEmail;
+            createPhotographerRequest.socialProvider = socialProvider;
+            createPhotographerRequest.attributeCode = attributeCode;
+            createPhotographerRequest.profileImage = profileImage;
+            createPhotographerRequest.photoMoods = photoMoods;
+            createPhotographerRequest.activeAreas = activeAreas;
+            createPhotographerRequest.cameras = cameras;
+            return createPhotographerRequest;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ActiveAreaRequest {
+        private Long code;
+        private Integer priority;
+    }
+
+
+    @Data
+    @NoArgsConstructor
+    public static class ActiveAreaResponse {
         private Long code;
         private String name;
         private Integer priority;
 
-        public static ActiveAreaRes of(ActiveArea activeArea) {
-            ActiveAreaRes activeAreaRes = new ActiveAreaRes();
-            activeAreaRes.code     = activeArea.getArea().getId();
-            activeAreaRes.name     = activeArea.getName();
-            activeAreaRes.priority = activeArea.getPriority();
-            return activeAreaRes;
+        public static ActiveAreaResponse of(ActiveArea activeArea) {
+            ActiveAreaResponse activeAreaResponse = new ActiveAreaResponse();
+            activeAreaResponse.code     = activeArea.getArea().getId();
+            activeAreaResponse.name     = activeArea.getArea().getName();
+            activeAreaResponse.priority = activeArea.getPriority();
+            return activeAreaResponse;
         }
     }
 
     @Data
     @NoArgsConstructor
-    public static class Create {
-        private int year;
-        private int month;
-        private String instagram;
-        private String introduction;
-        private List<String> photoMoods;
-        private List<ActiveAreaReq> activeAreas;
-
-        public static Create of (int year, int month, String instagram, String introduction, List<String> photoMoods,
-            List<ActiveAreaReq> activeAreas) {
-            Create create = new Create();
-            create.year = year;
-            create.month = month;
-            create.instagram = instagram;
-            create.introduction = introduction;
-            create.photoMoods = photoMoods;
-            create.activeAreas = activeAreas;
-
-            return create;
-        }
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class ActiveAreaReq {
-        private Long code;
-        private Integer priority;
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class AddCareer {
-        private List<CareerType> careers;
-
-        public static AddCareer of(List<CareerType> careers) {
-            AddCareer addCareer = new AddCareer();
-            addCareer.careers = careers;
-            return addCareer;
-        }
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class UpdateCareerPeriod {
-        private int year;
-        private int month;
-        public static UpdateCareerPeriod of(int year, int month) {
-            UpdateCareerPeriod updateCareerPeriod = new UpdateCareerPeriod();
-            updateCareerPeriod.year = year;
-            updateCareerPeriod.month = month;
-            return updateCareerPeriod;
-        }
+    public static class PhotographerCameraRequest {
+        private String type; // 핸드폰, 카메라
+        private String brand; // 직접 입력 가능, 애플, 삼성, 소니
+        private String name; // 직접 입력 가능, 모델명
+        private String cameraBrand; // DSLR, 필름 등등...
     }
 }

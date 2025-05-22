@@ -17,9 +17,6 @@ public enum PhotographerErrorCode implements BaseErrorCode {
     /* Photographer */
     PHOTOGRAPHER_NOT_FOUND(BAD_REQUEST, "PHOTOGRAPHER_404_1", "해당 작가가 존재하지 않습니다."),
 
-    /* Career */
-    WRONG_CAREER_TYPE(BAD_REQUEST, "CAREER_400_1", "유효하지 않은 경력 유형입니다."),
-
     /* Area */
     WRONG_AREA_CODE(BAD_REQUEST, "AREA_400_1", "유효하지 않은 법정동 정보입니다."),
 
