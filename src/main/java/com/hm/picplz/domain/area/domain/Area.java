@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.locationtech.jts.geom.Point;
+
 import com.hm.picplz.domain.photographer.domain.ActiveArea;
 import com.hm.picplz.global.common.entity.BaseEntity;
 
@@ -46,6 +48,15 @@ public class Area extends BaseEntity {
 
 	@Column(name = "old_code")
 	private Long oldCode;
+
+	// 위도, 경도 수동 입력 필요
+	private Double latitude;
+
+	private Double longitude;
+
+	//
+	@Column(columnDefinition = "POINT SRID 4326", nullable = false)
+	private Point location;
 
 	@OneToMany(mappedBy = "area", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private List<ActiveArea> activeAreas = new ArrayList<>();
