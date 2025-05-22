@@ -1,5 +1,6 @@
 package com.hm.picplz.domain.sms.service;
 
+import com.hm.picplz.domain.sms.dto.SMSDto;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;
@@ -27,14 +28,14 @@ public class SMSService {
     private String domain = "https://api.coolsms.co.kr";
 
     @Transactional
-    public void sendMessage(String to) {
+    public void sendMessage(SMSDto.SMSSendReq request) {
         DefaultMessageService messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, domain);
 
         Message message = new Message();
         String number = generateNumber();
 
         message.setFrom(from);
-        message.setTo(to);
+        message.setTo(request.getTo());
         message.setText("픽플즈 핸드폰 본인 인증 번호 [" + number + "]");
 
         //TODO: number DB에 저장
@@ -42,7 +43,6 @@ public class SMSService {
         try {
             messageService.send(message);
         } catch (NurigoMessageNotReceivedException exception) {
-            // 발송에 실패한 메시지 목록을 확인할 수 있습니다!
             System.out.println(exception.getFailedMessageList());
             System.out.println(exception.getMessage());
         } catch (Exception exception) {
