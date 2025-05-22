@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hm.picplz.domain.area.domain.Area;
+import com.hm.picplz.domain.area.exception.AreaErrorCode;
 import com.hm.picplz.domain.following.repository.FollowingRepository;
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.domain.Role;
@@ -20,7 +21,7 @@ import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
 import com.hm.picplz.domain.photographer.repository.ActiveAreaRepository;
-import com.hm.picplz.domain.photographer.repository.AreaRepoisotry;
+import com.hm.picplz.domain.area.repository.AreaRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerCameraRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.global.common.entity.YesNo;
@@ -37,7 +38,7 @@ public class PhotographerService {
 	private final PhotographerRepository photographerRepository;
 	private final FollowingRepository followingRepository;
 	private final ActiveAreaRepository activeAreaRepository;
-	private final AreaRepoisotry areaRepoisotry;
+	private final AreaRepository areaRepository;
 	private final PhotographerCameraRepository photographerCameraRepository;
 
 	private final RedisTemplate<String, Object> redisTemplate;
@@ -75,8 +76,8 @@ public class PhotographerService {
 	 */
 	private void createActiveAreas(List<PhotographerDto.ActiveAreaRequest> areaDtos, Photographer photographer) {
 		for (PhotographerDto.ActiveAreaRequest dto : areaDtos) {
-			Area area = areaRepoisotry.findById(dto.getCode())
-				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.WRONG_AREA_CODE));
+			Area area = areaRepository.findById(dto.getCode())
+				.orElseThrow(() -> ExceptionFactory.of(AreaErrorCode.WRONG_AREA_CODE));
 
 			ActiveArea activeArea = ActiveArea.builder()
 				.photographer(photographer)

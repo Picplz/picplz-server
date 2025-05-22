@@ -1,0 +1,57 @@
+package com.hm.picplz.domain.area.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.hm.picplz.domain.area.domain.Area;
+import com.hm.picplz.domain.area.dto.AreaDto;
+import com.hm.picplz.domain.area.exception.AreaErrorCode;
+import com.hm.picplz.domain.area.repository.AreaRepository;
+import com.hm.picplz.global.error.ExceptionFactory;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class AreaService {
+	private final AreaRepository areaRepository;
+
+	static final double EARTH_RADIUS = 111_000;
+
+	/**
+	 * 사용자의 현재 위치 근처의 법정동을 반환합니다.
+	 * @param radius km 단위의 범위
+	 * @param lat 위도
+	 * @param lng 경도
+	 * @return 근처 법정동 최대 10개
+	 */
+	public List<AreaDto.Card> getNearbyAreas(int radius, double lat, double lng) {
+		if (lng == 0 || lat == 0 || radius == 0) {
+			throw ExceptionFactory.of(AreaErrorCode.BAD_POSITION);
+		}
+
+		double latDiff = radius / EARTH_RADIUS;
+		double lngDiff = radius / (EARTH_RADIUS * Math.cos(Math.toRadians(lat)));
+
+		List<Area> nearAreas = areaRepository.findAreaInMBR(
+			lng - lngDiff, lat - latDiff,
+			lng + lngDiff, lat + latDiff
+		);
+
+		return nearAreas.stream()
+			.map(AreaDto.Card::from)
+			.toList();
+	}
+
+	/**
+	 * 법정동을 키워드로 검색합니다.
+	 * @param keyword 검색 키워드
+	 * @return 해당 키워드를 포함하는 법정동 최대 10개
+	 */
+	public List<AreaDto.Card> searchAreasWithKeyword(String keyword) {
+		return areaRepository.searchByKeyword(keyword).stream()
+			.map(AreaDto.Card::from)
+			.toList();
+	}
+}

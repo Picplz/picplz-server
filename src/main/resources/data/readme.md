@@ -19,6 +19,8 @@ csv파일을 sh 파일과 같은 경로에 두시고 실행하시면 됩니다.
 - 빠른 거리 계산을 위해서 spatial 데이터 타입을 사용해야합니다.
 - spatial 데이터 타입은 jpa로 자동 인덱스 적용이 안됩니다. 따라서 mysql에서 아래 쿼리를 직접 실행해주세요.
 `ALTER TABLE area ADD SPATIAL INDEX(location);`
+- 키워드 검색을 위해 ngram 인덱스를 사용했습니다. 아래 쿼리를 직접 실행해주세요.
+`ALTER TABLE area ADD FULLTEXT INDEX idx_name_ngram (name) WITH PARSER ngram;`
 
 
 ### etc
