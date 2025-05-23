@@ -44,7 +44,7 @@ public class PhotoMoodService {
 		// 3. 저장
 		photoMoodRepository.saveAll(photoMoods);
 
-		return PhotoMoodDto.PhotoMoodResponse.of(photoMoods);
+		return PhotoMoodDto.PhotoMoodResponse.from(photoMoods);
 	}
 
 	@Transactional

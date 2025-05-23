@@ -1,4 +1,4 @@
-package com.hm.picplz.domain.member;
+package com.hm.picplz.domain.member.repository;
 
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.domain.SocialProvider;

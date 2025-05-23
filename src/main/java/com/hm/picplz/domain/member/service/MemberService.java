@@ -12,7 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hm.picplz.domain.member.MemberRepository;
+import com.hm.picplz.domain.member.repository.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.dto.MemberDto;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
@@ -69,7 +69,7 @@ public class MemberService {
         member.updateInstagram(updateMemberInfoRequest.getInstagram());
         member.updateIntroduction(updateMemberInfoRequest.getIntroduction());
 
-        return MemberDto.MemberInfoResponse.of(member);
+        return MemberDto.MemberInfoResponse.from(member);
     }
 
     private boolean checkNicknameForUpdate(String nickname, Member member) {
@@ -121,7 +121,7 @@ public class MemberService {
 
         memberRepository.save(member);
 
-        return MemberDto.MemberInfoResponse.of(member);
+        return MemberDto.MemberInfoResponse.from(member);
     }
 
     /**
@@ -147,7 +147,7 @@ public class MemberService {
      * @return 정제된 멤버 정보
      */
     public MemberDto.MemberInfoResponse getMemberInfo(Long id) {
-        return MemberDto.MemberInfoResponse.of(getMemberById(id));
+        return MemberDto.MemberInfoResponse.from(getMemberById(id));
     }
 
     /**
