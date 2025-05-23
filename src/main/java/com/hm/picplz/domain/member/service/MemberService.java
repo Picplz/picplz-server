@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import com.hm.picplz.domain.member.domain.SocialProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.geo.Point;
@@ -24,6 +25,7 @@ import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -68,8 +70,8 @@ public class MemberService {
                 .ifPresent(member::updateProfileImage);
         // 닉네임 수정
         Optional.ofNullable(updateMemberInfoRequest.getNickname()).ifPresent(nickname -> {
-            if (checkNicknameForUpdate(nickname, member)) {
-                member.updateNickname(updateMemberInfoRequest.getNickname());
+            if (!checkNicknameForUpdate(nickname, member)) { // 해당 아이디가 아니면서, 해당 닉네임을 가지고 있는 사람이 없다면 변경
+                member.updateNickname(nickname);
             }
         });
         // 인스타그램 수정
