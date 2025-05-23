@@ -2,8 +2,11 @@ package com.hm.picplz.domain.member.service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
+import com.hm.picplz.domain.member.domain.SocialProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.geo.GeoResults;
@@ -24,6 +27,7 @@ import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -54,7 +58,8 @@ public class MemberService {
     }
 
     /**
-     * 닉네임과 프로필 이미지 수정 api
+     * 회원 정보 수정 api
+     * @param updateMemberInfoRequest
      * @return 수정된 멤버 정보
      */
     @Transactional
@@ -62,13 +67,21 @@ public class MemberService {
         Member member = memberRepository.findById(updateMemberInfoRequest.getId())
                 .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        // 닉네임 중복 확인
-        if (checkNicknameForUpdate(updateMemberInfoRequest.getNickname(), member)) {
-            member.updateNickname(updateMemberInfoRequest.getNickname());
-        }
-        member.updateProfileImage(updateMemberInfoRequest.getProfileImage());
-        member.updateInstagram(updateMemberInfoRequest.getInstagram());
-        member.updateIntroduction(updateMemberInfoRequest.getIntroduction());
+        // 프로필 사진 수정
+        Optional.ofNullable(updateMemberInfoRequest.getProfileImage())
+                .ifPresent(member::updateProfileImage);
+        // 닉네임 수정
+        Optional.ofNullable(updateMemberInfoRequest.getNickname()).ifPresent(nickname -> {
+            if (!checkNicknameForUpdate(nickname, member)) { // 해당 아이디가 아니면서, 해당 닉네임을 가지고 있는 사람이 없다면 변경
+                member.updateNickname(nickname);
+            }
+        });
+        // 인스타그램 수정
+        Optional.ofNullable(updateMemberInfoRequest.getInstagram())
+                .ifPresent(member::updateInstagram);
+        // 소개말 수정
+        Optional.ofNullable(updateMemberInfoRequest.getIntroduction())
+                .ifPresent(member::updateIntroduction);
 
         return MemberDto.MemberInfoResponse.from(member);
     }
@@ -118,8 +131,8 @@ public class MemberService {
                 .role(createMemberRequest.getRole())
                 .socialEmail(createMemberRequest.getSocialEmail())
                 .profileImage(createMemberRequest.getProfileImage())
-                .socialCode(null)
-                .socialProvider(null)
+                .socialCode("aaa")
+                .socialProvider(SocialProvider.KAKAO)
                 .build();
 
         memberRepository.save(member);

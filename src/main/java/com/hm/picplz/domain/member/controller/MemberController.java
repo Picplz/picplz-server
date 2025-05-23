@@ -29,7 +29,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @Operation(summary = "회원 닉네임, 프로필 사진 업데이트")
+    @Operation(summary = "회원 정보 업데이트")
     @PatchMapping(value = "/info")
     public MemberDto.MemberInfoResponse updateMemberInfo(@RequestBody MemberDto.UpdateMemberInfoRequest updateMemberInfoRequest) {
         return memberService.updateMemberInfo(updateMemberInfoRequest);
