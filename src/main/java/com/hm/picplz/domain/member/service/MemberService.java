@@ -1,6 +1,7 @@
 package com.hm.picplz.domain.member.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import com.hm.picplz.domain.member.domain.SocialProvider;
@@ -53,7 +54,7 @@ public class MemberService {
     }
 
     /**
-     * 닉네임과 프로필 이미지 수정 api
+     * 회원 정보 수정 api
      * @param updateMemberInfoRequest
      * @return 수정된 멤버 정보
      */
@@ -62,13 +63,21 @@ public class MemberService {
         Member member = memberRepository.findById(updateMemberInfoRequest.getId())
                 .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        // 닉네임 중복 확인
-        if (checkNicknameForUpdate(updateMemberInfoRequest.getNickname(), member)) {
-            member.updateNickname(updateMemberInfoRequest.getNickname());
-        }
-        member.updateProfileImage(updateMemberInfoRequest.getProfileImage());
-        member.updateInstagram(updateMemberInfoRequest.getInstagram());
-        member.updateIntroduction(updateMemberInfoRequest.getIntroduction());
+        // 프로필 사진 수정
+        Optional.ofNullable(updateMemberInfoRequest.getProfileImage())
+                .ifPresent(member::updateProfileImage);
+        // 닉네임 수정
+        Optional.ofNullable(updateMemberInfoRequest.getNickname()).ifPresent(nickname -> {
+            if (checkNicknameForUpdate(nickname, member)) {
+                member.updateNickname(updateMemberInfoRequest.getNickname());
+            }
+        });
+        // 인스타그램 수정
+        Optional.ofNullable(updateMemberInfoRequest.getInstagram())
+                .ifPresent(member::updateInstagram);
+        // 소개말 수정
+        Optional.ofNullable(updateMemberInfoRequest.getIntroduction())
+                .ifPresent(member::updateIntroduction);
 
         return MemberDto.MemberInfoResponse.of(member);
     }
@@ -140,16 +149,6 @@ public class MemberService {
         if (memberRepository.existsByNicknameIs(nickname)) {
             throw ExceptionFactory.of(MemberErrorCode.DUPLICATE_NICKNAME);
         }
-    }
-
-    @Transactional
-    public MemberDto.UpdateNicknameResponse updateNickname(MemberDto.UpdateNicknameRequest updateNicknameRequest) {
-        Member member = memberRepository.findById(updateNicknameRequest.getMemberId())
-                .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
-        checkNickname(updateNicknameRequest.getNickname());
-        member.updateNickname(updateNicknameRequest.getNickname());
-
-        return MemberDto.UpdateNicknameResponse.of(member);
     }
 
     /**
