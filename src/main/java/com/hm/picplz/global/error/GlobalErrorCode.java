@@ -12,7 +12,7 @@ public enum GlobalErrorCode implements BaseErrorCode {
 
     /* global error */
     HTTP_MESSAGE_NOT_READABLE(BAD_REQUEST, "GLOBAL_400_1", "잘못된 형식의 값을 입력했습니다."),
-    _INTERNAL_SERVER_ERROR(INTERNAL_SERVER_ERROR, "GLOBAL_500_1", "서버 오류, 관리자에게 문의 부탁드립니다."),
+    PICPLZ_INTERNAL_SERVER_ERROR(INTERNAL_SERVER_ERROR, "GLOBAL_500_1", "서버 오류, 관리자에게 문의 부탁드립니다."),
 
     /* 토큰 에러 */
     NO_TOKEN(UNAUTHORIZED, "AUTH_401_1", "토큰이 존재하지 않습니다."),
@@ -26,9 +26,9 @@ public enum GlobalErrorCode implements BaseErrorCode {
     INVALID_SIGNATURE(UNAUTHORIZED, "AUTH_401_8", "잘못된 JWT 서명입니다"),
     ;
 
-    private HttpStatus status;
-    private String code;
-    private String reason;
+    private final HttpStatus status;
+    private final String code;
+    private final String reason;
 
     @Override
     public ErrorReason getErrorReason() {
