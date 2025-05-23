@@ -9,21 +9,21 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CameraDto {
+public class DefaultCameraDto {
 
 	@Data
 	@NoArgsConstructor
-	public static class DefaultCameraCard {
+	public static class Card {
 		private String type; // 핸드폰, 카메라
 		private String brand; // 애플, 삼성, 소니 ...
 		private String name; // 모델명
 
-		public static DefaultCameraCard from(DefaultCamera defaultCamera) {
-			DefaultCameraCard defaultCameraCard = new DefaultCameraCard();
-			defaultCameraCard.type = defaultCamera.getType();
-			defaultCameraCard.name = defaultCamera.getName();
-			defaultCameraCard.brand = defaultCamera.getBrand();
-			return defaultCameraCard;
+		public static Card from(DefaultCamera defaultCamera) {
+			Card card = new Card();
+			card.type = defaultCamera.getType();
+			card.name = defaultCamera.getName();
+			card.brand = defaultCamera.getBrand();
+			return card;
 		}
 	}
 }
