@@ -9,9 +9,9 @@ import lombok.Getter;
 @Getter
 public class CommonResponse {
 
-    private LocalDateTime timestamp;
-    private int statusCode;
-    private String message;
+    private final LocalDateTime timestamp;
+    private final int statusCode;
+    private final String message;
 
     private CommonResponse(int statusCode, String message) {
         this.timestamp = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
@@ -21,7 +21,7 @@ public class CommonResponse {
 
     @Getter
     public static class SuccessResponse<T> extends CommonResponse {
-        private T data;
+        private final T data;
 
         @Builder
         public SuccessResponse(int statusCode, String message, T data) {
@@ -32,7 +32,7 @@ public class CommonResponse {
 
     @Getter
     public static class ErrorResponse extends CommonResponse {
-        private String code;
+        private final String code;
 
         @Builder
         public ErrorResponse(int statusCode, String message, String code) {

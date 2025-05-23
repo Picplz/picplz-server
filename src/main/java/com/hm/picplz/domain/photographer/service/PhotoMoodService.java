@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.domain.photographer.domain.Photographer;
-import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
 import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
 import com.hm.picplz.domain.photographer.repository.PhotoMoodRepository;
 import com.hm.picplz.global.error.ExceptionFactory;
@@ -24,7 +23,7 @@ public class PhotoMoodService {
 	private final PhotoMoodRepository photoMoodRepository;
 
 	@Transactional
-	public PhotoMoodDto.PhotoMoodResponse createPhotoMoods(List<String> photoMoodContents, Photographer photographer) {
+	public void createPhotoMoods(List<String> photoMoodContents, Photographer photographer) {
 		// 1. null·빈 문자열 제거 & trim 후 중복 제거
 		List<String> distinctContents = photoMoodContents.stream()
 			.filter(Objects::nonNull)
@@ -43,8 +42,6 @@ public class PhotoMoodService {
 
 		// 3. 저장
 		photoMoodRepository.saveAll(photoMoods);
-
-		return PhotoMoodDto.PhotoMoodResponse.of(photoMoods);
 	}
 
 	@Transactional

@@ -45,25 +45,6 @@ public class PhotographerController {
         photographerService.cachePhotographerExistence(memberId);
     }
 
-
-    // @PhotographerOnly
-    // @Operation(summary = "작가 경력 추가")
-    // @PostMapping("/career")
-    // public void updatePhotographerCareer(
-    //     @AuthenticationPrincipal Long memberId,
-    //     @RequestBody PhotographerDto.AddCareer addCareerRequestDto) {
-    //     photographerService.addCareer(addCareerRequestDto, memberId);
-    // }
-    //
-    // @PhotographerOnly
-    // @Operation(summary = "작가 경력 기간 수정")
-    // @PatchMapping("/period")
-    // public void updatePhotographerCareerPeriod(
-    //     @AuthenticationPrincipal Long memberId,
-    //     @RequestBody PhotographerDto.UpdateCareerPeriod updateCareerPeriodRequestDto) {
-    //     photographerService.updateCareerPeriod(updateCareerPeriodRequestDto, memberId);
-    // }
-
     @PhotographerOnly
     @Operation(summary = "사진 감성 해시 태그 생성")
     @PostMapping("/photo-mood")

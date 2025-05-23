@@ -67,7 +67,7 @@ public class PhotographerDto {
             detail.nickname = photographer.getMember().getNickname();
             detail.profileImage = photographer.getMember().getProfileImage();
             detail.area = photographer.getActiveAreas().stream()
-                .map(ActiveAreaResponse::of)
+                .map(ActiveAreaResponse::from)
                 .sorted(Comparator.comparingInt(ActiveAreaResponse::getPriority))
                 .toList();
             detail.active = photographer.getActive();
@@ -88,8 +88,8 @@ public class PhotographerDto {
         @NotBlank
         private String nickname;
         private String socialEmail;
-        private SocialProvider socialProvider;
-        private String attributeCode;
+        private SocialProvider socialProvider;  // 카카오 or 애플
+        private String socialCode;
         private String profileImage;
 
         private List<String> photoMoods;
@@ -97,13 +97,13 @@ public class PhotographerDto {
         private List<PhotographerCameraRequest> cameras;
 
         public static CreatePhotographerRequest of (String nickname, String socialEmail, SocialProvider socialProvider,
-            String attributeCode, String profileImage, List<String> photoMoods, List<ActiveAreaRequest> activeAreas,
+            String socialCode, String profileImage, List<String> photoMoods, List<ActiveAreaRequest> activeAreas,
             List<PhotographerCameraRequest> cameras) {
             CreatePhotographerRequest createPhotographerRequest = new CreatePhotographerRequest();
             createPhotographerRequest.nickname = nickname;
             createPhotographerRequest.socialEmail = socialEmail;
             createPhotographerRequest.socialProvider = socialProvider;
-            createPhotographerRequest.attributeCode = attributeCode;
+            createPhotographerRequest.socialCode = socialCode;
             createPhotographerRequest.profileImage = profileImage;
             createPhotographerRequest.photoMoods = photoMoods;
             createPhotographerRequest.activeAreas = activeAreas;
@@ -127,7 +127,7 @@ public class PhotographerDto {
         private String name;
         private Integer priority;
 
-        public static ActiveAreaResponse of(ActiveArea activeArea) {
+        public static ActiveAreaResponse from(ActiveArea activeArea) {
             ActiveAreaResponse activeAreaResponse = new ActiveAreaResponse();
             activeAreaResponse.code     = activeArea.getArea().getId();
             activeAreaResponse.name     = activeArea.getArea().getName();

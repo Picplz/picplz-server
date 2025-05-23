@@ -3,7 +3,7 @@ package com.hm.picplz.domain.product.dto;
 import com.hm.picplz.domain.product.domain.ProductPhoto;
 import com.hm.picplz.domain.product.domain.ShootProduct;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -33,11 +33,11 @@ public class ProductDto {
     @NoArgsConstructor
     public static class ProductId {
 
-        private Long productId;
+        private Long id;
 
-        public static ProductId from(Long id) {
+        public static ProductId of(Long id) {
             ProductId productId = new ProductId();
-            productId.productId = id;
+            productId.id = id;
 
             return productId;
         }
@@ -71,7 +71,7 @@ public class ProductDto {
             detail.otherDetails = product.getOtherDetails();
             detail.productPhotos = photos.stream()
                     .map(ProductPhoto::getImageData)
-                    .collect(Collectors.toList());
+                    .toList();
 
             return detail;
         }

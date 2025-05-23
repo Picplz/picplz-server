@@ -6,6 +6,7 @@ import com.hm.picplz.global.common.response.CommonResponse.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -53,8 +54,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         final Map<String, Object> fieldAndErrorMessages =
                 errors.stream()
                         .collect(
-                                Collectors.toMap(
-                                        FieldError::getField, FieldError::getDefaultMessage));
+                                Collectors.toMap(FieldError::getField,
+                            err -> Optional.ofNullable(err.getDefaultMessage()).orElse("Invalid value")));
         final String errorsToJsonString =
                 fieldAndErrorMessages.entrySet().stream()
                         .map(e -> e.getKey() + " : " + e.getValue())
@@ -97,7 +98,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             Exception e, HttpServletRequest request) {
         log.error("Exception", e);
 
-        final GlobalErrorCode globalErrorCode = GlobalErrorCode._INTERNAL_SERVER_ERROR;
+        final GlobalErrorCode globalErrorCode = GlobalErrorCode.PICPLZ_INTERNAL_SERVER_ERROR;
         final ErrorReason errorReason = globalErrorCode.getErrorReason();
         final ErrorResponse errorResponse = ErrorResponse.from(errorReason);
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(errorResponse);

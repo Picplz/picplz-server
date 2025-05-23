@@ -1,9 +1,11 @@
 package com.hm.picplz.domain.auth.dto;
 
 import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
+import com.hm.picplz.domain.member.domain.SocialProvider;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,29 +25,32 @@ public class AuthDto {
 	public static class LoginResponse {
 		@Schema(description = "회원 가입 여부", example = "true / false")
 		private boolean isRegistered;
+		@Schema(description = "소셜 로그인에서 제공하는 유저 식별용 code값. 회원 가입 시 필요", example = "0123456789")
+		private String socialCode;
 		@Schema(description = "간편 로그인 제공 업체", example = "kakao / apple")
-		private String provider;
+		private SocialProvider socialProvider;
 		@Schema(description = "픽플즈 accessToken")
 		private JwtTokenResponseDto token;
 
-		public static LoginResponse of(boolean isRegistered, String provider, JwtTokenResponseDto token) {
-			LoginResponse loginResponse = new LoginResponse();
-			loginResponse.isRegistered = isRegistered;
-			loginResponse.provider = provider;
-			loginResponse.token = token;
-			return loginResponse;
+		@Builder
+		public LoginResponse(boolean isRegistered, String socialCode, SocialProvider socialProvider, JwtTokenResponseDto token) {
+			this.isRegistered = isRegistered;
+			this.socialCode = socialCode;
+			this.socialProvider = socialProvider;
+			this.token = token;
 		}
+
 	}
 
 	@Data
 	@NoArgsConstructor
 	public static class KakaoUserInfo {
-		private Long id;
+		private String socialCode;
 		private String email;
 
-		public static KakaoUserInfo of(Long id, String email) {
+		public static KakaoUserInfo of(String socialCode, String email) {
 			KakaoUserInfo kakaoUserInfo = new KakaoUserInfo();
-			kakaoUserInfo.id = id;
+			kakaoUserInfo.socialCode = socialCode;
 			kakaoUserInfo.email = email;
 			return kakaoUserInfo;
 		}

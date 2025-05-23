@@ -1,5 +1,6 @@
 package com.hm.picplz.domain.member.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -8,6 +9,7 @@ import com.hm.picplz.domain.member.domain.SocialProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResult;
+import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.connection.RedisGeoCommands.GeoLocation;
@@ -15,7 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hm.picplz.domain.member.MemberRepository;
+import com.hm.picplz.domain.member.repository.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.dto.MemberDto;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
@@ -38,7 +40,7 @@ public class MemberService {
 
     /**
      * 고객, 작가 회원가입 시 멤버 데이터 추가
-     * @param createMemberRequest
+     * @param createMemberRequest 회원가입 필수 데이터
      * @return 멤버 entity
      */
     @Transactional
@@ -48,7 +50,7 @@ public class MemberService {
             .socialEmail(createMemberRequest.getSocialEmail())
             .role(createMemberRequest.getRole())
             .socialProvider(createMemberRequest.getSocialProvider())
-            .attributeCode(createMemberRequest.getAttributeCode())
+            .socialCode(createMemberRequest.getSocialCode())
             .profileImage(createMemberRequest.getProfileImage())
             .build();
 
@@ -81,7 +83,7 @@ public class MemberService {
         Optional.ofNullable(updateMemberInfoRequest.getIntroduction())
                 .ifPresent(member::updateIntroduction);
 
-        return MemberDto.MemberInfoResponse.of(member);
+        return MemberDto.MemberInfoResponse.from(member);
     }
 
     private boolean checkNicknameForUpdate(String nickname, Member member) {
@@ -103,7 +105,7 @@ public class MemberService {
      * @return 검색된 데이터 목록
      */
     public List<PhotographerDto.Card> findPhotographersWithinRadius(double longitude, double latitude, long distance) {
-        Circle circle = new Circle(new Point(longitude, latitude), distance * 1000);    // 반경 (단위: m)
+        Circle circle = new Circle(new Point(longitude, latitude), distance * 1000d);    // 반경 (단위: m)
 
         // 검색 옵션 (거리 포함, 가까운 순)
         RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs
@@ -111,10 +113,12 @@ public class MemberService {
                 .includeDistance()
                 .sortAscending();
 
-        List<GeoResult<GeoLocation<Object>>> results = redisTemplate
-                .opsForGeo()
-                .radius(GEO_KEY, circle, args)
-                .getContent();
+        GeoResults<GeoLocation<Object>> geoResults = redisTemplate
+            .opsForGeo()
+            .radius(GEO_KEY, circle, args);
+
+        List<GeoResult<GeoLocation<Object>>> results =
+            geoResults != null ? geoResults.getContent() : Collections.emptyList();
 
         return photographerHelper.getPhotographerCardByMemberGeoInfo(results);
     }
@@ -127,13 +131,13 @@ public class MemberService {
                 .role(createMemberRequest.getRole())
                 .socialEmail(createMemberRequest.getSocialEmail())
                 .profileImage(createMemberRequest.getProfileImage())
-                .attributeCode("aaa")
+                .socialCode("aaa")
                 .socialProvider(SocialProvider.KAKAO)
                 .build();
 
         memberRepository.save(member);
 
-        return MemberDto.MemberInfoResponse.of(member);
+        return MemberDto.MemberInfoResponse.from(member);
     }
 
     /**
@@ -159,7 +163,7 @@ public class MemberService {
      * @return 정제된 멤버 정보
      */
     public MemberDto.MemberInfoResponse getMemberInfo(Long id) {
-        return MemberDto.MemberInfoResponse.of(getMemberById(id));
+        return MemberDto.MemberInfoResponse.from(getMemberById(id));
     }
 
     /**

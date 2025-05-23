@@ -1,5 +1,8 @@
 # Compiled class file
 *.class
+/bin/
+/build/
+/out/
 
 # Log file
 *.log

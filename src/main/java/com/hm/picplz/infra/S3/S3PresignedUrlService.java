@@ -47,8 +47,8 @@ public class S3PresignedUrlService {
     /**
      * 업로드 presignedURL 생성
      * @param type  업로드 타입 (PROFILE/PORTFOLIO)
-     * @param filename
-     * @return
+     * @param filename 파일 명
+     * @return 미리 생성된 url
      */
     public URL generateUploadUrl(ImageType type, String filename) {
         String objectKey = type.generateKeyWithUuid(filename);

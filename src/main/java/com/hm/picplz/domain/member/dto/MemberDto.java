@@ -22,7 +22,7 @@ public class MemberDto {
 		private String socialEmail;
 		private Role role;
 		private SocialProvider socialProvider;
-		private String attributeCode;
+		private String socialCode;
 		private String profileImage;
 
 		public static CreateMemberRequest of(MemberSignupInfo member, Role role) {
@@ -31,7 +31,7 @@ public class MemberDto {
 			createMemberRequest.socialEmail = member.getSocialEmail();
 			createMemberRequest.role = role;
 			createMemberRequest.socialProvider = member.getSocialProvider();
-			createMemberRequest.attributeCode = member.getAttributeCode();
+			createMemberRequest.socialCode = member.getSocialCode();
 			createMemberRequest.profileImage = member.getProfileImage();
 			return createMemberRequest;
 		}
@@ -71,23 +71,21 @@ public class MemberDto {
 	public static class MemberInfoResponse {
 		private Long id;
 		private String nickname;
-		private LocalDate birth;
 		private Role role;
 		private String socialEmail;
 		private String profileImage;
 		private SocialProvider socialProvider;
-		private String attributeCode;
+		private String socialCode;
 
-		public static MemberInfoResponse of(Member member) {
+		public static MemberInfoResponse from(Member member) {
 			MemberInfoResponse memberInfoResponse = new MemberInfoResponse();
 			memberInfoResponse.id = member.getId();
 			memberInfoResponse.nickname = member.getNickname();
-			memberInfoResponse.birth = member.getBirth();
 			memberInfoResponse.role = member.getRole();
 			memberInfoResponse.socialEmail = member.getSocialEmail();
 			memberInfoResponse.profileImage = member.getProfileImage();
 			memberInfoResponse.socialProvider = member.getSocialProvider();
-			memberInfoResponse.attributeCode = member.getAttributeCode();
+			memberInfoResponse.socialCode = member.getSocialCode();
 			return memberInfoResponse;
 		}
 	}
