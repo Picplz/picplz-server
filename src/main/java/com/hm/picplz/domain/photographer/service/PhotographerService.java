@@ -112,7 +112,7 @@ public class PhotographerService {
 	 * 작가 상세 정보 반환
 	 * @param photographerId 조회하려는 작가 정보
 	 * @param memberId 조회를 시도하는 회원 정보(팔로우 여부를 위해)
-	 * @return
+	 * @return 작가 상세 정보
 	 */
 	public PhotographerDto.Detail getPhotographerDetail(Long photographerId, Long memberId) {
 		Photographer photographer = getPhotographerByPhotographerId(photographerId);
@@ -124,7 +124,7 @@ public class PhotographerService {
 	/**
 	 * 작가 entity 데이터 조회 메서드
 	 * @param photographerId 작가 pk
-	 * @return
+	 * @return 작가 엔티티
 	 */
 	private Photographer getPhotographerByPhotographerId(Long photographerId) {
 		return photographerRepository.findPhotographerWithMoods(photographerId)
@@ -134,7 +134,7 @@ public class PhotographerService {
 	/**
 	 * 작가 enitty 데이터 조회 메서드
 	 * @param memberId 작가의 member pk
-	 * @return
+	 * @return 작가 엔티티
 	 */
 	private Photographer getPhotographerByMemberId(Long memberId) {
 		return photographerRepository.findByMemberId(memberId)
@@ -143,7 +143,7 @@ public class PhotographerService {
 
 	/**
 	 * 작가 권한 확인을 위해 캐시 확인
-	 * @param memberId
+	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
 	 * @return 작가의 권한 확인 결과가 redis에 존재하는지
 	 */
 	public Boolean getCachedPhotographerExistence(Long memberId) {
@@ -152,7 +152,7 @@ public class PhotographerService {
 
 	/**
 	 * 작가인 경우, redis에 캐시로 저장해 작가 권한을 빠르게 확인하도록 한다.
-	 * @param memberId
+	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
 	 * @return 작가인지 아닌지 반환 (작가라면 redis에 캐싱)
 	 */
 	public boolean cachePhotographerExistence(Long memberId) {
@@ -163,8 +163,8 @@ public class PhotographerService {
 
 	/**
 	 * member Id로 작가인지 확인하고, 캐시가 없다면 작가 여부를 MySQL에서 확인하고 나서 반환한다.
-	 * @param memberId
-	 * @return
+	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
+	 * @return 작가인가 아닌가
 	 */
 	public boolean checkAndCachePhotographer(Long memberId) {
 		Boolean cached = getCachedPhotographerExistence(memberId);
@@ -176,7 +176,7 @@ public class PhotographerService {
 
 	/**
 	 * 작가의 팔로워 수를 조회
-	 * @param photographer
+	 * @param photographer 조회하려는 작가
 	 * @return 작가의 팔로워 수
 	 */
 	private int getFollowers(Photographer photographer) {

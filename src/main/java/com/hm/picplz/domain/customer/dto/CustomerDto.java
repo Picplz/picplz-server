@@ -19,8 +19,8 @@ public class CustomerDto {
 		@NotBlank
 		private String nickname;
 		private String socialEmail;
-		private SocialProvider socialProvider;
-		private String attributeCode;
+		private SocialProvider socialProvider; // 카카오 or 애플
+		private String socialCode;
 		private String profileImage;
 	}
 }

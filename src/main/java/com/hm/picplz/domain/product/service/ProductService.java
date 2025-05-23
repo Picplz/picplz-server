@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hm.picplz.domain.photographer.domain.Photographer;
-import com.hm.picplz.domain.photographer.exception.PhotographerNotFound;
+import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.domain.product.domain.ProductPhoto;
 import com.hm.picplz.domain.product.domain.ShootProduct;
 import com.hm.picplz.domain.product.dto.ProductDto;
-import com.hm.picplz.domain.product.exception.ProductNotFound;
 import com.hm.picplz.domain.product.repository.ProductPhotoRepository;
 import com.hm.picplz.domain.product.repository.ProductRepository;
+import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,9 +29,7 @@ public class ProductService {
     @Transactional
     public ProductDto.ProductId createProduct(ProductDto.Create request) {
         Photographer photographer = photographerRepository.findByMemberId(request.getPhotographerId())
-                .orElseThrow(() -> {
-                    throw PhotographerNotFound.EXCEPTION;
-                });
+            .orElseThrow(() ->  ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
         ShootProduct product = ShootProduct.of(request, photographer);
         ShootProduct savedProduct = productRepository.save(product);
 
@@ -43,9 +41,7 @@ public class ProductService {
 
     public ProductDto.Detail findProductDetailById(Long productId) {
         ShootProduct product = productRepository.findById(productId)
-                .orElseThrow(() -> {
-                    throw ProductNotFound.EXCEPTION;
-                });
+            .orElseThrow(() ->  ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
         List<ProductPhoto> photos = productPhotoRepository.findByShootProductIdOrderByPhotoOrderAsc(productId);
         return ProductDto.Detail.of(product, photos);
     }

@@ -1,7 +1,6 @@
 package com.hm.picplz.domain.product.domain;
 
 import com.hm.picplz.domain.photographer.domain.Photographer;
-import com.hm.picplz.domain.product.dto.ProductDto;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

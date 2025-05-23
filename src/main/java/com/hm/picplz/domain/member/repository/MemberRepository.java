@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByAttributeCodeAndSocialProvider(String attributeCode, SocialProvider socialProvider);
+    Optional<Member> findBySocialCodeAndSocialProvider(String socialCode, SocialProvider socialProvider);
     boolean existsByNicknameIs(String nickname);
 
 	boolean existsByNicknameIsAndIdNot(@NotNull @Size(max = 30) String nickname, Long id);
