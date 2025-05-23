@@ -49,7 +49,7 @@ public class Member extends BaseEntity {
     private SocialProvider socialProvider; // 카카오 or 애플
 
     @NotNull
-    private String attributeCode;
+    private String socialCode;
 
     private String instagram; // 인스타그램 아이디
 
@@ -62,7 +62,8 @@ public class Member extends BaseEntity {
     private Customer customer;
 
     @Builder
-    private Member(Long id, String nickname, LocalDate birth, Role role, String socialEmail, String profileImage, SocialProvider socialProvider, String attributeCode) {
+    private Member(Long id, String nickname, LocalDate birth, Role role, String socialEmail, String profileImage,
+        SocialProvider socialProvider, String socialCode) {
         this.id = id;
         this.nickname = nickname;
         this.birth = birth;
@@ -70,7 +71,7 @@ public class Member extends BaseEntity {
         this.socialEmail = socialEmail;
         this.profileImage = profileImage;
         this.socialProvider = socialProvider;
-        this.attributeCode = attributeCode;
+        this.socialCode = socialCode;
     }
 
     public String getRoleKey() {

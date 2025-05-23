@@ -1,10 +1,10 @@
 package com.hm.picplz.domain.auth.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,12 +14,15 @@ import org.springframework.web.client.RestClient;
 import com.hm.picplz.domain.auth.dto.AuthDto;
 import com.hm.picplz.domain.auth.jwt.JwtTokenProvider;
 import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
-import com.hm.picplz.domain.member.repository.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.domain.SocialProvider;
+import com.hm.picplz.domain.member.exception.MemberErrorCode;
+import com.hm.picplz.domain.member.repository.MemberRepository;
+import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("SameParameterValue")
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -30,29 +33,45 @@ public class AuthService {
 
 	public AuthDto.LoginResponse checkUserKakao(String accessToken) {
 		AuthDto.KakaoUserInfo userInfo = fetchKakaoUserInfo(accessToken);
-		Optional<Member> member = findByCodeAndProvider(String.valueOf(userInfo.getId()), SocialProvider.KAKAO);
+		Optional<Member> member = findByCodeAndProvider(String.valueOf(userInfo.getSocialCode()), SocialProvider.KAKAO);
 		return member.map(
-				value -> AuthDto.LoginResponse.of(true, SocialProvider.KAKAO.getName(), generateTokenForMember(value)))
-			.orElseGet(() -> AuthDto.LoginResponse.of(false, SocialProvider.KAKAO.getName(), null));
+				value -> AuthDto.LoginResponse.builder()
+					.isRegistered(true)
+					.socialCode(userInfo.getSocialCode())
+					.socialProvider(SocialProvider.KAKAO)
+					.token(generateTokenForMember(value))
+					.build())
+			.orElseGet(() -> AuthDto.LoginResponse.builder()
+				.isRegistered(false)
+				.socialCode(userInfo.getSocialCode())
+				.socialProvider(SocialProvider.KAKAO)
+				.build());
 	}
 
 	private AuthDto.KakaoUserInfo fetchKakaoUserInfo(String accessToken) {
+		ParameterizedTypeReference<Map<String, Object>> responseType =
+			new ParameterizedTypeReference<>() {};
+
 		Map<String, Object> body = restClient.get()
 			.uri("https://kapi.kakao.com/v2/user/me")
 			.header("Authorization", "Bearer " + accessToken)
 			.retrieve()
-			.body(Map.class);
+			.body(responseType);
 
-		Long id = ((Number) body.get("id")).longValue(); // 필수 값
-		// kakao email은 not null이어야하는데 카카오 앱이 비즈앱이 아니라 email을 강제로 받을 수 없음
-		Map<String, Object> account = Optional.ofNullable((Map<String, Object>) body.get("kakao_account"))
-			.orElse(Collections.emptyMap());
-		String email = (String) account.get("email");
-		return AuthDto.KakaoUserInfo.of(id, email);
+		if (body == null) {
+			throw ExceptionFactory.of(MemberErrorCode.NO_KAKAO_USER);
+		}
+		String code = (String) body.get("id"); // 필수 값
+
+		/* kakao email은 not null이어야하는데 카카오 앱이 비즈앱이 아니라 email을 강제로 받을 수 없음
+		 * Map<String, Object> account = Optional.ofNullable((Map<String, Object>) body.get("kakao_account")).orElse(Collections.emptyMap());
+		 * String email = (String) account.get("email");
+		*/
+		return AuthDto.KakaoUserInfo.of(code, null);
 	}
 
 	private Optional<Member> findByCodeAndProvider(String code, SocialProvider socialProvider) {
-		return memberRepository.findByAttributeCodeAndSocialProvider(code, socialProvider);
+		return memberRepository.findBySocialCodeAndSocialProvider(code, socialProvider);
 	}
 
 	private JwtTokenResponseDto generateTokenForMember(Member member) {

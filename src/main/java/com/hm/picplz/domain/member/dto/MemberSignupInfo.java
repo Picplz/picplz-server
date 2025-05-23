@@ -6,6 +6,6 @@ public interface MemberSignupInfo {
 	String getNickname();
 	String getSocialEmail();
 	SocialProvider getSocialProvider();
-	String getAttributeCode();
+	String getSocialCode();
 	String getProfileImage();
 }

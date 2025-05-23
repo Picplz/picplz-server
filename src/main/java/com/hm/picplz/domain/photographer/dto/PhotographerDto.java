@@ -88,8 +88,8 @@ public class PhotographerDto {
         @NotBlank
         private String nickname;
         private String socialEmail;
-        private SocialProvider socialProvider;
-        private String attributeCode;
+        private SocialProvider socialProvider;  // 카카오 or 애플
+        private String socialCode;
         private String profileImage;
 
         private List<String> photoMoods;
@@ -97,13 +97,13 @@ public class PhotographerDto {
         private List<PhotographerCameraRequest> cameras;
 
         public static CreatePhotographerRequest of (String nickname, String socialEmail, SocialProvider socialProvider,
-            String attributeCode, String profileImage, List<String> photoMoods, List<ActiveAreaRequest> activeAreas,
+            String socialCode, String profileImage, List<String> photoMoods, List<ActiveAreaRequest> activeAreas,
             List<PhotographerCameraRequest> cameras) {
             CreatePhotographerRequest createPhotographerRequest = new CreatePhotographerRequest();
             createPhotographerRequest.nickname = nickname;
             createPhotographerRequest.socialEmail = socialEmail;
             createPhotographerRequest.socialProvider = socialProvider;
-            createPhotographerRequest.attributeCode = attributeCode;
+            createPhotographerRequest.socialCode = socialCode;
             createPhotographerRequest.profileImage = profileImage;
             createPhotographerRequest.photoMoods = photoMoods;
             createPhotographerRequest.activeAreas = activeAreas;

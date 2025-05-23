@@ -17,7 +17,10 @@ public enum MemberErrorCode implements BaseErrorCode {
 
     /* 중복 에러*/
     DUPLICATE_NICKNAME(BAD_REQUEST, "MEMBER_400_1", "이미 사용중인 닉네임입니다."),
-    NOT_VALID_NICKNAME(BAD_REQUEST, "MEMBER_400_2", "사용 불가능한 닉네임입니다.")
+    NOT_VALID_NICKNAME(BAD_REQUEST, "MEMBER_400_2", "사용 불가능한 닉네임입니다."),
+
+    /* 소셜 관련 */
+    NO_KAKAO_USER(BAD_REQUEST, "SOCIAL_400_1", "카카오 사용자 정보를 가져오지 못했습니다.")
     ;
 
 
