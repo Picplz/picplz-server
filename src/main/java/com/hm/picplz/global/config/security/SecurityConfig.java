@@ -37,6 +37,7 @@ public class SecurityConfig {
 		"/webjars/**",
 		"/members/test",
 		"/auth/**",
+		"/cameras",
 		"/**"
 	};
 
