@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import com.hm.picplz.domain.member.domain.SocialProvider;
+import com.hm.picplz.domain.photographer.service.PhotographerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResult;
@@ -22,7 +23,6 @@ import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.dto.MemberDto;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
-import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
 import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class MemberService {
     private static final String GEO_KEY = "members:locations";
 
     private final MemberRepository memberRepository;
-    private final PhotographerHelper photographerHelper;
+    private final PhotographerService photographerService;
     private final RedisTemplate<String, Object> redisTemplate;
 
     /**
@@ -120,7 +120,17 @@ public class MemberService {
         List<GeoResult<GeoLocation<Object>>> results =
             geoResults != null ? geoResults.getContent() : Collections.emptyList();
 
-        return photographerHelper.getPhotographerCardByMemberGeoInfo(results);
+        // 현재 위치 반경 기준 활동중인 작가들
+        List<PhotographerDto.Card> list =
+                photographerService.getPhotographerCardByMemberGeoInfo(results);
+
+        if(list.isEmpty()) {
+            //TODO: 관심 고객 많은 작가 return
+        } else if (list.size() < 5) {
+            //TODO: 비활 + 현재 고객 위치가 활동지역인 작가 return
+        }
+
+        return list;
     }
 
     @Transactional

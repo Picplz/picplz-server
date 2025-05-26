@@ -2,7 +2,10 @@ package com.hm.picplz.domain.photographer.service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
+import org.springframework.data.geo.GeoResult;
+import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -220,4 +223,16 @@ public class PhotographerService {
 		photoMoodService.deletePhotoMood(deletePhotoMoodDto.getPhotoMood(), photographer);
 	}
 
+	public List<PhotographerDto.Card> getPhotographerCardByMemberGeoInfo(List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> results) {
+		return results.stream()
+				.map(result -> {
+					Long memberId = Long.parseLong(result.getContent().getName().toString());
+					Photographer photographer = photographerRepository.findByMemberId(memberId)
+							.orElseThrow(() ->  ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+					return photographer != null ? PhotographerDto.Card.of(photographer, (long) result.getDistance().getValue()) : null;
+				})
+				.filter(Objects::nonNull)
+				.filter(card -> card.getActive().equals(YesNo.Y))
+				.toList();
+	}
 }
