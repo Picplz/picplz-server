@@ -50,7 +50,7 @@ public class PhotographerService {
 	 * @param createPhotographerRequest 작가 회원가입을 위한 입력 정보
 	 */
 	@Transactional
-	public void createPhotographer(PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
+	public PhotographerDto.Detail createPhotographer(PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
 		// 마지막 닉네임 중복 확인
 		memberService.checkNickname(createPhotographerRequest.getNickname());
 		// 멤버 데이터 생성
@@ -67,6 +67,8 @@ public class PhotographerService {
 		createActiveAreas(createPhotographerRequest.getActiveAreas(), photographer);
 		// 작가 촬영 카메라
 		createPhotographerCameras(createPhotographerRequest.getCameras(), photographer);
+
+		return PhotographerDto.Detail.of(photographer);
 	}
 
 	/**

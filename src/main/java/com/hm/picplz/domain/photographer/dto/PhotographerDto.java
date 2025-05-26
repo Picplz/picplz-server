@@ -80,6 +80,24 @@ public class PhotographerDto {
 
             return detail;
         }
+
+        public static Detail of(Photographer photographer) {
+            Detail detail = new Detail();
+            detail.photographerId = photographer.getId();
+            detail.nickname = photographer.getMember().getNickname();
+            detail.profileImage = photographer.getMember().getProfileImage();
+            detail.area = photographer.getActiveAreas().stream()
+                    .map(ActiveAreaResponse::from)
+                    .sorted(Comparator.comparingInt(ActiveAreaResponse::getPriority))
+                    .toList();
+            detail.active = photographer.getActive();
+            detail.instagram = photographer.getMember().getInstagram();
+            detail.photoMoods = photographer.getPhotoMoods().stream()
+                    .map(PhotoMood::getContent)
+                    .toList();
+
+            return detail;
+        }
     }
 
     @Data
@@ -110,6 +128,13 @@ public class PhotographerDto {
             createPhotographerRequest.cameras = cameras;
             return createPhotographerRequest;
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class CreatePhotographerResponse {
+        private Long memberId;
+        private Long photographerId;
     }
 
     @Data

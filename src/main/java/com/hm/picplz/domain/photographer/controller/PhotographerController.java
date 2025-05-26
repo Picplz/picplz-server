@@ -35,8 +35,8 @@ public class PhotographerController {
 
     @Operation(summary = "작가 회원가입")
     @PostMapping
-    public void createPhotographer(@RequestBody PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
-        photographerService.createPhotographer(createPhotographerRequest);
+    public PhotographerDto.Detail createPhotographer(@RequestBody PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
+        return photographerService.createPhotographer(createPhotographerRequest);
     }
 
     @Operation(summary = "작가 로그인")
