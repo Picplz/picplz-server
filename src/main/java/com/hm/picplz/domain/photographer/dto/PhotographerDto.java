@@ -28,10 +28,10 @@ public class PhotographerDto {
         private String nickname;
         private String profileImage;
         private YesNo active;
-        private double distance;
+        private long distance;
         private List<String> photoMoods;
 
-        public static Card of(Photographer photographer, double distance) {
+        public static Card of(Photographer photographer, long distance) {
             Card card = new Card();
             card.photographerId = photographer.getId();
             card.nickname = photographer.getMember().getNickname();

@@ -28,7 +28,7 @@ public class PhotographerHelper {
                     Long memberId = Long.parseLong(result.getContent().getName().toString());
                     Photographer photographer = photographerRepository.findByMemberId(memberId)
                             .orElseThrow(() ->  ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
-                    return photographer != null ? PhotographerDto.Card.of(photographer, result.getDistance().getValue()) : null;
+                    return photographer != null ? PhotographerDto.Card.of(photographer, (long) result.getDistance().getValue()) : null;
                 })
                 .filter(Objects::nonNull)
                 .toList();
