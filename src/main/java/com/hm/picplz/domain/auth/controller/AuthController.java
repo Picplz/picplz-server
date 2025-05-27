@@ -26,4 +26,10 @@ public class AuthController {
 	public AuthDto.LoginResponse kakaoLogin(@RequestBody AuthDto.KakaoTokenRequest request) {
 		return authService.checkUserKakao(request.getAccessToken());
 	}
+
+	@Operation(summary = "임시 로그인", tags = "test")
+	@PostMapping("/test")
+	public AuthDto.LoginResponse testLogin(@RequestBody AuthDto.TestLogin request) {
+		return authService.testLogin(request);
+	}
 }
