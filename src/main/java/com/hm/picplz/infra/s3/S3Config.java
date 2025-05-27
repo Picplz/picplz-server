@@ -1,4 +1,4 @@
-package com.hm.picplz.infra.S3;
+package com.hm.picplz.infra.s3;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

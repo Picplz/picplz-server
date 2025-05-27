@@ -1,5 +1,7 @@
 package com.hm.picplz.global.config.security;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,19 +32,7 @@ public class SecurityConfig {
 	private final JwtTokenProvider jwtTokenProvider;
 
 	/* 권한 제외 대상 */
-	private static final String[] permitAllUrl = new String[] {
-		"/swagger-ui/**",
-		"/swagger-resources/**",
-		"/v3/api-docs/**",      // 하위 경로 모두 포함
-		"/webjars/**",
-		"/members/test", "/members/nickname",
-		"/auth/**",
-		"/cameras",
-		"/photographers", // 작가 회원가입
-		"/customers", // 고객 회원가입
-		"/s3/**" // s3
-		, "/**" // 개발용 검증 해제
-	};
+	private final List<String> permitAllUrls; // 주입
 
 	/* Admin 접근 권한 */
 	private static final String[] permitAdminUrl = new String[] {
@@ -65,9 +55,9 @@ public class SecurityConfig {
 				.authenticationEntryPoint(jwtAuthenticationEntryPoint)
 				.accessDeniedHandler(jwtAccessDeniedHandler)
 			)
-			.addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(new JwtFilter(jwtTokenProvider, permitAllUrls), UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(authz -> authz
-				.requestMatchers(permitAllUrl).permitAll()
+				.requestMatchers(permitAllUrls.toArray(String[]::new)).permitAll()
 				.requestMatchers(permitAdminUrl).hasRole("ADMIN")
 				.anyRequest().authenticated()
 			)
