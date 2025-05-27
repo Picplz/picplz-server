@@ -25,7 +25,7 @@ public class DefaultCameraController {
 
 	@Operation(summary = "기획서에서 정한 기본 촬영 기기 목록 반환")
 	@GetMapping
-	public List<DefaultCameraDto.Card> getAllCameras() {
+	public List<DefaultCameraDto.CameraInfo> getAllCameras() {
 		return defaultCameraService.getCameras();
 	}
 }

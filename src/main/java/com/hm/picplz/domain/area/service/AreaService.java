@@ -26,7 +26,7 @@ public class AreaService {
 	 * @param lng 경도
 	 * @return 근처 법정동 최대 10개
 	 */
-	public List<AreaDto.Card> getNearbyAreas(int radius, double lat, double lng) {
+	public List<AreaDto.AreaInfo> getNearbyAreas(int radius, double lat, double lng) {
 		if (lng == 0 || lat == 0 || radius == 0) {
 			throw ExceptionFactory.of(AreaErrorCode.BAD_POSITION);
 		}
@@ -39,7 +39,7 @@ public class AreaService {
 		);
 
 		return nearAreas.stream()
-			.map(AreaDto.Card::from)
+			.map(AreaDto.AreaInfo::from)
 			.toList();
 	}
 
@@ -48,9 +48,9 @@ public class AreaService {
 	 * @param keyword 검색 키워드
 	 * @return 해당 키워드를 포함하는 법정동 최대 10개
 	 */
-	public List<AreaDto.Card> searchAreasWithKeyword(String keyword) {
+	public List<AreaDto.AreaInfo> searchAreasWithKeyword(String keyword) {
 		return areaRepository.searchByKeyword(keyword).stream()
-			.map(AreaDto.Card::from)
+			.map(AreaDto.AreaInfo::from)
 			.toList();
 	}
 }

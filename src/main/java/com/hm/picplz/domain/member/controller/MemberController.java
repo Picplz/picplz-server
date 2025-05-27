@@ -62,7 +62,7 @@ public class MemberController {
     }
 
     @Operation(summary = "회원 닉네임 중복검사")
-    @GetMapping()
+    @GetMapping("/nickname")
     public void checkNickname(@RequestParam String nickname) {
 		memberService.checkNickname(nickname);
 	}
