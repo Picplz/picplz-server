@@ -147,7 +147,7 @@ public class PhotographerService {
 	 * @return 작가의 권한 확인 결과가 redis에 존재하는지
 	 */
 	public Boolean getCachedPhotographerExistence(Long memberId) {
-		return (Boolean)redisTemplate.opsForValue().get(PHOTOGRAPHER_REDIS_KEY + memberId);
+		return (Boolean) redisTemplate.opsForValue().get(PHOTOGRAPHER_REDIS_KEY + memberId);
 	}
 
 	/**
@@ -156,6 +156,9 @@ public class PhotographerService {
 	 * @return 작가인지 아닌지 반환 (작가라면 redis에 캐싱)
 	 */
 	public boolean cachePhotographerExistence(Long memberId) {
+		// 1. 픽플즈에 존재하는 회원인가?
+		memberService.getMemberById(memberId);
+		// 2. 작가인가?
 		boolean exists = photographerRepository.existsByMemberId(memberId);
 		redisTemplate.opsForValue().set(PHOTOGRAPHER_REDIS_KEY + memberId, exists, Duration.ofMinutes(30));
 		return exists;
