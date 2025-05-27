@@ -85,9 +85,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BaseErrorException.class)
     public ResponseEntity<ErrorResponse> handleBaseErrorException(
             BaseErrorException e, HttpServletRequest request) {
-        log.error("BaseErrorException", e);
         final ErrorReason errorReason = e.getErrorCode().getErrorReason();
+        request.setAttribute("errorReason", errorReason);
         final ErrorResponse errorResponse = ErrorResponse.from(errorReason);
+		log.error("[PICPLZ_ERROR] - {} : {}", errorResponse.getCode(), errorResponse.getMessage());
         return ResponseEntity.status(HttpStatus.valueOf(errorReason.getStatus()))
                 .body(errorResponse);
     }

@@ -171,7 +171,7 @@ public class MemberService {
      * @param id 조회하려는 멤버의 pk
      * @return DB에 저장된 멤버의 모든 정보
      */
-    private Member getMemberById(Long id) {
+    public Member getMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 }

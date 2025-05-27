@@ -63,10 +63,11 @@ public class AuthService {
 		}
 		String code = (String) body.get("id"); // 필수 값
 
-		/* kakao email은 not null이어야하는데 카카오 앱이 비즈앱이 아니라 email을 강제로 받을 수 없음
-		 * Map<String, Object> account = Optional.ofNullable((Map<String, Object>) body.get("kakao_account")).orElse(Collections.emptyMap());
-		 * String email = (String) account.get("email");
-		*/
+		// 카카오 앱이 비즈앱이 아니라 email 수집을 강제할 수 없어, email 파싱 코드는 생략했습니다.
+		// (비즈앱 전환 후 아래 로직 참고: kakao_account에서 email 가져오기)
+		// 예시 (비즈앱 전환 시 사용):
+		// "Map<String, Object> account = Optional.ofNullable((Map<String, Object>) body.get(\"kakao_account\"))"
+		// + ".orElse(Collections.emptyMap()); String email = (String) account.get(\"email\");"
 		return AuthDto.KakaoUserInfo.of(code, null);
 	}
 
@@ -80,5 +81,18 @@ public class AuthService {
 			List.of(new SimpleGrantedAuthority(member.getRoleKey()))
 		);
 		return jwtTokenProvider.generateTokenDto(authentication);
+	}
+
+	public AuthDto.LoginResponse testLogin(AuthDto.TestLogin req) {
+		return findByCodeAndProvider(String.valueOf(req.getSocialCode()), req.getSocialProvider())
+			.map(value -> AuthDto.LoginResponse.builder()
+				.isRegistered(true)
+				.socialCode(value.getSocialCode())
+				.socialProvider(value.getSocialProvider())
+				.token(generateTokenForMember(value))
+				.build())
+			.orElseGet(() -> AuthDto.LoginResponse.builder()
+				.isRegistered(false)
+				.build());
 	}
 }

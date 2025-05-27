@@ -1,12 +1,15 @@
 package com.hm.picplz.global.error;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class BaseErrorException extends RuntimeException {
-    private BaseErrorCode errorCode;
+    private final BaseErrorCode errorCode;
+
+    public BaseErrorException(BaseErrorCode errorCode) {
+        super(errorCode.getErrorReason().getReason()); // ✅ 메시지를 부모에 전달
+        this.errorCode = errorCode;
+    }
 
     public ErrorReason getErrorReason() {
         return this.errorCode.getErrorReason();

@@ -25,7 +25,7 @@ public class PhotographerCheckAspect {
 		Long memberId = (Long) principal;
 		boolean isPhotographer = photographerService.checkAndCachePhotographer(memberId);
 		if (!isPhotographer) {
-			throw ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND);
+			throw ExceptionFactory.of(PhotographerErrorCode.NOT_PHOTOGRAPHER);
 		}
 	}
 }

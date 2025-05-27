@@ -55,4 +55,11 @@ public class AuthDto {
 			return kakaoUserInfo;
 		}
 	}
+
+	@Data
+	@NoArgsConstructor
+	public static class TestLogin {
+		private String socialCode;
+		private SocialProvider socialProvider;
+	}
 }
