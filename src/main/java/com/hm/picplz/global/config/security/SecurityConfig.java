@@ -41,7 +41,7 @@ public class SecurityConfig {
 		"/photographers", // 작가 회원가입
 		"/customers", // 고객 회원가입
 		"/s3/**" // s3
-		// , "/**" // 개발용 검증 해제
+		, "/**" // 개발용 검증 해제
 	};
 
 	/* Admin 접근 권한 */
