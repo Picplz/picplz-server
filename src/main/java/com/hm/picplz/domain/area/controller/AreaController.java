@@ -26,14 +26,14 @@ public class AreaController {
 
 	@Operation(summary = "사용자 근처 법정동 반환")
 	@GetMapping(value = "/nearby")
-	public List<AreaDto.Card> getNearbyAreas(
-		@RequestParam int radius, @RequestParam double lat, @RequestParam double lng) {
-		return areaService.getNearbyAreas(radius, lat, lng);
+	public List<AreaDto.AreaInfo> getNearbyAreas(
+		@RequestParam int rad, @RequestParam double lat, @RequestParam double lng) {
+		return areaService.getNearbyAreas(rad, lat, lng);
 	}
 
 	@Operation(summary = "키워드로 법정동 검색")
 	@GetMapping(value = "/search")
-	public List<AreaDto.Card> searchAreasWithKeyword(@RequestParam String keyword) {
+	public List<AreaDto.AreaInfo> searchAreasWithKeyword(@RequestParam String keyword) {
 		return areaService.searchAreasWithKeyword(keyword);
 	}
 }

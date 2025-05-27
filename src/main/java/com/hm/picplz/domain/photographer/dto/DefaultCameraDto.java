@@ -13,17 +13,17 @@ public class DefaultCameraDto {
 
 	@Data
 	@NoArgsConstructor
-	public static class Card {
+	public static class CameraInfo {
 		private String type; // 핸드폰, 카메라
 		private String brand; // 애플, 삼성, 소니 ...
 		private String name; // 모델명
 
-		public static Card from(DefaultCamera defaultCamera) {
-			Card card = new Card();
-			card.type = defaultCamera.getType();
-			card.name = defaultCamera.getName();
-			card.brand = defaultCamera.getBrand();
-			return card;
+		public static CameraInfo from(DefaultCamera defaultCamera) {
+			CameraInfo cameraInfo = new CameraInfo();
+			cameraInfo.type = defaultCamera.getType();
+			cameraInfo.name = defaultCamera.getName();
+			cameraInfo.brand = defaultCamera.getBrand();
+			return cameraInfo;
 		}
 	}
 }

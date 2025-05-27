@@ -25,7 +25,7 @@ public class SwaggerConfig {
 	@Bean
 	public OpenAPI openAPI() {
 		String securityJwtName = "JWT";
-		// SecurityRequirement securityRequirement = new SecurityRequirement().addList(securityJwtName);
+		SecurityRequirement securityRequirement = new SecurityRequirement().addList(securityJwtName);
 		Components components = new Components()
 			.addSecuritySchemes(securityJwtName, new SecurityScheme()
 				.name(securityJwtName)
@@ -33,7 +33,7 @@ public class SwaggerConfig {
 				.scheme(BEARER_TOKEN_PREFIX));
 
 		return new OpenAPI()
-			// .addSecurityItem(securityRequirement)
+			.addSecurityItem(securityRequirement)
 			.components(components);
 	}
 }

@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 public class DefaultCameraService {
 	private final DefaultCameraRepository defaultCameraRepository;
 
-	public List<DefaultCameraDto.Card> getCameras() {
-		return defaultCameraRepository.findAll().stream().map(DefaultCameraDto.Card::from).toList();
+	public List<DefaultCameraDto.CameraInfo> getCameras() {
+		return defaultCameraRepository.findAll().stream().map(DefaultCameraDto.CameraInfo::from).toList();
 	}
 }
