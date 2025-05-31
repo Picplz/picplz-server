@@ -75,45 +75,6 @@ public class PhotographerService {
 	}
 
 	/**
-	 * 작가의 주 촬영지(법정동 데이터 기반) 목록을 받아 N:M 관계 테이블에 저장
-	 * @param areaDtos 주 촬영지 목록
-	 * @param photographer 작가
-	 */
-	private void createActiveAreas(List<PhotographerDto.ActiveAreaRequest> areaDtos, Photographer photographer) {
-		for (PhotographerDto.ActiveAreaRequest dto : areaDtos) {
-			Area area = areaRepository.findById(dto.getCode())
-				.orElseThrow(() -> ExceptionFactory.of(AreaErrorCode.WRONG_AREA_CODE));
-
-			ActiveArea activeArea = ActiveArea.builder()
-				.photographer(photographer)
-				.area(area)
-				.priority(dto.getPriority())
-				.build();
-
-			activeAreaRepository.save(activeArea);
-		}
-	}
-
-	/**
-	 * 작가의 촬영 기기 1:N 테이블 저장
-	 * @param cameraDtos 작가의 촬영 기기
-	 * @param photographer 작가
-	 */
-	private void createPhotographerCameras(List<PhotographerDto.PhotographerCameraRequest> cameraDtos, Photographer photographer) {
-		for (PhotographerDto.PhotographerCameraRequest dto : cameraDtos) {
-			PhotographerCamera camera = PhotographerCamera.builder()
-				.photographer(photographer)
-				.type(dto.getType())
-				.brand(dto.getBrand())
-				.name(dto.getName())
-				.cameraBrand(dto.getCameraBrand())
-				.build();
-
-			photographerCameraRepository.save(camera);
-		}
-	}
-
-	/**
 	 * 작가 상세 정보 반환
 	 * @param photographerId 조회하려는 작가 정보
 	 * @param memberId 조회를 시도하는 회원 정보(팔로우 여부를 위해)
@@ -124,26 +85,6 @@ public class PhotographerService {
 		int followersCount = getFollowers(photographer);
 		YesNo isFollowing = isFollowing(photographer, memberId);
 		return PhotographerDto.Detail.of(photographer, followersCount, isFollowing);
-	}
-
-	/**
-	 * 작가 entity 데이터 조회 메서드
-	 * @param photographerId 작가 pk
-	 * @return 작가 엔티티
-	 */
-	private Photographer getPhotographerByPhotographerId(Long photographerId) {
-		return photographerRepository.findPhotographerWithMoods(photographerId)
-			.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
-	}
-
-	/**
-	 * 작가 enitty 데이터 조회 메서드
-	 * @param memberId 작가의 member pk
-	 * @return 작가 엔티티
-	 */
-	private Photographer getPhotographerByMemberId(Long memberId) {
-		return photographerRepository.findByMemberId(memberId)
-			.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
 	}
 
 	/**
@@ -180,27 +121,6 @@ public class PhotographerService {
 	}
 
 	/**
-	 * 작가의 팔로워 수를 조회
-	 * @param photographer 조회하려는 작가
-	 * @return 작가의 팔로워 수
-	 */
-	private int getFollowers(Photographer photographer) {
-		return Math.toIntExact(followingRepository.countByFollowingId(photographer.getMember().getId()));
-	}
-
-	/**
-	 * 작가를 팔로우하고 있는지 확인
-	 * @param photographer 작가
-	 * @param memberId 로그인한 회원 pk
-	 * @return 팔로우 여부
-	 */
-	private YesNo isFollowing(Photographer photographer, Long memberId) {
-		return Boolean.TRUE.equals(
-			followingRepository.existsByFollowingIdAndFollowerId(photographer.getMember().getId(), memberId)) ?
-			YesNo.Y : YesNo.N;
-	}
-
-	/**
 	 * 작가의 분위기 키워드 추가
 	 * @param addPhotoMoodDto 분위기 키워드 1개
 	 * @param memberId 작가 member Id(토큰에서 파싱)
@@ -234,5 +154,85 @@ public class PhotographerService {
 				.filter(Objects::nonNull)
 				.filter(card -> card.getActive().equals(YesNo.Y))
 				.toList();
+	}
+
+	/**
+	 * 작가의 주 촬영지(법정동 데이터 기반) 목록을 받아 N:M 관계 테이블에 저장
+	 * @param areaDtos 주 촬영지 목록
+	 * @param photographer 작가
+	 */
+	private void createActiveAreas(List<PhotographerDto.ActiveAreaRequest> areaDtos, Photographer photographer) {
+		for (PhotographerDto.ActiveAreaRequest dto : areaDtos) {
+			Area area = areaRepository.findById(dto.getCode())
+					.orElseThrow(() -> ExceptionFactory.of(AreaErrorCode.WRONG_AREA_CODE));
+
+			ActiveArea activeArea = ActiveArea.builder()
+					.photographer(photographer)
+					.area(area)
+					.priority(dto.getPriority())
+					.build();
+
+			activeAreaRepository.save(activeArea);
+		}
+	}
+
+	/**
+	 * 작가의 촬영 기기 1:N 테이블 저장
+	 * @param cameraDtos 작가의 촬영 기기
+	 * @param photographer 작가
+	 */
+	private void createPhotographerCameras(List<PhotographerDto.PhotographerCameraRequest> cameraDtos, Photographer photographer) {
+		for (PhotographerDto.PhotographerCameraRequest dto : cameraDtos) {
+			PhotographerCamera camera = PhotographerCamera.builder()
+					.photographer(photographer)
+					.type(dto.getType())
+					.brand(dto.getBrand())
+					.name(dto.getName())
+					.cameraBrand(dto.getCameraBrand())
+					.build();
+
+			photographerCameraRepository.save(camera);
+		}
+	}
+
+	/**
+	 * 작가 entity 데이터 조회 메서드
+	 * @param photographerId 작가 pk
+	 * @return 작가 엔티티
+	 */
+	private Photographer getPhotographerByPhotographerId(Long photographerId) {
+		return photographerRepository.findPhotographerWithMoods(photographerId)
+				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+	}
+
+	/**
+	 * 작가 enitty 데이터 조회 메서드
+	 * @param memberId 작가의 member pk
+	 * @return 작가 엔티티
+	 */
+	private Photographer getPhotographerByMemberId(Long memberId) {
+		return photographerRepository.findByMemberId(memberId)
+				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+	}
+
+	/**
+	 * 작가의 팔로워 수를 조회
+	 * @param photographer 조회하려는 작가
+	 * @return 작가의 팔로워 수
+	 */
+	private int getFollowers(Photographer photographer) {
+		return Math.toIntExact(followingRepository.countByFollowingId(photographer.getMember().getId()));
+	}
+
+	/**
+	 * 작가를 팔로우하고 있는지 확인
+	 * @param photographer 작가
+	 * @param memberId 로그인한 회원 pk
+	 * @return 팔로우 여부
+	 */
+	private YesNo isFollowing(Photographer photographer, Long memberId) {
+		return Boolean.TRUE.equals(
+				followingRepository.existsByFollowingIdAndFollowerId(photographer.getMember().getId(), memberId)) ?
+				YesNo.Y : YesNo.N;
 	}
 }
