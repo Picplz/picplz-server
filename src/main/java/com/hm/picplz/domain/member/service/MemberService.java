@@ -177,6 +177,17 @@ public class MemberService {
     }
 
     /**
+     * 멤버의 좌표 반환 메서드
+     * @param id 조회하려는 멤버의 pk
+     * @return 멤버의 좌표 정보
+     */
+    public Point getMemberLocation(Long id) {
+        return Optional.ofNullable(redisTemplate.opsForGeo().position(GEO_KEY, id))
+                .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_LOCATION_NOT_FOUND))
+                .get(0);
+    }
+
+    /**
      * 실제 멤버 entity 데이터
      * @param id 조회하려는 멤버의 pk
      * @return DB에 저장된 멤버의 모든 정보
