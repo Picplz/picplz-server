@@ -24,6 +24,9 @@ public enum GlobalErrorCode implements BaseErrorCode {
     FORBIDDEN_ADMIN(FORBIDDEN, "AUTH_403_1", "권한이 부여되지 않은 사용자입니다"),
     UNSUPPORTED_TOKEN(UNAUTHORIZED, "AUTH_401_7", "지원하지 않는 토큰입니다"),
     INVALID_SIGNATURE(UNAUTHORIZED, "AUTH_401_8", "잘못된 JWT 서명입니다"),
+
+    /* API 호출 에러 */
+    API_INTERNAL_SERVER_ERROR(INTERNAL_SERVER_ERROR, "API_500_1", "외부 API 서버 오류입니다.")
     ;
 
     private final HttpStatus status;

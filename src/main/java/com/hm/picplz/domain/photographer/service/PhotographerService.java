@@ -4,7 +4,10 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.hm.picplz.global.common.service.WebClientService;
 import org.springframework.data.geo.GeoResult;
+import org.springframework.data.geo.Point;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -38,6 +41,7 @@ public class PhotographerService {
 
 	private final MemberService memberService;
 	private final PhotoMoodService photoMoodService;
+	private final WebClientService webClientService;
 	private final PhotographerRepository photographerRepository;
 	private final FollowingRepository followingRepository;
 	private final ActiveAreaRepository activeAreaRepository;
@@ -143,16 +147,24 @@ public class PhotographerService {
 		photoMoodService.deletePhotoMood(deletePhotoMoodDto.getPhotoMood(), photographer);
 	}
 
-	public List<PhotographerDto.Card> getPhotographerCardByMemberGeoInfo(List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> results) {
-		return results.stream()
-				.map(result -> {
-					Long memberId = Long.parseLong(result.getContent().getName().toString());
-					Photographer photographer = photographerRepository.findByMemberId(memberId)
-							.orElseThrow(() ->  ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
-					return photographer != null ? PhotographerDto.Card.of(photographer, (long) result.getDistance().getValue()) : null;
+	/**
+	 * 현재 멤버의 위치 = 주 활동지역 작가 탐색
+	 * @param memberId 조회를 진행한 멤버
+	 * @return 작가 상세 정보
+	 */
+	@Transactional
+	public List<PhotographerDto.Detail> getPhotographersByActiveArea(Long memberId) {
+		Long areaId = webClientService.requestAreaIdByPoint(
+				memberService.getMemberLocation(memberId)
+		);
+
+		return activeAreaRepository.findAllByAreaIdWithPhotographer(areaId).stream()
+				.map(ActiveArea::getPhotographer)
+				.map(photographer -> {
+					int followersCount = getFollowers(photographer);
+					YesNo isFollowing = isFollowing(photographer, memberId);
+					return PhotographerDto.Detail.of(photographer, followersCount, isFollowing);
 				})
-				.filter(Objects::nonNull)
-				.filter(card -> card.getActive().equals(YesNo.Y))
 				.toList();
 	}
 
