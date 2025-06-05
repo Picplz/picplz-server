@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import com.hm.picplz.domain.member.domain.SocialProvider;
+import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResult;
@@ -22,7 +23,6 @@ import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.domain.member.dto.MemberDto;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
-import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
 import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -120,7 +120,15 @@ public class MemberService {
         List<GeoResult<GeoLocation<Object>>> results =
             geoResults != null ? geoResults.getContent() : Collections.emptyList();
 
-        return photographerHelper.getPhotographerCardByMemberGeoInfo(results);
+        // 현재 위치 반경 기준 활동중인 작가들
+        List<PhotographerDto.Card> list =
+                photographerHelper.getPhotographerCardByMemberGeoInfo(results);
+
+        if(list.isEmpty()) {
+            //TODO: 관심 고객 많은 작가 return
+        }
+
+        return list;
     }
 
     @Transactional
@@ -164,6 +172,17 @@ public class MemberService {
      */
     public MemberDto.MemberInfoResponse getMemberInfo(Long id) {
         return MemberDto.MemberInfoResponse.from(getMemberById(id));
+    }
+
+    /**
+     * 멤버의 좌표 반환 메서드
+     * @param id 조회하려는 멤버의 pk
+     * @return 멤버의 좌표 정보
+     */
+    public Point getMemberLocation(Long id) {
+        return Optional.ofNullable(redisTemplate.opsForGeo().position(GEO_KEY, id))
+                .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_LOCATION_NOT_FOUND))
+                .get(0);
     }
 
     /**

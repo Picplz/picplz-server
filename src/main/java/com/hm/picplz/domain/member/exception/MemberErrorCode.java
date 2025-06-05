@@ -13,7 +13,8 @@ import org.springframework.http.HttpStatus;
 public enum MemberErrorCode implements BaseErrorCode {
 
     /* Member */
-    MEMBER_NOT_FOUND(BAD_REQUEST, "MEMBER_404_1", "해당 회원이 존재하지 않습니다."),
+    MEMBER_NOT_FOUND(NOT_FOUND, "MEMBER_404_1", "해당 회원이 존재하지 않습니다."),
+    MEMBER_LOCATION_NOT_FOUND(NOT_FOUND, "MEMBER_404_2", "해당 회원의 위치가 존재하지 않습니다."),
 
     /* 중복 에러*/
     DUPLICATE_NICKNAME(BAD_REQUEST, "MEMBER_400_1", "이미 사용중인 닉네임입니다."),

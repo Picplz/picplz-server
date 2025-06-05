@@ -3,13 +3,7 @@ package com.hm.picplz.domain.photographer.controller;
 import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.hm.picplz.domain.photographer.annotation.PhotographerOnly;
 import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
@@ -35,8 +29,8 @@ public class PhotographerController {
 
     @Operation(summary = "작가 회원가입")
     @PostMapping
-    public void createPhotographer(@RequestBody PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
-        photographerService.createPhotographer(createPhotographerRequest);
+    public PhotographerDto.Detail createPhotographer(@RequestBody PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
+        return photographerService.createPhotographer(createPhotographerRequest);
     }
 
     @Operation(summary = "작가 로그인")
@@ -77,5 +71,14 @@ public class PhotographerController {
     ) {
         log.info("촬영 상품 리스트 조회하기");
         return productService.findProductsByPhotographer(photographerId);
+    }
+
+    //TODO: 이후에 @RequestParam -> @AuthenticationPrincipal 로 변경
+    @Operation(summary = "자신의 위치와 활동지역이 같은 작가 조회")
+    @GetMapping("/active-area")
+    public List<PhotographerDto.Detail> getPhotographersByMemberId(
+            @RequestParam Long memberId
+    ) {
+        return photographerService.getPhotographersByActiveArea(memberId);
     }
 }
