@@ -1,5 +1,6 @@
 package com.hm.picplz.domain.auth.controller;
 
+import com.hm.picplz.domain.member.domain.SocialProvider;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +22,16 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 	private final AuthService authService;
 
-	@Operation(summary = "회원인 경우 픽플즈 토큰 반환, 아닐 경우 ")
+	@Operation(summary = "카카오 로그인")
 	@PostMapping("/kakao")
 	public AuthDto.LoginResponse kakaoLogin(@RequestBody AuthDto.KakaoTokenRequest request) {
-		return authService.checkUserKakao(request.getAccessToken());
+		return authService.checkUser(SocialProvider.KAKAO, request.getAccessToken());
+	}
+
+	@Operation(summary = "애플 로그인")
+	@PostMapping("/apple")
+	public AuthDto.LoginResponse appleLogin(@RequestBody AuthDto.AppleTokenRequest request) {
+		return authService.checkUser(SocialProvider.APPLE, request.getIdToken());
 	}
 
 	@Operation(summary = "임시 로그인", tags = "test")

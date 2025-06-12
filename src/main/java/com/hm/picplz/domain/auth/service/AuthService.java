@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.hm.picplz.domain.auth.dto.SocialUserInfo;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,30 +29,55 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
 	private final JwtTokenProvider jwtTokenProvider;
+	private final AppleTokenService appleTokenService;
 	private final MemberRepository memberRepository;
 	private final RestClient restClient = RestClient.create();
 
-	public AuthDto.LoginResponse checkUserKakao(String accessToken) {
-		AuthDto.KakaoUserInfo userInfo = fetchKakaoUserInfo(accessToken);
-		Optional<Member> member = findByCodeAndProvider(String.valueOf(userInfo.getSocialCode()), SocialProvider.KAKAO);
-		return member.map(
-				value -> AuthDto.LoginResponse.builder()
-					.isRegistered(true)
-					.socialCode(userInfo.getSocialCode())
-					.socialProvider(SocialProvider.KAKAO)
-					.token(generateTokenForMember(value))
-					.build())
-			.orElseGet(() -> AuthDto.LoginResponse.builder()
-				.isRegistered(false)
-				.socialCode(userInfo.getSocialCode())
-				.socialProvider(SocialProvider.KAKAO)
-				.build());
+	public AuthDto.LoginResponse checkUser(SocialProvider socialProvider, String token) {
+		SocialUserInfo userInfo = fetchUserInfo(socialProvider, token);
+		return findByCodeAndProvider(userInfo.getSocialCode(), userInfo.getSocialProvider())
+				.map(
+				member -> AuthDto.LoginResponse.builder()
+						.isRegistered(true)
+						.socialCode(member.getSocialCode())
+						.socialProvider(member.getSocialProvider())
+						.socialEmail(member.getSocialEmail())
+						.token(generateTokenForMember(member))
+						.build())
+				.orElseGet(() -> AuthDto.LoginResponse.builder()
+						.isRegistered(false)
+						.socialCode(userInfo.getSocialCode())
+						.socialEmail(userInfo.getSocialEmail())
+						.socialProvider(userInfo.getSocialProvider())
+						.build());
+	}
+
+	public AuthDto.LoginResponse testLogin(AuthDto.TestLogin req) {
+		return findByCodeAndProvider(String.valueOf(req.getSocialCode()), req.getSocialProvider())
+				.map(value -> AuthDto.LoginResponse.builder()
+						.isRegistered(true)
+						.socialCode(value.getSocialCode())
+						.socialProvider(value.getSocialProvider())
+						.token(generateTokenForMember(value))
+						.build())
+				.orElseGet(() -> AuthDto.LoginResponse.builder()
+						.isRegistered(false)
+						.build());
+	}
+
+	private SocialUserInfo fetchUserInfo(SocialProvider socialProvider, String token) {
+		if(socialProvider.equals(SocialProvider.KAKAO)) {
+			return fetchKakaoUserInfo(token);
+		} else {
+			return appleTokenService.fetchAppleUserInfo(token);
+		}
 	}
 
 	private AuthDto.KakaoUserInfo fetchKakaoUserInfo(String accessToken) {
 		ParameterizedTypeReference<Map<String, Object>> responseType =
 			new ParameterizedTypeReference<>() {};
 
+		//TODO: WebClient 로 통일
 		Map<String, Object> body = restClient.get()
 			.uri("https://kapi.kakao.com/v2/user/me")
 			.header("Authorization", "Bearer " + accessToken)
@@ -81,18 +107,5 @@ public class AuthService {
 			List.of(new SimpleGrantedAuthority(member.getRoleKey()))
 		);
 		return jwtTokenProvider.generateTokenDto(authentication);
-	}
-
-	public AuthDto.LoginResponse testLogin(AuthDto.TestLogin req) {
-		return findByCodeAndProvider(String.valueOf(req.getSocialCode()), req.getSocialProvider())
-			.map(value -> AuthDto.LoginResponse.builder()
-				.isRegistered(true)
-				.socialCode(value.getSocialCode())
-				.socialProvider(value.getSocialProvider())
-				.token(generateTokenForMember(value))
-				.build())
-			.orElseGet(() -> AuthDto.LoginResponse.builder()
-				.isRegistered(false)
-				.build());
 	}
 }
