@@ -16,8 +16,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class WebClientService {
 
-    private static final String GEO_CODER_URL = "https://api.vworld.kr";
-    private static final String APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys";
+    private static final String HTTPS = "https";
+    private static final String GEO_CODER_HOST = "api.vworld.kr";
+    private static final String APPLE_JWKS_HOST = "appleid.apple.com";
 
     private final WebClient webClient;
 
@@ -33,7 +34,9 @@ public class WebClientService {
         JsonNode result = webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(GEO_CODER_URL + "/req/address")
+                        .scheme(HTTPS)
+                        .host(GEO_CODER_HOST)
+                        .path("/req/address")
                         .queryParam("service", "address")
                         .queryParam("request", "getAddress")
                         .queryParam("version", "2.0")
@@ -68,7 +71,11 @@ public class WebClientService {
      */
     public AuthDto.ApplePublicKeys requestApplePublicKey() {
         return webClient.get()
-                .uri(APPLE_JWKS_URL)
+                .uri(uriBuilder -> uriBuilder
+                        .scheme(HTTPS)
+                        .host(APPLE_JWKS_HOST)
+                        .path("/auth/keys")
+                        .build())
                 .retrieve()
                 .bodyToMono(AuthDto.ApplePublicKeys.class)
                 .block();
