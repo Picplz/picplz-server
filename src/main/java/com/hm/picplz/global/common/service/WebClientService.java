@@ -1,6 +1,7 @@
 package com.hm.picplz.global.common.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hm.picplz.domain.auth.dto.AuthDto;
 import com.hm.picplz.global.error.ExceptionFactory;
 import com.hm.picplz.global.error.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -11,11 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class WebClientService {
+
+    private static final String GEO_CODER_URL = "https://api.vworld.kr";
+    private static final String APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys";
 
     private final WebClient webClient;
 
@@ -31,7 +33,7 @@ public class WebClientService {
         JsonNode result = webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/req/address")
+                        .path(GEO_CODER_URL + "/req/address")
                         .queryParam("service", "address")
                         .queryParam("request", "getAddress")
                         .queryParam("version", "2.0")
@@ -58,5 +60,17 @@ public class WebClientService {
                 .path("structure")
                 .path("level4LC")
                 .asLong();
+    }
+
+    /**
+     * Apple 의 Public key 조회
+     * @return Apple Public Keys
+     */
+    public AuthDto.ApplePublicKeys requestApplePublicKey() {
+        return webClient.get()
+                .uri(APPLE_JWKS_URL)
+                .retrieve()
+                .bodyToMono(AuthDto.ApplePublicKeys.class)
+                .block();
     }
 }

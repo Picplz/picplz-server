@@ -8,12 +8,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    private static final String GEO_CODER_URI = "https://api.vworld.kr";
-
     @Bean
     public WebClient webClient(WebClient.Builder builder) {
-        return builder
-                .baseUrl(GEO_CODER_URI)
-                .build();
+        return builder.build();
     }
 }
