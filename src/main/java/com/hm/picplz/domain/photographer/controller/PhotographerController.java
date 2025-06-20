@@ -73,11 +73,10 @@ public class PhotographerController {
         return productService.findProductsByPhotographer(photographerId);
     }
 
-    //TODO: 이후에 @RequestParam -> @AuthenticationPrincipal 로 변경
     @Operation(summary = "자신의 위치와 활동지역이 같은 작가 조회")
     @GetMapping("/active-area")
     public List<PhotographerDto.Detail> getPhotographersByMemberId(
-            @RequestParam Long memberId
+            @AuthenticationPrincipal Long memberId
     ) {
         return photographerService.getPhotographersByActiveArea(memberId);
     }
