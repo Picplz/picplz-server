@@ -62,19 +62,7 @@ public class PhotographerDto {
         private YesNo isFollowing;  // 팔로우 여부
 
         public static Detail of(Photographer photographer, int followers, YesNo isFollowing) {
-            Detail detail = new Detail();
-            detail.photographerId = photographer.getId();
-            detail.nickname = photographer.getMember().getNickname();
-            detail.profileImage = photographer.getMember().getProfileImage();
-            detail.area = photographer.getActiveAreas().stream()
-                .map(ActiveAreaResponse::from)
-                .sorted(Comparator.comparingInt(ActiveAreaResponse::getPriority))
-                .toList();
-            detail.active = photographer.getActive();
-            detail.instagram = photographer.getMember().getInstagram();
-            detail.photoMoods = photographer.getPhotoMoods().stream()
-                    .map(PhotoMood::getContent)
-                    .toList();
+            Detail detail = Detail.of(photographer);
             detail.followers = followers;
             detail.isFollowing = isFollowing;
 
