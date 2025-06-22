@@ -73,12 +73,19 @@ public class PhotographerController {
         return productService.findProductsByPhotographer(photographerId);
     }
 
-    //TODO: 이후에 @RequestParam -> @AuthenticationPrincipal 로 변경
     @Operation(summary = "자신의 위치와 활동지역이 같은 작가 조회")
     @GetMapping("/active-area")
     public List<PhotographerDto.Detail> getPhotographersByMemberId(
-            @RequestParam Long memberId
+            @AuthenticationPrincipal Long memberId
     ) {
         return photographerService.getPhotographersByActiveArea(memberId);
+    }
+
+    @Operation(summary = "작가의 주 활동지역 변경")
+    @PutMapping("/active-area")
+    public PhotographerDto.UpdateActiveAreaResponse updateActiveArea(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody PhotographerDto.UpdateActiveAreaRequest updateActiveAreaRequestDto) {
+        return photographerService.updateActiveArea(memberId, updateActiveAreaRequestDto);
     }
 }

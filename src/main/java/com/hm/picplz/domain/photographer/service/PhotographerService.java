@@ -1,14 +1,12 @@
 package com.hm.picplz.domain.photographer.service;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.global.common.service.WebClientService;
-import org.springframework.data.geo.GeoResult;
-import org.springframework.data.geo.Point;
-import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +26,6 @@ import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
 import com.hm.picplz.domain.photographer.repository.ActiveAreaRepository;
 import com.hm.picplz.domain.area.repository.AreaRepository;
-import com.hm.picplz.domain.photographer.repository.PhotographerCameraRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.global.common.entity.YesNo;
 import com.hm.picplz.global.error.ExceptionFactory;
@@ -46,7 +43,6 @@ public class PhotographerService {
 	private final FollowingRepository followingRepository;
 	private final ActiveAreaRepository activeAreaRepository;
 	private final AreaRepository areaRepository;
-	private final PhotographerCameraRepository photographerCameraRepository;
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
@@ -69,7 +65,7 @@ public class PhotographerService {
 		photographerRepository.save(photographer);
 
 		// 작가 분위기 키워드
-		photoMoodService.createPhotoMoods(createPhotographerRequest.getPhotoMoods(), photographer);
+		createPhotoMoods(createPhotographerRequest.getPhotoMoods(), photographer);
 		// 작가 주 촬영지
 		createActiveAreas(createPhotographerRequest.getActiveAreas(), photographer);
 		// 작가 촬영 카메라
@@ -172,11 +168,53 @@ public class PhotographerService {
 	}
 
 	/**
+	 * 작가의 주 활동지역 변경(교체)
+	 * @param memberId 변경이 필요한 멤버
+	 * @param updateActiveAreaRequestDto 바꾸고자 하는 주 활동지역
+	 * @return 변경된 주 활동지역
+	 */
+	@Transactional
+	public PhotographerDto.UpdateActiveAreaResponse updateActiveArea(Long memberId, PhotographerDto.UpdateActiveAreaRequest updateActiveAreaRequestDto) {
+		Photographer photographer = getPhotographerByMemberId(memberId);
+		deleteAllActiveAreas(photographer);
+		createActiveAreas(updateActiveAreaRequestDto.getAreas(), photographer);
+		return PhotographerDto.UpdateActiveAreaResponse.from(photographer);
+	}
+
+	/**
+	 * 작가의 분위기 키워드 목록 받아 1:N 관계 테이블 저장
+	 * @param photoMoodContents 분위기 키워드
+	 * @param photographer 작가
+	 */
+	private void createPhotoMoods(List<String> photoMoodContents, Photographer photographer) {
+		// 1. null·빈 문자열 제거 & trim 후 중복 제거
+		List<String> distinctContents = photoMoodContents.stream()
+				.filter(Objects::nonNull)
+				.map(String::trim)
+				.filter(s -> !s.isEmpty())
+				.distinct()
+				.toList();
+
+		// 2. 엔티티로 매핑
+		List<PhotoMood> photoMoods = distinctContents.stream()
+				.map(content -> PhotoMood.builder()
+						.photographer(photographer)
+						.content(content)
+						.build())
+				.toList();
+
+		photographer.addAllPhotoMoods(photoMoods);
+	}
+
+	/**
 	 * 작가의 주 촬영지(법정동 데이터 기반) 목록을 받아 N:M 관계 테이블에 저장
 	 * @param areaDtos 주 촬영지 목록
 	 * @param photographer 작가
 	 */
 	private void createActiveAreas(List<PhotographerDto.ActiveAreaRequest> areaDtos, Photographer photographer) {
+
+		List<ActiveArea> activeAreas = new ArrayList<>();
+
 		for (PhotographerDto.ActiveAreaRequest dto : areaDtos) {
 			Area area = areaRepository.findById(dto.getCode())
 					.orElseThrow(() -> ExceptionFactory.of(AreaErrorCode.WRONG_AREA_CODE));
@@ -187,8 +225,9 @@ public class PhotographerService {
 					.priority(dto.getPriority())
 					.build();
 
-			activeAreaRepository.save(activeArea);
+			activeAreas.add(activeArea);
 		}
+		photographer.addAllActiveAreas(activeAreas);
 	}
 
 	/**
@@ -197,6 +236,8 @@ public class PhotographerService {
 	 * @param photographer 작가
 	 */
 	private void createPhotographerCameras(List<PhotographerDto.PhotographerCameraRequest> cameraDtos, Photographer photographer) {
+		List<PhotographerCamera> cameras = new ArrayList<>();
+
 		for (PhotographerDto.PhotographerCameraRequest dto : cameraDtos) {
 			PhotographerCamera camera = PhotographerCamera.builder()
 					.photographer(photographer)
@@ -205,9 +246,10 @@ public class PhotographerService {
 					.name(dto.getName())
 					.cameraBrand(dto.getCameraBrand())
 					.build();
-
-			photographerCameraRepository.save(camera);
+			cameras.add(camera);
 		}
+
+		photographer.addAllCameras(cameras);
 	}
 
 	/**
@@ -249,5 +291,14 @@ public class PhotographerService {
 		return Boolean.TRUE.equals(
 				followingRepository.existsByFollowingIdAndFollowerId(photographer.getMember().getId(), memberId)) ?
 				YesNo.Y : YesNo.N;
+	}
+
+	/**
+	 * 작가의 모든 주 활동지역 삭제
+	 * @param photographer 작가
+	 */
+	private void deleteAllActiveAreas(Photographer photographer) {
+        activeAreaRepository.deleteAll(photographer.getActiveAreas());
+		photographer.removeAllActiveArea();
 	}
 }

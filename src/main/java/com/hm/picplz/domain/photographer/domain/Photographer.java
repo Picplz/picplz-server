@@ -66,4 +66,20 @@ public class Photographer extends BaseEntity {
 		photographer.active = YesNo.N;
 		return photographer;
 	}
+
+	public void addAllPhotoMoods(List<PhotoMood> photoMoods) {
+		this.photoMoods.addAll(photoMoods);
+	}
+
+	public void addAllActiveAreas(List<ActiveArea> activeAreas) {
+		this.activeAreas.addAll(activeAreas);
+	}
+
+	public void removeAllActiveArea() {
+		this.activeAreas.clear();
+	}
+
+	public void addAllCameras(List<PhotographerCamera> cameras) {
+		this.cameras.addAll(cameras);
+	}
 }
