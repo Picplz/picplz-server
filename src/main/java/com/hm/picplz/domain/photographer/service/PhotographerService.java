@@ -168,6 +168,20 @@ public class PhotographerService {
 	}
 
 	/**
+	 * 작가의 주 활동지역 변경(교체)
+	 * @param memberId 변경이 필요한 멤버
+	 * @param updateActiveAreaRequestDto 바꾸고자 하는 주 활동지역
+	 * @return 변경된 주 활동지역
+	 */
+	@Transactional
+	public PhotographerDto.UpdateActiveAreaResponse updateActiveArea(Long memberId, PhotographerDto.UpdateActiveAreaRequest updateActiveAreaRequestDto) {
+		Photographer photographer = getPhotographerByMemberId(memberId);
+		deleteAllActiveAreas(photographer);
+		createActiveAreas(updateActiveAreaRequestDto.getAreas(), photographer);
+		return PhotographerDto.UpdateActiveAreaResponse.from(photographer);
+	}
+
+	/**
 	 * 작가의 분위기 키워드 목록 받아 1:N 관계 테이블 저장
 	 * @param photoMoodContents 분위기 키워드
 	 * @param photographer 작가
@@ -277,5 +291,14 @@ public class PhotographerService {
 		return Boolean.TRUE.equals(
 				followingRepository.existsByFollowingIdAndFollowerId(photographer.getMember().getId(), memberId)) ?
 				YesNo.Y : YesNo.N;
+	}
+
+	/**
+	 * 작가의 모든 주 활동지역 삭제
+	 * @param photographer 작가
+	 */
+	private void deleteAllActiveAreas(Photographer photographer) {
+        activeAreaRepository.deleteAll(photographer.getActiveAreas());
+		photographer.removeAllActiveArea();
 	}
 }

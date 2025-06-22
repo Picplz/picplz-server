@@ -80,4 +80,12 @@ public class PhotographerController {
     ) {
         return photographerService.getPhotographersByActiveArea(memberId);
     }
+
+    @Operation(summary = "작가의 주 활동지역 변경")
+    @PutMapping("/active-area")
+    public PhotographerDto.UpdateActiveAreaResponse updateActiveArea(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody PhotographerDto.UpdateActiveAreaRequest updateActiveAreaRequestDto) {
+        return photographerService.updateActiveArea(memberId, updateActiveAreaRequestDto);
+    }
 }

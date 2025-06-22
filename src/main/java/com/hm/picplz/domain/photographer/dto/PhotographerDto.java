@@ -157,4 +157,25 @@ public class PhotographerDto {
         private String name; // 직접 입력 가능, 모델명
         private String cameraBrand; // DSLR, 필름 등등...
     }
+
+    @Data
+    @NoArgsConstructor
+    public static class UpdateActiveAreaRequest {
+        List<ActiveAreaRequest> areas;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class UpdateActiveAreaResponse {
+        List<ActiveAreaResponse> areas;
+
+        public static UpdateActiveAreaResponse from(Photographer photographer) {
+            UpdateActiveAreaResponse updateActiveAreaResponse = new UpdateActiveAreaResponse();
+            updateActiveAreaResponse.areas = photographer.getActiveAreas()
+                    .stream()
+                    .map(ActiveAreaResponse::from)
+                    .toList();
+            return updateActiveAreaResponse;
+        }
+    }
 }

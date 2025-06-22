@@ -75,6 +75,10 @@ public class Photographer extends BaseEntity {
 		this.activeAreas.addAll(activeAreas);
 	}
 
+	public void removeAllActiveArea() {
+		this.activeAreas.clear();
+	}
+
 	public void addAllCameras(List<PhotographerCamera> cameras) {
 		this.cameras.addAll(cameras);
 	}
