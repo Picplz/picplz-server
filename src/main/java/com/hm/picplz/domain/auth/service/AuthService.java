@@ -87,7 +87,7 @@ public class AuthService {
 		if (body == null) {
 			throw ExceptionFactory.of(MemberErrorCode.NO_KAKAO_USER);
 		}
-		String code = (String) body.get("id"); // 필수 값
+		String code = String.valueOf(body.get("id")); // 필수 값
 
 		// 카카오 앱이 비즈앱이 아니라 email 수집을 강제할 수 없어, email 파싱 코드는 생략했습니다.
 		// (비즈앱 전환 후 아래 로직 참고: kakao_account에서 email 가져오기)
