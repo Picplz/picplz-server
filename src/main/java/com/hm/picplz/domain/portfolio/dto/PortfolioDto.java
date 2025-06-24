@@ -2,6 +2,7 @@ package com.hm.picplz.domain.portfolio.dto;
 
 import com.hm.picplz.domain.portfolio.domain.Portfolio;
 import com.hm.picplz.domain.portfolio.domain.PortfolioPhoto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,15 +15,20 @@ public class PortfolioDto {
     @Data
     @NoArgsConstructor
     public static class CreatePortfolioRequest {
+        @Schema(description = "포트폴리오 사진")
         private List<PortfolioPhotoRequest> photos;
+        @Schema(description = "촬영 장소")
         private String location;
+        @Schema(description = "촬영 날짜", example = "2025-06-24")
         private LocalDate uploadDate;
     }
 
     @Data
     @NoArgsConstructor
     public static class PortfolioPhotoRequest {
+        @Schema(description = "S3 ObjectKey")
         private String image;
+        @Schema(description = "사진 순서")
         private Integer photoOrder;
     }
 
