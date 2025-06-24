@@ -2,14 +2,12 @@ package com.hm.picplz.domain.portfolio.domain;
 
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.global.common.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,12 +31,19 @@ public class Portfolio extends BaseEntity {
 
     private LocalDate uploadDate;
 
+    @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private List<PortfolioPhoto> portfolioPhotos = new ArrayList<>();
+
     @Builder
     public Portfolio(Long id, Photographer photographer, String location, LocalDate uploadDate) {
         this.id = id;
         this.photographer = photographer;
         this.location = location;
         this.uploadDate = uploadDate;
+    }
+
+    public void addAllPortfolioPhotos(List<PortfolioPhoto> portfolioPhotos) {
+        this.portfolioPhotos.addAll(portfolioPhotos);
     }
 
     // factory method
