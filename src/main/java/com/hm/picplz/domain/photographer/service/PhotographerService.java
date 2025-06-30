@@ -182,6 +182,16 @@ public class PhotographerService {
 	}
 
 	/**
+	 * 작가 enitty 데이터 조회 메서드
+	 * @param memberId 작가의 member pk
+	 * @return 작가 엔티티
+	 */
+	public Photographer getPhotographerByMemberId(Long memberId) {
+		return photographerRepository.findByMemberId(memberId)
+				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+	}
+
+	/**
 	 * 작가의 분위기 키워드 목록 받아 1:N 관계 테이블 저장
 	 * @param photoMoodContents 분위기 키워드
 	 * @param photographer 작가
@@ -259,16 +269,6 @@ public class PhotographerService {
 	 */
 	private Photographer getPhotographerByPhotographerId(Long photographerId) {
 		return photographerRepository.findPhotographerWithMoods(photographerId)
-				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
-	}
-
-	/**
-	 * 작가 enitty 데이터 조회 메서드
-	 * @param memberId 작가의 member pk
-	 * @return 작가 엔티티
-	 */
-	private Photographer getPhotographerByMemberId(Long memberId) {
-		return photographerRepository.findByMemberId(memberId)
 				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
 	}
 
