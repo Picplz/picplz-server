@@ -176,7 +176,7 @@ public class PhotographerService {
 	@Transactional
 	public PhotographerDto.UpdateActiveAreaResponse updateActiveArea(Long memberId, PhotographerDto.UpdateActiveAreaRequest updateActiveAreaRequestDto) {
 		Photographer photographer = getPhotographerByMemberId(memberId);
-		deleteAllActiveAreas(photographer);
+		photographer.removeAllActiveArea();
 		createActiveAreas(updateActiveAreaRequestDto.getAreas(), photographer);
 		return PhotographerDto.UpdateActiveAreaResponse.from(photographer);
 	}
@@ -291,14 +291,5 @@ public class PhotographerService {
 		return Boolean.TRUE.equals(
 				followingRepository.existsByFollowingIdAndFollowerId(photographer.getMember().getId(), memberId)) ?
 				YesNo.Y : YesNo.N;
-	}
-
-	/**
-	 * 작가의 모든 주 활동지역 삭제
-	 * @param photographer 작가
-	 */
-	private void deleteAllActiveAreas(Photographer photographer) {
-        activeAreaRepository.deleteAll(photographer.getActiveAreas());
-		photographer.removeAllActiveArea();
 	}
 }

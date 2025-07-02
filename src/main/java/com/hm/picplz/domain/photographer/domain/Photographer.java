@@ -48,15 +48,15 @@ public class Photographer extends BaseEntity {
 	private List<Review> reviews = new ArrayList<>();
 
 	// 분위기 키워드
-	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private List<PhotoMood> photoMoods = new ArrayList<>();
 
 	// 주 촬영지
-	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private List<ActiveArea> activeAreas = new ArrayList<>();
 
 	// 촬영 기기
-	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "photographer", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private List<PhotographerCamera> cameras = new ArrayList<>();
 
 	@Builder
