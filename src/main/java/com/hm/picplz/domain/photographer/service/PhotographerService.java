@@ -254,7 +254,7 @@ public class PhotographerService {
 					.type(dto.getType())
 					.brand(dto.getBrand())
 					.name(dto.getName())
-					.cameraBrand(dto.getCameraBrand())
+					.cameraType(dto.getCameraType())
 					.build();
 			cameras.add(camera);
 		}

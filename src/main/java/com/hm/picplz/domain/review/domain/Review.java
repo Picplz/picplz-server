@@ -1,5 +1,6 @@
 package com.hm.picplz.domain.review.domain;
 
+import com.hm.picplz.domain.customer.domain.Customer;
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -33,11 +34,16 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "photographer_id")
     private Photographer photographer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
     @Builder
-    private Review(Long id, String content, Float starPoint, Photographer photographer) {
+    private Review(Long id, String content, Float starPoint, Photographer photographer, Customer customer) {
         this.id = id;
         this.content = content;
         this.starPoint = starPoint;
         this.photographer = photographer;
+        this.customer = customer;
     }
 }

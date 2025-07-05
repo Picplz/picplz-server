@@ -70,7 +70,7 @@ public class ProductDto {
             detail.editPrice = product.getEditPrice();
             detail.otherDetails = product.getOtherDetails();
             detail.productPhotos = photos.stream()
-                    .map(ProductPhoto::getImageData)
+                    .map(ProductPhoto::getImage)
                     .toList();
 
             return detail;

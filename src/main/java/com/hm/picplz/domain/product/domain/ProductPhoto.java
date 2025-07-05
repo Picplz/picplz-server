@@ -25,7 +25,7 @@ public class ProductPhoto extends BaseEntity {
     @Column(name = "product_photo_id", updatable = false)
     private Long id;
 
-    private String imageData;
+    private String image;
 
     @Column(name = "photo_order")
     private int photoOrder;
@@ -39,9 +39,9 @@ public class ProductPhoto extends BaseEntity {
     private ShootProduct shootProduct;
 
     @Builder
-    private ProductPhoto(Long id, String imageData, int photoOrder, ShootProduct shootProduct) {
+    private ProductPhoto(Long id, String image, int photoOrder, ShootProduct shootProduct) {
         this.id = id;
-        this.imageData = imageData;
+        this.image = image;
         this.photoOrder = photoOrder;
         this.shootProduct = shootProduct;
     }
@@ -49,7 +49,7 @@ public class ProductPhoto extends BaseEntity {
     // factory method
     public static ProductPhoto of(String photo, int photoOrder, ShootProduct shootProduct) {
         return ProductPhoto.builder()
-                .imageData(photo)
+                .image(photo)
                 .photoOrder(photoOrder)
                 .shootProduct(shootProduct)
                 .build();
