@@ -5,7 +5,10 @@ import com.hm.picplz.domain.photographer.service.PhotographerService;
 import com.hm.picplz.domain.portfolio.domain.Portfolio;
 import com.hm.picplz.domain.portfolio.domain.PortfolioPhoto;
 import com.hm.picplz.domain.portfolio.dto.PortfolioDto;
+import com.hm.picplz.domain.portfolio.exception.PortfolioErrorCode;
 import com.hm.picplz.domain.portfolio.repository.PortfolioRepository;
+import com.hm.picplz.domain.portfolio.repository.ScrapRepository;
+import com.hm.picplz.global.error.ExceptionFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +22,7 @@ public class PortfolioService {
 
     private final PhotographerService photographerService;
     private final PortfolioRepository portfolioRepository;
+    private final ScrapRepository scrapRepository;
 
     /**
      * 포트폴리오 생성
@@ -27,7 +31,7 @@ public class PortfolioService {
      * @return 포트폴리오 생성 결과
      */
     @Transactional
-    public PortfolioDto.CreatePortfolioResponse create(Long memberId, PortfolioDto.CreatePortfolioRequest request) {
+    public PortfolioDto.PortfolioResponse createPortfolio(Long memberId, PortfolioDto.CreatePortfolioRequest request) {
         Photographer photographer = photographerService.getPhotographerByMemberId(memberId);
 
         Portfolio portfolio = Portfolio.builder()
@@ -40,7 +44,20 @@ public class PortfolioService {
 
         portfolioRepository.save(portfolio);
 
-        return PortfolioDto.CreatePortfolioResponse.from(portfolio);
+        return PortfolioDto.PortfolioResponse.from(portfolio);
+    }
+
+    /**
+     * 포트폴리오 개별 조회
+     * @param portfolioId 포트폴리오 아이디
+     * @return 포트폴리오 개별 조회 결과
+     */
+    public PortfolioDto.PortfolioResponse getPortfolio(Long portfolioId) {
+        Portfolio portfolio = portfolioRepository.findPortfolioByIdWithPortfolioPhotos(portfolioId)
+                .orElseThrow(() -> ExceptionFactory.of(PortfolioErrorCode.PORTFOLIO_NOT_FOUND));
+        long scrapCount = scrapRepository.countByPortfolioId(portfolioId);
+
+        return PortfolioDto.PortfolioResponse.of(portfolio, scrapCount);
     }
 
     /**
