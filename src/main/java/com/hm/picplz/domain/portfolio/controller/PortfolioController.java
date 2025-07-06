@@ -26,8 +26,10 @@ public class PortfolioController {
 
     @Operation(summary = "포트폴리오 단일 조회")
     @GetMapping("/{portfolioId}")
-    public PortfolioDto.PortfolioResponse getPortfolio(@PathVariable Long portfolioId) {
-        return portfolioService.getPortfolio(portfolioId);
+    public PortfolioDto.PortfolioResponse getPortfolio(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long portfolioId) {
+        return portfolioService.getPortfolio(memberId, portfolioId);
     }
 
 }

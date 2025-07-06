@@ -52,12 +52,13 @@ public class PortfolioService {
      * @param portfolioId 포트폴리오 아이디
      * @return 포트폴리오 개별 조회 결과
      */
-    public PortfolioDto.PortfolioResponse getPortfolio(Long portfolioId) {
+    public PortfolioDto.PortfolioResponse getPortfolio(Long memberId, Long portfolioId) {
         Portfolio portfolio = portfolioRepository.findPortfolioByIdWithPortfolioPhotos(portfolioId)
                 .orElseThrow(() -> ExceptionFactory.of(PortfolioErrorCode.PORTFOLIO_NOT_FOUND));
         long scrapCount = scrapRepository.countByPortfolioId(portfolioId);
+        boolean scrapYN = scrapRepository.existsByMemberIdAndPortfolioId(memberId, portfolioId);
 
-        return PortfolioDto.PortfolioResponse.of(portfolio, scrapCount);
+        return PortfolioDto.PortfolioResponse.of(portfolio, scrapCount, scrapYN);
     }
 
     /**

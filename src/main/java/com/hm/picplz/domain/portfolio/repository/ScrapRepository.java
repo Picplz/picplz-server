@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ScrapRepository extends JpaRepository<Scrap, Long> {
 
     long countByPortfolioId(Long portfolioId);
+
+    boolean existsByMemberIdAndPortfolioId(Long memberId, Long portfolioId);
 }

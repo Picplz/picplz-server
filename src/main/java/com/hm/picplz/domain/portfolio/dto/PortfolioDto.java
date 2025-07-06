@@ -22,6 +22,7 @@ public class PortfolioDto {
         private String location;
         private LocalDate uploadDate;
         private Long scrapCount;
+        private Boolean scrapYN;
 
         public static PortfolioResponse from(Portfolio portfolio) {
             PortfolioResponse response = new PortfolioResponse();
@@ -35,9 +36,10 @@ public class PortfolioDto {
             return response;
         }
 
-        public static PortfolioResponse of(Portfolio portfolio, Long scrapCount) {
+        public static PortfolioResponse of(Portfolio portfolio, Long scrapCount, Boolean scrapYN) {
             PortfolioResponse response = from(portfolio);
             response.scrapCount = scrapCount;
+            response.scrapYN = scrapYN;
             return response;
         }
     }
