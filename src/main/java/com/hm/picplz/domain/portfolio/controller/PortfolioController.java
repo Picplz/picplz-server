@@ -6,10 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,10 +18,18 @@ public class PortfolioController {
 
     @Operation(summary = "포트폴리오 생성")
     @PostMapping
-    public PortfolioDto.CreatePortfolioResponse createPortfolio(
+    public PortfolioDto.PortfolioResponse createPortfolio(
             @AuthenticationPrincipal Long memberId,
             @RequestBody PortfolioDto.CreatePortfolioRequest request) {
-        return portfolioService.create(memberId, request);
+        return portfolioService.createPortfolio(memberId, request);
+    }
+
+    @Operation(summary = "포트폴리오 단일 조회")
+    @GetMapping("/{portfolioId}")
+    public PortfolioDto.PortfolioResponse getPortfolio(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long portfolioId) {
+        return portfolioService.getPortfolio(memberId, portfolioId);
     }
 
 }

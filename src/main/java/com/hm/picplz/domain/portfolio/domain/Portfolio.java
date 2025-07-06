@@ -23,7 +23,7 @@ public class Portfolio extends BaseEntity {
     @Column(name = "portfolio_id", updatable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "photographer_id")
     private Photographer photographer;
 
@@ -33,6 +33,9 @@ public class Portfolio extends BaseEntity {
 
     @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<PortfolioPhoto> portfolioPhotos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private List<Scrap> scraps = new ArrayList<>();
 
     @Builder
     public Portfolio(Long id, Photographer photographer, String location, LocalDate uploadDate) {
@@ -46,5 +49,7 @@ public class Portfolio extends BaseEntity {
         this.portfolioPhotos.addAll(portfolioPhotos);
     }
 
-    // factory method
+    public void addScrap(Scrap scrap) {
+        scraps.add(scrap);
+    }
 }

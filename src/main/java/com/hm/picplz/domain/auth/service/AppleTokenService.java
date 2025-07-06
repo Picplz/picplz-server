@@ -113,7 +113,7 @@ public class AppleTokenService {
                     .getBody();
         } catch (ExpiredJwtException e) {
             throw ExceptionFactory.of(AppleErrorCode.EXPIRED_TOKEN);
-        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+        } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
             throw ExceptionFactory.of(AppleErrorCode.INVALID_TOKEN);
         }
     }

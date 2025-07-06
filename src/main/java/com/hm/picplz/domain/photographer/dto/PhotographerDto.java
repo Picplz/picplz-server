@@ -155,7 +155,7 @@ public class PhotographerDto {
         private String type; // 핸드폰, 카메라
         private String brand; // 직접 입력 가능, 애플, 삼성, 소니
         private String name; // 직접 입력 가능, 모델명
-        private String cameraBrand; // DSLR, 필름 등등...
+        private String cameraType; // DSLR, 필름 등등...
     }
 
     @Data

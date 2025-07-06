@@ -27,19 +27,19 @@ public class PhotographerCamera extends BaseEntity {
 	private String type; // 핸드폰, 카메라
 	private String brand; // 직접 입력 가능, 애플, 삼성, 소니
 	private String name; // 직접 입력 가능, 모델명
-	private String cameraBrand; // DSLR, 필름 등등...
+	private String cameraType; // DSLR, 필름 등등...
 
 	@ManyToOne
 	@JoinColumn(name = "photographer_id")
 	private Photographer photographer;
 
 	@Builder
-	public PhotographerCamera(Long id, String type, String brand, String name, String cameraBrand, Photographer photographer) {
+	public PhotographerCamera(Long id, String type, String brand, String name, String cameraType, Photographer photographer) {
 		this.id = id;
 		this.type = type;
 		this.brand = brand;
 		this.name = name;
-		this.cameraBrand = cameraBrand;
+		this.cameraType = cameraType;
 		this.photographer = photographer;
 	}
 }

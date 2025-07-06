@@ -1,5 +1,6 @@
 package com.hm.picplz.domain.portfolio.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hm.picplz.domain.portfolio.domain.Portfolio;
 import com.hm.picplz.domain.portfolio.domain.PortfolioPhoto;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,6 +12,37 @@ import java.util.Comparator;
 import java.util.List;
 
 public class PortfolioDto {
+
+    @Data
+    @NoArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class PortfolioResponse {
+        private Long portfolioId;
+        private List<PortfolioPhotoResponse> photos;
+        private String location;
+        private LocalDate uploadDate;
+        private Long scrapCount;
+        private Boolean scrapYN;
+
+        public static PortfolioResponse from(Portfolio portfolio) {
+            PortfolioResponse response = new PortfolioResponse();
+            response.portfolioId = portfolio.getId();
+            response.photos = portfolio.getPortfolioPhotos().stream()
+                    .map(PortfolioPhotoResponse::from)
+                    .sorted(Comparator.comparingInt(PortfolioPhotoResponse::getPhotoOrder))
+                    .toList();
+            response.location = portfolio.getLocation();
+            response.uploadDate = portfolio.getUploadDate();
+            return response;
+        }
+
+        public static PortfolioResponse of(Portfolio portfolio, Long scrapCount, Boolean scrapYN) {
+            PortfolioResponse response = from(portfolio);
+            response.scrapCount = scrapCount;
+            response.scrapYN = scrapYN;
+            return response;
+        }
+    }
 
     @Data
     @NoArgsConstructor
@@ -32,26 +64,6 @@ public class PortfolioDto {
         private Integer photoOrder;
     }
 
-    @Data
-    @NoArgsConstructor
-    public static class CreatePortfolioResponse {
-        private Long portfolioId;
-        private List<PortfolioPhotoResponse> photos;
-        private String location;
-        private LocalDate uploadDate;
-
-        public static CreatePortfolioResponse from(Portfolio portfolio) {
-            CreatePortfolioResponse response = new CreatePortfolioResponse();
-            response.portfolioId = portfolio.getId();
-            response.photos = portfolio.getPortfolioPhotos().stream()
-                    .map(PortfolioPhotoResponse::from)
-                    .sorted(Comparator.comparingInt(PortfolioPhotoResponse::getPhotoOrder))
-                    .toList();
-            response.location = portfolio.getLocation();
-            response.uploadDate = portfolio.getUploadDate();
-            return response;
-        }
-    }
 
     @Data
     @NoArgsConstructor
