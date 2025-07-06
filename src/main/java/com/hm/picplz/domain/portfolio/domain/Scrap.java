@@ -1,6 +1,6 @@
 package com.hm.picplz.domain.portfolio.domain;
 
-import com.hm.picplz.domain.customer.domain.Customer;
+import com.hm.picplz.domain.member.domain.Member;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -23,12 +23,12 @@ public class Scrap extends BaseEntity {
     private Portfolio portfolio;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Builder
-    public Scrap(Portfolio portfolio, Customer customer) {
+    public Scrap(Portfolio portfolio, Member member) {
         this.portfolio = portfolio;
-        this.customer = customer;
+        this.member = member;
     }
 }
