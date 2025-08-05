@@ -78,7 +78,6 @@ public class AreaService {
 									districtEntry.getKey(),
 									districtEntry.getValue().stream()
 											.map(AllAreaInfoProjection::getEupmyeondong)
-											.distinct()
 											.toList()
 							))
 							.toList();
