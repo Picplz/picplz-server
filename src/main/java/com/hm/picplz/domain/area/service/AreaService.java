@@ -1,7 +1,6 @@
 package com.hm.picplz.domain.area.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.hm.picplz.domain.area.dto.AllAreaInfoProjection;
@@ -66,24 +65,16 @@ public class AreaService {
 		List<AllAreaInfoProjection> result = areaRepository.findAllEupmyeondong();
 
 		return result.stream()
-				.collect(Collectors.groupingBy(AllAreaInfoProjection::getSido))  // 지역별로 묶음
+				.collect(Collectors.groupingBy(AllAreaInfoProjection::getSido,
+						Collectors.groupingBy(AllAreaInfoProjection::getSigungu,
+								Collectors.mapping(AllAreaInfoProjection::getEupmyeondong, Collectors.toList()))))
 				.entrySet().stream()
-				.map(regionEntry -> {
-					String region = regionEntry.getKey(); // ex) 서울, 경기 등
-					Map<String, List<AllAreaInfoProjection>> districtGrouped = regionEntry.getValue().stream()
-							.collect(Collectors.groupingBy(AllAreaInfoProjection::getSigungu)); // 구/시로 묶기
-
-					List<AreaDto.DistrictDto> districts = districtGrouped.entrySet().stream()
-							.map(districtEntry -> new AreaDto.DistrictDto(
-									districtEntry.getKey(),
-									districtEntry.getValue().stream()
-											.map(AllAreaInfoProjection::getEupmyeondong)
-											.toList()
-							))
-							.toList();
-
-					return new AreaDto.AllAreaInfo(region, districts);
-				})
+				.map(regionEntry -> new AreaDto.AllAreaInfo(
+						regionEntry.getKey(),
+						regionEntry.getValue().entrySet().stream()
+								.map(districtEntry -> new AreaDto.DistrictDto(districtEntry.getKey(), districtEntry.getValue()))
+								.toList()
+				))
 				.toList();
 	}
 }
