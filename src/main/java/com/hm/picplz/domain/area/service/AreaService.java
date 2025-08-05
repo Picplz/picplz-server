@@ -1,7 +1,10 @@
 package com.hm.picplz.domain.area.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.hm.picplz.domain.area.dto.AllAreaInfoProjection;
 import org.springframework.stereotype.Service;
 
 import com.hm.picplz.domain.area.domain.Area;
@@ -52,5 +55,36 @@ public class AreaService {
 		return areaRepository.searchByKeyword(keyword).stream()
 			.map(AreaDto.AreaInfo::from)
 			.toList();
+	}
+
+	/**
+	 * 모든 법정동을 조회합니다.
+	 * 임시) 서울, 경기, 인천, 부산, 제주만 검색
+	 * @return 모든 법정동 데이터
+	 */
+	public List<AreaDto.AllAreaInfo> getAllAreas() {
+		List<AllAreaInfoProjection> result = areaRepository.findAllEupmyeondong();
+
+		return result.stream()
+				.collect(Collectors.groupingBy(AllAreaInfoProjection::getSido))  // 지역별로 묶음
+				.entrySet().stream()
+				.map(regionEntry -> {
+					String region = regionEntry.getKey(); // ex) 서울, 경기 등
+					Map<String, List<AllAreaInfoProjection>> districtGrouped = regionEntry.getValue().stream()
+							.collect(Collectors.groupingBy(AllAreaInfoProjection::getSigungu)); // 구/시로 묶기
+
+					List<AreaDto.DistrictDto> districts = districtGrouped.entrySet().stream()
+							.map(districtEntry -> new AreaDto.DistrictDto(
+									districtEntry.getKey(),
+									districtEntry.getValue().stream()
+											.map(AllAreaInfoProjection::getEupmyeondong)
+											.distinct()
+											.toList()
+							))
+							.toList();
+
+					return new AreaDto.AllAreaInfo(region, districts);
+				})
+				.toList();
 	}
 }

@@ -2,6 +2,8 @@ package com.hm.picplz.domain.area.repository;
 
 import java.util.List;
 
+import com.hm.picplz.domain.area.dto.AllAreaInfoProjection;
+import com.hm.picplz.domain.area.dto.AreaDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +29,20 @@ public interface AreaRepository extends JpaRepository<Area, Long> {
 		nativeQuery = true
 	)
 	List<Area> searchByKeyword(@Param("keyword") String keyword);
+
+	@Query(value = """
+		SELECT DISTINCT
+			   LEFT(sido, 2) AS sido,
+			   CASE
+				   WHEN sido IN ('경기도', '제주특별자치도') THEN LEFT(sigungu, 3)
+				   ELSE sigungu
+			   END AS sigungu,
+			   eupmyeondong,
+			   area_id  -- 추가
+		   FROM area
+		   WHERE deleted_date IS NULL
+			 AND eupmyeondong IS NOT NULL
+			 AND sido IN ('서울특별시', '부산광역시', '인천광역시', '경기도', '제주특별자치도')
+		   ORDER BY area_id;""", nativeQuery = true)
+	List<AllAreaInfoProjection> findAllEupmyeondong();
 }
