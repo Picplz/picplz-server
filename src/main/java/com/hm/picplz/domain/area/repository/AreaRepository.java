@@ -29,19 +29,17 @@ public interface AreaRepository extends JpaRepository<Area, Long> {
 	)
 	List<Area> searchByKeyword(@Param("keyword") String keyword);
 
-	@Query(value = """
-		SELECT
-			   LEFT(sido, 2) AS sido,
-			   CASE
-				   WHEN sido IN ('경기도', '제주특별자치도') THEN LEFT(sigungu, 3)
-				   ELSE sigungu
-			   END AS sigungu,
-			   eupmyeondong,
-			   area_id
-		   FROM area
-		   WHERE deleted_date IS NULL
-			 AND eupmyeondong IS NOT NULL
-			 AND sido IN ('서울특별시', '부산광역시', '인천광역시', '경기도', '제주특별자치도')
-		   ORDER BY area_id;""", nativeQuery = true)
+	@Query(value =
+		"""
+			SELECT
+      		LEFT(sido, 2) AS sido,
+      		IF(sido IN ('경기도', '제주특별자치도'), LEFT(sigungu, 3), sigungu) AS sigungu,
+      		JSON_ARRAYAGG(eupmyeondong) AS neighborhoods
+  			FROM area
+			WHERE deleted_date IS NULL
+    			AND eupmyeondong IS NOT NULL
+    			AND sido IN ('서울특별시', '부산광역시', '인천광역시', '경기도', '제주특별자치도')
+  			GROUP BY sido, sigungu;
+		""", nativeQuery = true)
 	List<AllAreaInfoProjection> findAllEupmyeondong();
 }
