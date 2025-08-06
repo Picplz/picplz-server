@@ -34,7 +34,7 @@ public class AppleTokenService {
     private String cid; // iOS 앱의 Bundle ID
 
     private final WebClientService webClientService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private final Map<String, PublicKey> keyCache = new ConcurrentHashMap<>();
 
     /**

@@ -36,4 +36,10 @@ public class AreaController {
 	public List<AreaDto.AreaInfo> searchAreasWithKeyword(@RequestParam String keyword) {
 		return areaService.searchAreasWithKeyword(keyword);
 	}
+
+	@Operation(summary = "모든 법정동 조회")
+	@GetMapping()
+	public List<AreaDto.AllAreaInfo> getAllAreas() {
+		return areaService.getAllAreas();
+	}
 }

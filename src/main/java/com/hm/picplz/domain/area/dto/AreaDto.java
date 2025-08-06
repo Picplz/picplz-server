@@ -2,10 +2,9 @@ package com.hm.picplz.domain.area.dto;
 
 import com.hm.picplz.domain.area.domain.Area;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,5 +26,21 @@ public class AreaDto {
 			areaInfo.ri = area.getRi();
 			return areaInfo;
 		}
+	}
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class AllAreaInfo {
+		private String region;
+		private List<DistrictDto> districts;
+	}
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class DistrictDto {
+		private String name;
+		private List<String> neighborhoods;
 	}
 }
