@@ -2,6 +2,7 @@ package com.hm.picplz.domain.member.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,10 +45,11 @@ public class MemberController {
     @Operation(summary = "위치 업데이트")
     @PostMapping(value = "/location")
     public void updateMemberLocation(
+            @AuthenticationPrincipal Long memberId,
             @RequestBody MemberDto.UpdateMemberLocationRequest updateMemberLocationRequest
     ) {
         log.info("사용자 위치 업데이트");
-        memberService.updateLocation(updateMemberLocationRequest);
+        memberService.updateLocation(memberId, updateMemberLocationRequest);
     }
 
     @Operation(summary = "주변 작가 불러오기")

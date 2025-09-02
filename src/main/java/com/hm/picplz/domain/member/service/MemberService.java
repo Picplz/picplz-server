@@ -59,7 +59,7 @@ public class MemberService {
 
     /**
      * 회원 정보 수정 api
-     * @param updateMemberInfoRequest
+     * @param updateMemberInfoRequest 수정 정보
      * @return 수정된 멤버 정보
      */
     @Transactional
@@ -86,13 +86,9 @@ public class MemberService {
         return MemberDto.MemberInfoResponse.from(member);
     }
 
-    private boolean checkNicknameForUpdate(String nickname, Member member) {
-        return memberRepository.existsByNicknameIsAndIdNot(nickname, member.getId());
-    }
-
-    public void updateLocation(MemberDto.UpdateMemberLocationRequest request) {
+    public void updateLocation(Long memberId, MemberDto.UpdateMemberLocationRequest request) {
         redisTemplate.opsForGeo().add(GEO_KEY, new RedisGeoCommands.GeoLocation<>(
-                request.getMemberId(), new Point(request.getLongitude(), request.getLatitude())));
+                memberId, new Point(request.getLongitude(), request.getLatitude())));
 
         // TODO: role이 photographer인지 customer인지 파악 후 부가 정보로 추가 + 활동중 여부
     }
@@ -192,5 +188,9 @@ public class MemberService {
      */
     public Member getMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    private boolean checkNicknameForUpdate(String nickname, Member member) {
+        return memberRepository.existsByNicknameIsAndIdNot(nickname, member.getId());
     }
 }

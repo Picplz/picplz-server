@@ -7,7 +7,6 @@ import com.hm.picplz.domain.member.domain.Role;
 import com.hm.picplz.domain.member.domain.SocialProvider;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -53,10 +52,6 @@ public class MemberDto {
 	@Data
 	@NoArgsConstructor
 	public static class UpdateMemberLocationRequest {
-		@Schema(defaultValue = "1", description = "회원 아이디")
-		@NotNull(message = "회원 아이디를 입력해주세요")
-		private Long memberId;
-
 		@Schema(defaultValue = "37.5665", description = "위도")
 		@NotNull(message = "위도를 입력해주세요")
 		private double latitude;
