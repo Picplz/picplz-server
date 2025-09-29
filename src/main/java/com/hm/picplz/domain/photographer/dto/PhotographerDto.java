@@ -30,8 +30,10 @@ public class PhotographerDto {
         private YesNo active;
         private long distance;
         private List<String> photoMoods;
+        private Boolean isFollowing;
+        private Boolean isOurPhotographer; // 우리 동네 작가
 
-        public static Card of(Photographer photographer, long distance) {
+        public static Card of(Photographer photographer, long distance, Boolean isFollowing) {
             Card card = new Card();
             card.photographerId = photographer.getId();
             card.nickname = photographer.getMember().getNickname();
@@ -41,7 +43,7 @@ public class PhotographerDto {
             card.photoMoods = photographer.getPhotoMoods().stream()
                     .map(PhotoMood::getContent)
                     .toList();
-
+            card.isFollowing = isFollowing;
             return card;
         }
     }
@@ -58,14 +60,28 @@ public class PhotographerDto {
         private YesNo active;
         private String instagram;
         private List<String> photoMoods;
-        private int followers;
         private YesNo isFollowing;  // 팔로우 여부
+        private int followers;
+        private long distance;
+        private YesNo isOurPhotographer;
+        private List<String> phoneBrands; // 아이폰, 갤럭시
+        private List<String> cameraTypes; // DSLR, 미러리스, 필름카메라, 디지털카메라
+        //TODO: '별점순'을 위한 리뷰 별점 추가, '예약 많은 순'을 위한 최근 한달 예약 개수 추가
+
+        public static Detail of(Photographer photographer, long distance, int followers, YesNo isFollowing, YesNo isOurPhotographer) {
+            Detail detail = Detail.of(photographer);
+            detail.distance = distance;
+            detail.followers = followers;
+            detail.isFollowing = isFollowing;
+            detail.isOurPhotographer = isOurPhotographer;
+            return detail;
+        }
 
         public static Detail of(Photographer photographer, int followers, YesNo isFollowing) {
             Detail detail = Detail.of(photographer);
             detail.followers = followers;
             detail.isFollowing = isFollowing;
-
+            detail.isOurPhotographer = YesNo.Y;
             return detail;
         }
 

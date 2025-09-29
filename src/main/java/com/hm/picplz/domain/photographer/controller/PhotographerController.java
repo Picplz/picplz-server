@@ -73,6 +73,16 @@ public class PhotographerController {
         return productService.findProductsByPhotographer(photographerId);
     }
 
+    @Operation(summary = "주변 작가 불러오기")
+    @GetMapping(value = "/location/nearby")
+    public List<PhotographerDto.Detail> loadNearbyPhotographers(
+            @AuthenticationPrincipal Long memberId,
+            @RequestParam(required = false, defaultValue = "2") long distance
+    ) {
+        log.info("주변 작가 불러오기");
+        return photographerService.findPhotographersWithinRadius(memberId, distance);
+    }
+
     @Operation(summary = "자신의 위치와 활동지역이 같은 작가 조회")
     @GetMapping("/active-area")
     public List<PhotographerDto.Detail> getPhotographersByMemberId(

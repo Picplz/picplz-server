@@ -52,17 +52,6 @@ public class MemberController {
         memberService.updateLocation(memberId, updateMemberLocationRequest);
     }
 
-    @Operation(summary = "주변 작가 불러오기")
-    @GetMapping(value = "/location/nearby")
-    public List<PhotographerDto.Card> loadNearbyPhotographers(
-            @RequestParam double longitude,
-            @RequestParam double latitude,
-            @RequestParam long distance
-    ) {
-        log.info("주변 작가 불러오기");
-        return memberService.findPhotographersWithinRadius(longitude, latitude, distance);
-    }
-
     @Operation(summary = "회원 닉네임 중복검사")
     @GetMapping("/nickname")
     public void checkNickname(@RequestParam String nickname) {

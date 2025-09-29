@@ -2,11 +2,17 @@ package com.hm.picplz.domain.photographer.service;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.global.common.service.WebClientService;
+import org.springframework.data.geo.Circle;
+import org.springframework.data.geo.GeoResult;
+import org.springframework.data.geo.GeoResults;
+import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +37,8 @@ import com.hm.picplz.global.common.entity.YesNo;
 import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
+
+import static com.hm.picplz.domain.member.service.MemberService.GEO_KEY;
 
 @Service
 @RequiredArgsConstructor
@@ -147,11 +155,54 @@ public class PhotographerService {
 	}
 
 	/**
+	 * 바로촬영 가능한 주변 작가 = 2km 반경 내 바로촬영 활성화 + 주 활동지역 = 현재 고객 위치인 작가
+	 * 바로 촬영 작가 없을 시 주 활동지역 같은 작가 조회
+	 * @param memberId 조회 기준이 되는 멤버 아이디
+	 * @param distance 반경 (단위: km)
+	 * @return 검색된 데이터 목록
+	 */
+	public List<PhotographerDto.Detail> findPhotographersWithinRadius(Long memberId, long distance) {
+
+		/*
+		 * 1. 멤버의 현재 위치 조회하여 해당 위치 기준 반경 distance(km -> m) 만큼 떨어져있는 멤버 조회
+		 */
+		Point currentPoint = memberService.getMemberLocation(memberId);
+		Circle circle = new Circle(currentPoint, distance * 1000d);    // 반경 (단위: m)
+
+		// 검색 옵션 (거리 포함, 가까운 순)
+		RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs
+				.newGeoRadiusArgs()
+				.includeDistance()
+				.sortAscending();
+
+		GeoResults<RedisGeoCommands.GeoLocation<Object>> geoResults = redisTemplate
+				.opsForGeo()
+				.radius(GEO_KEY, circle, args);
+
+		List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> results =
+				geoResults != null ? geoResults.getContent() : Collections.emptyList();
+
+		/*
+		 * 2. 조회한 redis 멤버 데이터를 가지고 바로 촬영 작가인지 확인 및 dto 화
+		 */
+		Long areaId = webClientService.requestAreaIdByPoint(currentPoint);
+		List<PhotographerDto.Detail> list = getPhotographerDetailByMemberGeoInfo(results, memberId, areaId);
+
+		/*
+		* 현재 위치 반경으로 활동중(바로 촬영 가능)한 작가가 없을 시, 현재 고객 위치 = 주 활동지역 위치 작가 리스트 반환
+		*/
+		if(list.isEmpty()) {
+			list.addAll(getPhotographersByActiveArea(memberId));
+		}
+
+		return list;
+	}
+
+	/**
 	 * 현재 멤버의 위치 = 주 활동지역 작가 탐색
 	 * @param memberId 조회를 진행한 멤버
 	 * @return 작가 상세 정보
 	 */
-	@Transactional
 	public List<PhotographerDto.Detail> getPhotographersByActiveArea(Long memberId) {
 		Long areaId = webClientService.requestAreaIdByPoint(
 				memberService.getMemberLocation(memberId)
@@ -291,5 +342,28 @@ public class PhotographerService {
 		return Boolean.TRUE.equals(
 				followingRepository.existsByFollowingIdAndFollowerId(photographer.getMember().getId(), memberId)) ?
 				YesNo.Y : YesNo.N;
+	}
+
+	private List<PhotographerDto.Detail> getPhotographerDetailByMemberGeoInfo(
+			List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> results, Long customerId, Long areaId) {
+		return results.stream()
+				.map(result -> {
+					Long memberId = Long.parseLong(result.getContent().getName().toString());
+					Photographer photographer = photographerRepository.findByMemberIdAndActive(memberId, YesNo.Y)
+							.orElseThrow(() ->  ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+					// 주활동지역에 해당 areaId가 포함되어 있는지 확인
+					YesNo isOurPhotographer = photographer.getActiveAreas().stream()
+							.anyMatch(activeArea -> activeArea.getArea().getId().equals(areaId))
+							? YesNo.Y : YesNo.N;
+
+					return PhotographerDto.Detail.of(
+							photographer,
+							(long) result.getDistance().getValue(),
+							getFollowers(photographer),
+							isFollowing(photographer, customerId),
+							isOurPhotographer
+					);
+				})
+				.toList();
 	}
 }

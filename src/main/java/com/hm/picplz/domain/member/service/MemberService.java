@@ -31,11 +31,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+    public static final String GEO_KEY = "members:locations";
     private static final Pattern NICKNAME_PATTERN = Pattern.compile("^(?!\\s)(?!.*\\s$)[a-zA-Z0-9가-힣]{2,15}$");
-    private static final String GEO_KEY = "members:locations";
 
     private final MemberRepository memberRepository;
-    private final PhotographerHelper photographerHelper;
     private final RedisTemplate<String, Object> redisTemplate;
 
     /**
@@ -91,40 +90,6 @@ public class MemberService {
                 memberId, new Point(request.getLongitude(), request.getLatitude())));
 
         // TODO: role이 photographer인지 customer인지 파악 후 부가 정보로 추가 + 활동중 여부
-    }
-
-    /**
-     *
-     * @param longitude 기준 경도
-     * @param latitude 기준 위도
-     * @param distance 반경 (단위: km)
-     * @return 검색된 데이터 목록
-     */
-    public List<PhotographerDto.Card> findPhotographersWithinRadius(double longitude, double latitude, long distance) {
-        Circle circle = new Circle(new Point(longitude, latitude), distance * 1000d);    // 반경 (단위: m)
-
-        // 검색 옵션 (거리 포함, 가까운 순)
-        RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs
-                .newGeoRadiusArgs()
-                .includeDistance()
-                .sortAscending();
-
-        GeoResults<GeoLocation<Object>> geoResults = redisTemplate
-            .opsForGeo()
-            .radius(GEO_KEY, circle, args);
-
-        List<GeoResult<GeoLocation<Object>>> results =
-            geoResults != null ? geoResults.getContent() : Collections.emptyList();
-
-        // 현재 위치 반경 기준 활동중인 작가들
-        List<PhotographerDto.Card> list =
-                photographerHelper.getPhotographerCardByMemberGeoInfo(results);
-
-        if(list.isEmpty()) {
-            //TODO: 관심 고객 많은 작가 return
-        }
-
-        return list;
     }
 
     @Transactional

@@ -21,16 +21,5 @@ public class PhotographerHelper {
 
     private final PhotographerRepository photographerRepository;
 
-    @Transactional
-    public List<PhotographerDto.Card> getPhotographerCardByMemberGeoInfo(List<GeoResult<GeoLocation<Object>>> results) {
-        return results.stream()
-                .map(result -> {
-                    Long memberId = Long.parseLong(result.getContent().getName().toString());
-                    Photographer photographer = photographerRepository.findByMemberId(memberId)
-                            .orElseThrow(() ->  ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
-                    return photographer != null ? PhotographerDto.Card.of(photographer, (long) result.getDistance().getValue()) : null;
-                })
-                .filter(Objects::nonNull)
-                .toList();
-    }
+
 }

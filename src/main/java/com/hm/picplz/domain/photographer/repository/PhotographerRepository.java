@@ -2,6 +2,7 @@ package com.hm.picplz.domain.photographer.repository;
 
 import java.util.Optional;
 
+import com.hm.picplz.global.common.entity.YesNo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +17,14 @@ public interface PhotographerRepository extends JpaRepository<Photographer, Long
     Optional<Photographer> findPhotographerWithMoods(@Param("photographerId") Long photographerId);
 
     Boolean existsByMemberId(@Param("memberId") Long memberId);
+
+    @Query("SELECT DISTINCT p FROM Photographer p " +
+            "JOIN FETCH p.member m " +
+            "JOIN FETCH p.activeAreas aa " +
+            "WHERE m.id = :memberId " +
+            "AND p.active = :active")
+    Optional<Photographer> findByMemberIdAndActive(
+            @Param("memberIds") Long memberId,
+            @Param("active") YesNo active
+    );
 }
