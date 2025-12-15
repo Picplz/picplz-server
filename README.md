@@ -57,7 +57,7 @@ src/main/java/com/hm/picplz/
 
 ### 환경 변수 설정
 
-`src/main/resources/application-dev.yml` 파일을 생성하고 아래 내용을 설정합니다:
+`src/main/resources/application-dev.yml` 노션을 참고하여 시크릿 설정:
 
 ```yaml
 spring:
@@ -106,59 +106,49 @@ cloud:
       static: ap-northeast-2
 ```
 
-### API 문서
-
-서버 실행 후 Swagger UI에서 API 문서를 확인할 수 있습니다:
-- http://localhost:8080/api/v1/swagger-ui.html
-
 ## Docker 배포
 
-### 로컬 Docker 빌드
+### 로컬 실행 Docker Compose
 
-```bash
-# 이미지 빌드
-docker build -t picplz-server .
-
-# 컨테이너 실행
-docker run -d -p 8080:8080 \
-  -e SPRING_PROFILES_ACTIVE=dev \
-  picplz-server
 ```
-
-### Docker Compose (권장)
+미리 mySql 실행필요
+```
 
 `docker-compose.yml` 예시:
 
 ```yaml
 version: '3.8'
 services:
-  app:
-    image: picplz-server
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-    depends_on:
-      - mysql
-      - redis
-
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: picplz
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
+   spring-app:
+      container_name: picplz-dev-server
+      ports:
+         - "8080:8080"
+      build:
+         context: .
+         dockerfile: Dockerfile.dev  # 개발용
+      volumes:
+         # 로컬에서 Gradle로 빌드한 jar 파일을 컨테이너의 app.jar에 덮어씌워서 변경 사항 반영
+         - ./build/libs/picplz-0.0.1-SNAPSHOT.jar:/picplz/app.jar
+      depends_on:
+         - redis
+   redis:
+      image: redis:7.0
+      container_name: redis
+      ports:
+         - "6379:6379"
+      volumes:
+         - redis-data:/data
+      environment:
+         REDIS_PASSWORD: picplz2025!!
+      networks:
+         - default
 
 volumes:
-  mysql_data:
+   redis-data:
+
+networks:
+   default:
+      driver: host
 ```
 
 ```bash
