@@ -159,10 +159,11 @@ public class ReviewServiceImpl implements ReviewService {
 
         List<ReviewPhoto> photos = new ArrayList<>();
         if (request.getPhotoUrls() != null && !request.getPhotoUrls().isEmpty()) {
+            List<ReviewPhoto> photosToSave = new ArrayList<>();
             for (int i = 0; i < request.getPhotoUrls().size(); i++) {
-                ReviewPhoto photo = ReviewPhoto.of(review, request.getPhotoUrls().get(i), i);
-                photos.add(reviewPhotoRepository.save(photo));
+                photosToSave.add(ReviewPhoto.of(review, request.getPhotoUrls().get(i), i));
             }
+            photos = reviewPhotoRepository.saveAll(photosToSave);
         }
 
         return ReviewDetailResponse.from(review, photos);
@@ -191,10 +192,11 @@ public class ReviewServiceImpl implements ReviewService {
 
         List<ReviewPhoto> photos = new ArrayList<>();
         if (request.getPhotoUrls() != null && !request.getPhotoUrls().isEmpty()) {
+            List<ReviewPhoto> photosToSave = new ArrayList<>();
             for (int i = 0; i < request.getPhotoUrls().size(); i++) {
-                ReviewPhoto photo = ReviewPhoto.of(review, request.getPhotoUrls().get(i), i);
-                photos.add(reviewPhotoRepository.save(photo));
+                photosToSave.add(ReviewPhoto.of(review, request.getPhotoUrls().get(i), i));
             }
+            photos = reviewPhotoRepository.saveAll(photosToSave);
         }
 
         return ReviewDetailResponse.from(review, photos);
