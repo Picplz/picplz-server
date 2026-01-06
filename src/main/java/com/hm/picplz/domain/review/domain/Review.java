@@ -3,14 +3,7 @@ package com.hm.picplz.domain.review.domain;
 import com.hm.picplz.domain.customer.domain.Customer;
 import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.global.common.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "review")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Review extends BaseEntity {
 
@@ -45,5 +39,10 @@ public class Review extends BaseEntity {
         this.starPoint = starPoint;
         this.photographer = photographer;
         this.customer = customer;
+    }
+
+    public void updateReview(Float starPoint, String content) {
+        this.starPoint = starPoint;
+        this.content = content;
     }
 }
