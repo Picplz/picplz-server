@@ -57,4 +57,20 @@ public class ReservationService {
                 .map(ReservationDto.Detail::of)
                 .toList();
     }
+
+    @Transactional
+    public void acceptReservationById(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> ExceptionFactory.of(ReservationErrorCode.RESERVATION_NOT_FOUND));
+        reservation.accept();
+    }
+
+    @Transactional
+    public ReservationDto.RejectReservationResponse rejectReservationById(Long reservationId,
+                                                                          ReservationDto.RejectReservationRequest rejectReservationRequest) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> ExceptionFactory.of(ReservationErrorCode.RESERVATION_NOT_FOUND));
+        reservation.reject();
+        return ReservationDto.RejectReservationResponse.of(rejectReservationRequest);
+    }
 }

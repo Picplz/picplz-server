@@ -5,8 +5,10 @@ import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.domain.product.domain.ShootProduct;
 import com.hm.picplz.domain.product.dto.ProductDto;
 import com.hm.picplz.domain.reservation.dto.ReservationDto;
+import com.hm.picplz.domain.reservation.exception.ReservationErrorCode;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import com.hm.picplz.global.common.entity.YesNo;
+import com.hm.picplz.global.error.ExceptionFactory;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -96,5 +98,22 @@ public class Reservation extends BaseEntity {
     private static String generateReservationNumber() {
         return "N" + System.currentTimeMillis();
     }
+
+    public void accept() {
+        if (this.status != ReservationStatus.PENDING) {
+            throw ExceptionFactory.of(ReservationErrorCode.RESERVATION_STATUS_INVALID);
+        }
+        this.status = ReservationStatus.ACCEPTED;
+    }
+
+    public void reject() {
+        if (this.status != ReservationStatus.PENDING) {
+            throw ExceptionFactory.of(ReservationErrorCode.RESERVATION_STATUS_INVALID);
+        }
+        this.status = ReservationStatus.REJECTED;
+    }
+
+
     // factory method
+
 }

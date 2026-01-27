@@ -87,4 +87,21 @@ public class ReservationDto {
         }
     }
 
+    @Data
+    @NoArgsConstructor
+    public static class RejectReservationRequest {
+        private String rejectReason;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class RejectReservationResponse {
+        private String rejectReason;
+
+        public static RejectReservationResponse of(RejectReservationRequest rejectReservationRequest) {
+            RejectReservationResponse rejectReservationResponse = new RejectReservationResponse();
+            rejectReservationResponse.rejectReason = rejectReservationRequest.rejectReason;
+            return rejectReservationResponse;
+        }
+    }
 }

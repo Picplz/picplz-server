@@ -93,7 +93,7 @@ public class PhotographerController {
     }
 
     @Operation(summary = "작가의 예약받은 내역 전체 조회")
-    @GetMapping("/reservation")
+    @GetMapping("/reservations")
     public List<ReservationDto.Detail> loadReservationsByPhotographerId(
             @AuthenticationPrincipal Long memberId
     ) {
@@ -101,4 +101,22 @@ public class PhotographerController {
         return reservationService.findReservationsByPhotographerId(memberId);
     }
 
+    @Operation(summary = "작가의 예약 승인")
+    @PatchMapping("/reservations/{reservationId}/accept")
+    public void approveReservationsByPhotographerId(
+            @PathVariable(name = "reservationId") Long reservationId
+    ) {
+        log.info("작가의 예약 내역 승인");
+        reservationService.acceptReservationById(reservationId);
+    }
+
+    @Operation(summary = "작가의 예약 거절")
+    @PatchMapping("/reservations/{reservationId}/reject")
+    public ReservationDto.RejectReservationResponse declineReservationsByPhotographerId(
+            @PathVariable(name = "reservationId") Long reservationId,
+            @RequestBody ReservationDto.RejectReservationRequest rejectReservationRequest
+    ) {
+        log.info("작가의 예약 내역 거절");
+        return reservationService.rejectReservationById(reservationId, rejectReservationRequest);
+    }
 }
