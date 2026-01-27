@@ -2,6 +2,8 @@ package com.hm.picplz.domain.photographer.controller;
 
 import java.util.List;
 
+import com.hm.picplz.domain.reservation.dto.ReservationDto;
+import com.hm.picplz.domain.reservation.service.ReservationService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,7 @@ public class PhotographerController {
 
     private final PhotographerService photographerService;
     private final ProductService productService;
+    private final ReservationService reservationService;
 
     @Operation(summary = "작가 회원가입")
     @PostMapping
@@ -88,4 +91,14 @@ public class PhotographerController {
             @RequestBody PhotographerDto.UpdateActiveAreaRequest updateActiveAreaRequestDto) {
         return photographerService.updateActiveArea(memberId, updateActiveAreaRequestDto);
     }
+
+    @Operation(summary = "작가의 예약받은 내역 전체 조회")
+    @GetMapping("/reservation")
+    public List<ReservationDto.Detail> loadReservationsByPhotographerId(
+            @AuthenticationPrincipal Long memberId
+    ) {
+        log.info("작가의 예약 상품 리스트 조회하기");
+        return reservationService.findReservationsByPhotographerId(memberId);
+    }
+
 }

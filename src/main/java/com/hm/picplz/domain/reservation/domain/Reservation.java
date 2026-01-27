@@ -1,12 +1,13 @@
 package com.hm.picplz.domain.reservation.domain;
 
+import com.hm.picplz.domain.customer.domain.Customer;
+import com.hm.picplz.domain.photographer.domain.Photographer;
+import com.hm.picplz.domain.product.domain.ShootProduct;
+import com.hm.picplz.domain.product.dto.ProductDto;
+import com.hm.picplz.domain.reservation.dto.ReservationDto;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import com.hm.picplz.global.common.entity.YesNo;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -28,12 +29,6 @@ public class Reservation extends BaseEntity {
 
     private String packageName;   // enum
 
-    private String companion;
-
-    @NotNull
-    @PositiveOrZero
-    private int price;  // 최종 결제 금액
-
     private int productPrice;   // 상품 금액
 
     private int editPrice;  // 보정 금액
@@ -42,34 +37,64 @@ public class Reservation extends BaseEntity {
 
     private String place;
 
-    private String camera;
-
     @NotNull
     @Positive
-    private String photoAmount;
+    private int photoAmount;
 
     private YesNo editedYn;
 
-    private String paymentType;    // enum
-
     private String reservationNumber;   // ex) N2025194926
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReservationStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shoot_product_id", nullable = false)
+    private ShootProduct shootProduct;
+
     @Builder
-    public Reservation(Long id, String packageName, String companion, int price, int productPrice, int editPrice, LocalDateTime reservationTime, String place, String camera, String photoAmount, YesNo editedYn, String paymentType, String reservationNumber) {
+    public Reservation(Long id, String packageName, int productPrice, int editPrice, LocalDateTime reservationTime, String place, int photoAmount, YesNo editedYn, String reservationNumber, ReservationStatus status, Customer customer, ShootProduct shootProduct) {
         this.id = id;
         this.packageName = packageName;
-        this.companion = companion;
-        this.price = price;
         this.productPrice = productPrice;
         this.editPrice = editPrice;
         this.reservationTime = reservationTime;
         this.place = place;
-        this.camera = camera;
         this.photoAmount = photoAmount;
         this.editedYn = editedYn;
-        this.paymentType = paymentType;
         this.reservationNumber = reservationNumber;
+        this.status = status;
+        this.customer = customer;
+        this.shootProduct = shootProduct;
     }
 
+    public static Reservation of(ReservationDto.Create request, Customer customer, ShootProduct shootProduct) {
+        return Reservation.builder()
+                .packageName(shootProduct.getName())
+                .productPrice(shootProduct.getShootPrice())
+                .editPrice(shootProduct.getEditPrice())
+                .reservationTime(
+                        request.getPerferredDateTimeSelected() == YesNo.Y
+                                ? LocalDateTime.of(request.getReservedDate(), request.getReservedTime())
+                                : null
+                ) // 희망일시 체크하면 입력한 시간대로, 작가와 협의 체크하면 자동으로 null
+                .place(request.getShootArea() + request.getShootAreaDetail())
+                .photoAmount(shootProduct.getAmount())
+                .editedYn(shootProduct.getEditedYn())
+                .reservationNumber(generateReservationNumber())
+                .status(ReservationStatus.PENDING) // 기본은 대기 상태
+                .customer(customer)
+                .shootProduct(shootProduct)
+                .build();
+    }
+
+    private static String generateReservationNumber() {
+        return "N" + System.currentTimeMillis();
+    }
     // factory method
 }
