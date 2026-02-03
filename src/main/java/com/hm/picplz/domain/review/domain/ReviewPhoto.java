@@ -1,13 +1,7 @@
 package com.hm.picplz.domain.review.domain;
 
 import com.hm.picplz.global.common.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,7 +18,7 @@ public class ReviewPhoto extends BaseEntity {
     @Column(name = "review_photo_id", updatable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
     private Review review;
 
@@ -36,7 +30,7 @@ public class ReviewPhoto extends BaseEntity {
     private int photoOrder;
 
     @Builder
-    public ReviewPhoto(Long id, Review review, String image, LocalDate uploadDate, int photoOrder) {
+    private ReviewPhoto(Long id, Review review, String image, LocalDate uploadDate, int photoOrder) {
         this.id = id;
         this.review = review;
         this.image = image;
@@ -44,5 +38,12 @@ public class ReviewPhoto extends BaseEntity {
         this.photoOrder = photoOrder;
     }
 
-    // factory method
+    public static ReviewPhoto of(Review review, String image, int photoOrder) {
+        return ReviewPhoto.builder()
+                .review(review)
+                .image(image)
+                .uploadDate(LocalDate.now())
+                .photoOrder(photoOrder)
+                .build();
+    }
 }
