@@ -1,5 +1,5 @@
 # Step 1: Build the application
-FROM openjdk:17-jdk-slim AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -22,7 +22,7 @@ RUN chmod +x ./gradlew
 RUN ./gradlew bootJar
 
 # Step 2: Create a minimal image with only the JAR file
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre
 
 # Set the working directory inside the container
 WORKDIR /picplz
