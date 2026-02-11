@@ -192,3 +192,6 @@ GitHub Actions를 통해 자동 빌드 및 배포가 구성되어 있습니다.
 | `/api/v1/portfolio` | 포트폴리오 |
 | `/api/v1/area` | 지역 정보 |
 | `/api/v1/s3` | 이미지 업로드 |
+
+
+---
