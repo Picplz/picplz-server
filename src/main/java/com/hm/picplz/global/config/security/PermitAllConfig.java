@@ -11,17 +11,20 @@ public class PermitAllConfig {
 	@Bean
 	public List<String> permitAllUrls() {
 		return List.of(
-			"/swagger-ui/**",
-			"/swagger-resources/**",
-			"/v3/api-docs/**",      // 하위 경로 모두 포함
-			"/webjars/**",
-			"/members/test", "/members/nickname",
-			"/auth/**",
-			"/cameras",
-			"/photographers", // 작가 회원가입
-			"/customers", // 고객 회원가입
-			"/s3/**" // s3
-			// , "/**" // 개발용 검증 해제
+				"/swagger-ui/**",
+				"/swagger-resources/**",
+				"/v3/api-docs/**", // 하위 경로 모두 포함
+				"/webjars/**",
+				"/members/test", "/members/nickname",
+				"/auth/**",
+				"/cameras",
+				"/photographers", // 작가 회원가입
+				"/customers", // 고객 회원가입
+				"/s3/**", // s3
+				"/chat-test.html", // 채팅 테스트 페이지
+				"/chat/**", // 채팅 테스트 페이지 (chat 폴더)
+				"/ws/**" // 웹소켓 연결
+		// , "/**" // 개발용 검증 해제
 		);
 	}
 }

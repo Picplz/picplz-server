@@ -1,6 +1,7 @@
 package com.hm.picplz.domain.chat.domain;
 
-import com.hm.picplz.domain.member.domain.Member;
+import com.hm.picplz.domain.photographer.domain.Photographer;
+import com.hm.picplz.domain.customer.domain.Customer;
 import com.hm.picplz.domain.reservation.domain.Reservation;
 import com.hm.picplz.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -31,12 +32,12 @@ public class ChatRoom extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "photographer_id", nullable = false)
-    private Member photographer;
+    private Photographer photographer;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
-    private Member customer;
+    private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
@@ -72,7 +73,7 @@ public class ChatRoom extends BaseEntity {
     private LocalDateTime lastMessageAt;
 
     @Builder
-    private ChatRoom(Member photographer, Member customer, Reservation reservation) {
+    private ChatRoom(Photographer photographer, Customer customer, Reservation reservation) {
         this.photographer = photographer;
         this.customer = customer;
         this.reservation = reservation;
@@ -99,9 +100,9 @@ public class ChatRoom extends BaseEntity {
      * 읽지 않은 메시지 카운트 증가
      */
     public void incrementUnreadCount(Long memberId) {
-        if (photographer.getId().equals(memberId)) {
+        if (photographer.getMember().getId().equals(memberId)) {
             this.unreadCountPhotographer++;
-        } else if (customer.getId().equals(memberId)) {
+        } else if (customer.getMember().getId().equals(memberId)) {
             this.unreadCountCustomer++;
         }
     }
@@ -110,9 +111,9 @@ public class ChatRoom extends BaseEntity {
      * 읽지 않은 메시지 카운트 리셋
      */
     public void resetUnreadCount(Long memberId) {
-        if (photographer.getId().equals(memberId)) {
+        if (photographer.getMember().getId().equals(memberId)) {
             this.unreadCountPhotographer = 0;
-        } else if (customer.getId().equals(memberId)) {
+        } else if (customer.getMember().getId().equals(memberId)) {
             this.unreadCountCustomer = 0;
         }
     }
@@ -135,10 +136,10 @@ public class ChatRoom extends BaseEntity {
      * 상대방 Member ID 조회
      */
     public Long getOtherMemberId(Long memberId) {
-        if (photographer.getId().equals(memberId)) {
-            return customer.getId();
-        } else if (customer.getId().equals(memberId)) {
-            return photographer.getId();
+        if (photographer.getMember().getId().equals(memberId)) {
+            return customer.getMember().getId();
+        } else if (customer.getMember().getId().equals(memberId)) {
+            return photographer.getMember().getId();
         }
         throw new IllegalArgumentException("해당 Member는 이 채팅방의 참여자가 아닙니다.");
     }
@@ -147,6 +148,6 @@ public class ChatRoom extends BaseEntity {
      * 해당 Member가 채팅방 참여자인지 확인
      */
     public boolean isMember(Long memberId) {
-        return photographer.getId().equals(memberId) || customer.getId().equals(memberId);
+        return photographer.getMember().getId().equals(memberId) || customer.getMember().getId().equals(memberId);
     }
 }
