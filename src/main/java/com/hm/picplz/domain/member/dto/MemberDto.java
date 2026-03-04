@@ -100,4 +100,20 @@ public class MemberDto {
 		private String socialEmail;
 		private String profileImage;
 	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	public static class SwitchRoleRequest {
+		private Role targetRole;
+	}
+
+	@Getter
+	@Builder
+	public static class SwitchRoleResponse {
+		private String accessToken;
+		private String refreshToken;
+		private Role currentRole;
+		private Boolean hasPhotographerProfile;
+		private Boolean hasCustomerProfile;
+	}
 }

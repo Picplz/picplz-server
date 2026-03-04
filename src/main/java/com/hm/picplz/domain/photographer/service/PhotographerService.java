@@ -56,13 +56,21 @@ public class PhotographerService {
 	public PhotographerDto.Detail createPhotographer(PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
 		// 마지막 닉네임 중복 확인
 		memberService.checkNickname(createPhotographerRequest.getNickname());
-		// 멤버 데이터 생성
-		Member member = memberService.createMember(MemberDto.CreateMemberRequest.of(createPhotographerRequest,
-			Role.PHOTOGRAPHER));
 
-		// 작가 정보 생성
+		// 1. social_code로 기존 Member 조회 또는 생성
+		Member member = memberService.findOrCreateMember(
+			MemberDto.CreateMemberRequest.of(createPhotographerRequest, Role.PHOTOGRAPHER)
+		);
+
+		// 2. 이미 Photographer 프로필이 있는지 확인
+		if (member.getPhotographer() != null) {
+			throw ExceptionFactory.of(PhotographerErrorCode.ALREADY_PHOTOGRAPHER);
+		}
+
+		// 3. Photographer 프로필 생성 (active = 'Y')
 		Photographer photographer = Photographer.from(member);
 		photographerRepository.save(photographer);
+		member.updateRole(Role.PHOTOGRAPHER);
 
 		// 작가 분위기 키워드
 		createPhotoMoods(createPhotographerRequest.getPhotoMoods(), photographer);

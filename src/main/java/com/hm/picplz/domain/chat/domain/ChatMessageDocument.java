@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -18,11 +21,16 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Document(collection = "chat_messages")
+@CompoundIndexes({
+    @CompoundIndex(name = "room_created_idx", def = "{'room_id': 1, 'created_at': -1}"),
+    @CompoundIndex(name = "room_status_idx", def = "{'room_id': 1, 'status': 1}")
+})
 public class ChatMessageDocument {
 
     @Id
     private String id;
 
+    @Indexed
     @Field("room_id")
     private Long roomId;
 

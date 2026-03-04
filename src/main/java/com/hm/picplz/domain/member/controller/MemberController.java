@@ -2,6 +2,7 @@ package com.hm.picplz.domain.member.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,6 +73,15 @@ public class MemberController {
     @GetMapping("/{memberId}/info")
     public MemberDto.MemberInfoResponse getMemberInfo(@PathVariable Long memberId) {
         return memberService.getMemberInfo(memberId);
+    }
+
+    @Operation(summary = "역할 전환 (작가 ↔ 고객)", description = "작가와 고객 역할을 전환합니다. 전환하려는 역할의 프로필이 존재해야 합니다.")
+    @PostMapping("/me/switch-role")
+    public MemberDto.SwitchRoleResponse switchRole(
+        @AuthenticationPrincipal Long memberId,
+        @RequestBody @Valid MemberDto.SwitchRoleRequest request
+    ) {
+        return memberService.switchRole(memberId, request.getTargetRole());
     }
 
 }

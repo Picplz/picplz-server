@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
+import com.hm.picplz.domain.auth.service.AuthService;
 import com.hm.picplz.domain.member.domain.SocialProvider;
 import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hm.picplz.domain.member.repository.MemberRepository;
 import com.hm.picplz.domain.member.domain.Member;
+import com.hm.picplz.domain.member.domain.Role;
 import com.hm.picplz.domain.member.dto.MemberDto;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
@@ -37,6 +40,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PhotographerHelper photographerHelper;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final AuthService authService;
 
     /**
      * 고객, 작가 회원가입 시 멤버 데이터 추가
@@ -55,6 +59,22 @@ public class MemberService {
             .build();
 
         return memberRepository.save(member);
+    }
+
+    /**
+     * social_code로 기존 Member 조회 또는 새로 생성
+     * 작가-고객 전환 시 1개의 Member에 2개의 프로필을 연결하기 위한 메서드
+     */
+    @Transactional
+    public Member findOrCreateMember(MemberDto.CreateMemberRequest createMemberRequest) {
+        // social_code + social_provider로 기존 Member 조회
+        Optional<Member> existingMember = memberRepository.findBySocialCodeAndSocialProvider(
+            createMemberRequest.getSocialCode(),
+            createMemberRequest.getSocialProvider()
+        );
+
+        // 기존 Member가 있으면 재사용, 없으면 새로 생성
+        return existingMember.orElseGet(() -> createMember(createMemberRequest));
     }
 
     /**
@@ -192,5 +212,45 @@ public class MemberService {
      */
     public Member getMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    /**
+     * 회원의 역할 전환 (작가 ↔ 고객)
+     * 전환하려는 역할의 프로필이 이미 존재해야 전환 가능
+     * @param memberId 역할을 전환할 회원 ID
+     * @param targetRole 전환하려는 역할
+     * @return 새로운 JWT 토큰과 프로필 정보
+     */
+    @Transactional
+    public MemberDto.SwitchRoleResponse switchRole(Long memberId, Role targetRole) {
+        // 1. Member 조회
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 2. 전환하려는 역할의 프로필이 있는지 확인
+        if (targetRole == Role.PHOTOGRAPHER) {
+            if (member.getPhotographer() == null) {
+                throw ExceptionFactory.of(MemberErrorCode.PHOTOGRAPHER_PROFILE_NOT_FOUND);
+            }
+        } else if (targetRole == Role.CUSTOMER) {
+            if (member.getCustomer() == null) {
+                throw ExceptionFactory.of(MemberErrorCode.CUSTOMER_PROFILE_NOT_FOUND);
+            }
+        }
+
+        // 3. Member의 role 업데이트
+        member.updateRole(targetRole);
+
+        // 4. 새로운 JWT 토큰 발급
+        JwtTokenResponseDto tokenDto = authService.generateTokens(member);
+
+        // 5. 응답 생성
+        return MemberDto.SwitchRoleResponse.builder()
+            .accessToken(tokenDto.getAccessToken())
+            .refreshToken(tokenDto.getRefreshToken())
+            .currentRole(member.getRole())
+            .hasPhotographerProfile(member.hasPhotographerProfile())
+            .hasCustomerProfile(member.hasCustomerProfile())
+            .build();
     }
 }
