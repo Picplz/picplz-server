@@ -108,4 +108,13 @@ public class AuthService {
 		);
 		return jwtTokenProvider.generateTokenDto(authentication);
 	}
+
+	/**
+	 * Member 정보로 JWT 토큰 생성
+	 * @param member JWT 토큰을 생성할 Member 엔티티
+	 * @return JWT 토큰 응답 DTO
+	 */
+	public JwtTokenResponseDto generateTokens(Member member) {
+		return generateTokenForMember(member);
+	}
 }

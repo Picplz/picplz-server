@@ -3,6 +3,7 @@ package com.hm.picplz.domain.chat.service;
 import com.hm.picplz.domain.chat.domain.ChatMessage;
 import com.hm.picplz.domain.chat.domain.ChatMessageDocument;
 import com.hm.picplz.domain.chat.domain.ChatRoom;
+import com.hm.picplz.domain.chat.domain.MessageStatus;
 import com.hm.picplz.domain.chat.dto.ChatMessageDto;
 import com.hm.picplz.domain.chat.error.ChatErrorCode;
 import com.hm.picplz.domain.chat.repository.ChatMessageRepository;
@@ -12,8 +13,14 @@ import com.hm.picplz.domain.member.service.MemberService;
 import com.hm.picplz.global.error.ExceptionFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +39,8 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MemberService memberService;
+    private final MongoTemplate mongoTemplate;
+    private final CacheManager cacheManager;
 
     /**
      * 메시지 전송
@@ -42,7 +51,7 @@ public class ChatMessageService {
      */
     @Transactional
     public ChatMessageDto.Response sendMessage(ChatMessageDto.SendRequest request, Long senderId) {
-        // 채팅방 조회 및 권한 확인
+        // 채팅방 조회
         ChatRoom chatRoom = chatRoomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> ExceptionFactory.of(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
 
@@ -65,13 +74,9 @@ public class ChatMessageService {
         );
 
         // MongoDB에 저장
-        log.debug("MongoDB 저장 시작: message={}", message);
         ChatMessageDocument document = ChatMessageDocument.from(message);
-        log.debug("Document 변환 완료: document={}", document);
 
         ChatMessageDocument savedDocument = chatMessageRepository.save(document);
-        log.info("MongoDB 저장 성공: savedDocumentId={}, roomId={}, senderId={}",
-                savedDocument.getId(), request.getRoomId(), senderId);
 
         // ChatRoom 메타데이터 업데이트 (MySQL)
         chatRoom.updateLastMessage(message.getContent(), message.getType(), senderId);
@@ -80,8 +85,8 @@ public class ChatMessageService {
         Long otherMemberId = chatRoom.getOtherMemberId(senderId);
         chatRoom.incrementUnreadCount(otherMemberId);
 
-        log.info("메시지 전송 완료: roomId={}, senderId={}, messageId={}",
-                request.getRoomId(), senderId, savedDocument.getId());
+        // 해당 채팅방의 메시지 캐시만 무효화 (첫 페이지 캐시)
+        evictChatMessagesCache(request.getRoomId());
 
         return ChatMessageDto.Response.from(savedDocument.toDomain());
     }
@@ -105,12 +110,18 @@ public class ChatMessageService {
     /**
      * 채팅방의 메시지 목록 조회
      *
+     * 캐싱 전략:
+     * - 첫 페이지(page=0, size=50) 캐싱 (채팅방 입장 시 최근 메시지)
+     * - TTL: 2분 (CacheConfig에서 설정)
+     *
      * @param roomId 채팅방 ID
      * @param memberId 현재 로그인한 Member ID
      * @param page 페이지 번호 (0부터 시작)
      * @param size 페이지 크기
      * @return 메시지 목록
      */
+    @Cacheable(value = "chatMessages", key = "#roomId + '_' + #page + '_' + #size",
+               condition = "#page == 0 and #size == 50")  // 첫 페이지만 캐싱
     public ChatMessageDto.ListResponse getMessages(Long roomId, Long memberId, int page, int size) {
         // 채팅방 조회 및 권한 확인
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
@@ -143,6 +154,7 @@ public class ChatMessageService {
     /**
      * 메시지 읽음 처리
      * 채팅방의 모든 메시지를 읽음 처리하고 unreadCount를 리셋
+     * MongoDB 벌크 업데이트를 사용하여 N번의 쿼리를 1번으로 최적화
      *
      * @param roomId 채팅방 ID
      * @param memberId 현재 로그인한 Member ID
@@ -157,22 +169,38 @@ public class ChatMessageService {
             throw ExceptionFactory.of(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
         }
 
-        // MongoDB: readBy에 memberId가 없는 메시지 조회 및 업데이트
-        List<ChatMessageDocument> unreadMessages = chatMessageRepository
-                .findByRoomIdOrderByCreatedAtDesc(roomId, Pageable.unpaged())
-                .stream()
-                .filter(doc -> !doc.getReadBy().contains(memberId))
-                .collect(Collectors.toList());
+        // MongoDB: readBy에 memberId가 없는 메시지를 벌크 업데이트
+        Query query = new Query();
+        query.addCriteria(Criteria.where("room_id").is(roomId)
+                .and("read_by").ne(memberId));
 
-        for (ChatMessageDocument document : unreadMessages) {
-            document.addReadBy(memberId);
-            chatMessageRepository.save(document);
-        }
+        Update update = new Update();
+        update.addToSet("read_by", memberId);
+        update.set("status", MessageStatus.READ);
+
+        // 벌크 업데이트 실행 (updateMulti: 조건에 맞는 모든 문서 업데이트)
+        long updatedCount = mongoTemplate.updateMulti(query, update, ChatMessageDocument.class).getModifiedCount();
 
         // MySQL: ChatRoom의 unreadCount 리셋
         chatRoom.resetUnreadCount(memberId);
 
-        log.info("메시지 읽음 처리 완료: roomId={}, memberId={}, unreadCount={}",
-                roomId, memberId, unreadMessages.size());
+        log.info("메시지 읽음 처리 완료 (벌크 업데이트): roomId={}, memberId={}, updatedCount={}",
+                roomId, memberId, updatedCount);
+    }
+
+    /**
+     * 특정 채팅방의 메시지 캐시 무효화
+     *
+     * @param roomId 채팅방 ID
+     */
+    private void evictChatMessagesCache(Long roomId) {
+        try {
+            // 첫 페이지 캐시만 무효화 (page=0, size=50)
+            String cacheKey = roomId + "_0_50";
+            cacheManager.getCache("chatMessages").evict(cacheKey);
+            log.debug("채팅 메시지 캐시 무효화: roomId={}, cacheKey={}", roomId, cacheKey);
+        } catch (Exception e) {
+            log.warn("채팅 메시지 캐시 무효화 실패: roomId={}", roomId, e);
+        }
     }
 }
