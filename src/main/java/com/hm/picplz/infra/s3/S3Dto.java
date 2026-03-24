@@ -22,4 +22,16 @@ public class S3Dto {
 			return response;
 		}
 	}
+
+	@Data
+	@NoArgsConstructor
+	public static class DownloadUrlResponse {
+		private String downloadUrl;
+
+		public static DownloadUrlResponse of(String downloadUrl) {
+			DownloadUrlResponse response = new DownloadUrlResponse();
+			response.downloadUrl = downloadUrl;
+			return response;
+		}
+	}
 }
