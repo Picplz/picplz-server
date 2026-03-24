@@ -23,9 +23,9 @@ public class S3PresignedUrlController {
         + "cloud front 추가해두었습니다. 링크는 `d3gsimgp4t78ys.cloudfront.net` 입니다. "
         + "하지만 혹시 몰라서 download url api도 남겨둡니다.")
     @GetMapping("/presigned-download-url")
-    public String getDownloadUrl(@RequestParam("objectKey") String objectKey) {
+    public S3Dto.DownloadUrlResponse getDownloadUrl(@RequestParam("objectKey") String objectKey) {
         URL url = s3PresignedUrlService.generateDownloadUrl(objectKey);
-        return url.toString();
+        return S3Dto.DownloadUrlResponse.of(url.toString());
     }
 
     @Operation(summary = "업로드용 presignedURL 발급", description = "응답값의 objectKey를 프로필 이미지 수정 / 포트폴리오 이미지 등록 요청 값에 포함해주시면 됩니다.")
