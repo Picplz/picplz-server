@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -58,8 +57,6 @@ public class ReviewServiceImpl implements ReviewService {
         // 리뷰 사진 일괄 조회
         List<ReviewPhoto> photos = reviewPhotoRepository.findByReviewIdIn(reviewIds);
 
-//        Map<Long, List<ReviewPhoto>> photosByReviewId = photos.stream()
-//                .collect(Collectors.groupingBy(photo -> photo.getReview().getId()));
         Map<Long, List<ReviewPhoto>> photosByReviewId = new HashMap<>();
 
         for (ReviewPhoto photo : photos) {

@@ -33,12 +33,6 @@ public class PhotographerController {
         return photographerService.createPhotographer(createPhotographerRequest);
     }
 
-    @Operation(summary = "작가 로그인")
-    @PostMapping("/login")
-    public void loginPhotographer(@AuthenticationPrincipal Long memberId) {
-        photographerService.cachePhotographerExistence(memberId);
-    }
-
     @PhotographerOnly
     @Operation(summary = "사진 감성 해시 태그 생성")
     @PostMapping("/photo-mood")

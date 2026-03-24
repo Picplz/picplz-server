@@ -43,6 +43,7 @@ public class AuthService {
 						.socialProvider(member.getSocialProvider())
 						.socialEmail(member.getSocialEmail())
 						.token(generateTokenForMember(member))
+						.currentRole(member.getRole())
 						.build())
 				.orElseGet(() -> AuthDto.LoginResponse.builder()
 						.isRegistered(false)
@@ -59,6 +60,7 @@ public class AuthService {
 						.socialCode(value.getSocialCode())
 						.socialProvider(value.getSocialProvider())
 						.token(generateTokenForMember(value))
+						.currentRole(value.getRole())
 						.build())
 				.orElseGet(() -> AuthDto.LoginResponse.builder()
 						.isRegistered(false)
@@ -116,5 +118,12 @@ public class AuthService {
 	 */
 	public JwtTokenResponseDto generateTokens(Member member) {
 		return generateTokenForMember(member);
+	}
+
+	/**
+	 * 리프레시 토큰으로 액세스 토큰 재발급
+	 */
+	public JwtTokenResponseDto refreshToken(String refreshToken) {
+		return jwtTokenProvider.refreshAccessToken(refreshToken);
 	}
 }
