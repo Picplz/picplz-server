@@ -6,6 +6,7 @@ import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
 import com.hm.picplz.domain.member.domain.SocialProvider;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,13 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AuthDto {
+
+	@Data
+	@NoArgsConstructor
+	public static class RefreshRequest {
+		@NotBlank
+		private String refreshToken;
+	}
 
 	@Data
 	@NoArgsConstructor

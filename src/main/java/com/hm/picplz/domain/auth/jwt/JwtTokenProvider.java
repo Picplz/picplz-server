@@ -16,6 +16,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.hm.picplz.domain.auth.error.AuthErrorCode;
+import com.hm.picplz.global.error.BaseErrorException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -45,7 +47,7 @@ public class JwtTokenProvider implements InitializingBean {
         this.redisTemplate = redisTemplate;
         this.secret = secret;
         this.accessTokenValidityInMilliseconds = tokenValidityInSeconds * 30; // 60,000ms : 1m(0.001d), 60000 * 30 = 30m
-        this.refreshTokenValidityInMilliseconds = tokenValidityInSeconds * 60; // 60,000ms : 1m(0.001d), 60000 * 60 * 24 * 2 = 2d
+        this.refreshTokenValidityInMilliseconds = tokenValidityInSeconds * 60 * 24 * 2; // 60,000ms : 1m(0.001d), 60000 * 60 * 24 * 2 = 2d
     }
 
     // 빈이 생성되고 주입을 받은 후에 secret값을 Base64 Decode해서 key 변수에 할당하기 위해
@@ -115,6 +117,41 @@ public class JwtTokenProvider implements InitializingBean {
         Long memberId = Long.valueOf(claims.getSubject());
 
         return new UsernamePasswordAuthenticationToken(memberId, token, authorities);
+    }
+
+    public JwtTokenResponseDto refreshAccessToken(String refreshToken) {
+        Claims claims;
+        try {
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            throw new BaseErrorException(AuthErrorCode.EXPIRED_REFRESH_TOKEN);
+        } catch (Exception e) {
+            throw new BaseErrorException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        String memberId = claims.getSubject();
+
+        String storedToken = redisTemplate.opsForValue().get("token : " + memberId);
+        if (storedToken == null) {
+            throw new BaseErrorException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+        if (!storedToken.equals(refreshToken)) {
+            throw new BaseErrorException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
+        }
+
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .toList();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                Long.valueOf(memberId), null, authorities);
+
+        return generateTokenDto(authentication);
     }
 
     // 토큰의 유효성 검증을 수행

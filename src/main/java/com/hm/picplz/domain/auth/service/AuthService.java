@@ -117,4 +117,11 @@ public class AuthService {
 	public JwtTokenResponseDto generateTokens(Member member) {
 		return generateTokenForMember(member);
 	}
+
+	/**
+	 * 리프레시 토큰으로 액세스 토큰 재발급
+	 */
+	public JwtTokenResponseDto refreshToken(String refreshToken) {
+		return jwtTokenProvider.refreshAccessToken(refreshToken);
+	}
 }
