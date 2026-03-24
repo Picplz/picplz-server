@@ -120,13 +120,6 @@ public class PhotographerDto {
 
     @Data
     @NoArgsConstructor
-    public static class CreatePhotographerResponse {
-        private Long memberId;
-        private Long photographerId;
-    }
-
-    @Data
-    @NoArgsConstructor
     public static class ActiveAreaRequest {
         private Long code;
         private Integer priority;
