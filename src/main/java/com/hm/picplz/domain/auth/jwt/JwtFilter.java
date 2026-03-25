@@ -1,5 +1,6 @@
 package com.hm.picplz.domain.auth.jwt;
 
+import com.hm.picplz.domain.auth.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +21,7 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 	public static final String AUTHORIZATION_HEADER = "Authorization";
 	private final JwtTokenProvider jwtTokenProvider;
-
+	private final TokenBlacklistService tokenBlacklistService;
 	private final List<String> permitAllUrls; // 권한 검증 제외 경로
 	private boolean isPermitAll(String uri) {
 		return permitAllUrls.stream().anyMatch(uri::startsWith);
@@ -37,6 +38,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		if (!isPermitAll(requestURI)) {
 			if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
+
+				// 블랙리스트에 등록된 토큰차단
+				// 이전 토큰으로 API 호출하는 것을 방지
+				if (tokenBlacklistService.isBlacklisted(jwt)) {
+					log.warn("블랙리스트 토큰 접근 차단 - URI: {}", requestURI);
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					return;
+				}
+
 				Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 				log.debug("인증 성공 - 사용자: {}, URI: {}", authentication.getName(), requestURI);

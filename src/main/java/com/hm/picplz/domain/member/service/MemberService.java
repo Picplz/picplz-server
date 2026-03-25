@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import com.hm.picplz.domain.auth.jwt.JwtTokenProvider;
 import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
 import com.hm.picplz.domain.auth.service.AuthService;
+import com.hm.picplz.domain.auth.service.TokenBlacklistService;
 import com.hm.picplz.domain.member.domain.SocialProvider;
 import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,8 @@ public class MemberService {
     private final PhotographerHelper photographerHelper;
     private final RedisTemplate<String, Object> redisTemplate;
     private final AuthService authService;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * 고객, 작가 회원가입 시 멤버 데이터 추가
@@ -169,20 +173,30 @@ public class MemberService {
     }
 
     /**
-     * 닉네임 패턴 및 중복 여부 확인
-     * @param nickname 확인하려는 닉네임
+     * 닉네임 패턴 검사
+     * - 앞뒤 공백 불가, 한글/영문/숫자 2~15자, 이모티콘·특수문자 불가
      */
-    public void checkNickname(String nickname) {
-        /*
-        * - 닉네임의 처음과 마지막 부분 공백 사용 불가
-        * - 한글, 영문, 숫자 입력 가능 (2-15자)
-        * - 이모티콘, 특수문자 사용 불가
-        * - 중복 닉네임 불가
-        * */
-        if (!NICKNAME_PATTERN.matcher(nickname).matches()) throw ExceptionFactory.of(MemberErrorCode.NOT_VALID_NICKNAME);
+    public void validateNicknameFormat(String nickname) {
+        if (!NICKNAME_PATTERN.matcher(nickname).matches()) {
+            throw ExceptionFactory.of(MemberErrorCode.NOT_VALID_NICKNAME);
+        }
+    }
+
+    /**
+     * 닉네임 중복 검사
+     */
+    public void checkNicknameDuplicate(String nickname) {
         if (memberRepository.existsByNicknameIs(nickname)) {
             throw ExceptionFactory.of(MemberErrorCode.DUPLICATE_NICKNAME);
         }
+    }
+
+    /**
+     * 닉네임 패턴 및 중복 여부 확인 (내부 공통 사용)
+     */
+    public void checkNickname(String nickname) {
+        validateNicknameFormat(nickname);
+        checkNicknameDuplicate(nickname);
     }
 
     /**
@@ -217,12 +231,13 @@ public class MemberService {
     /**
      * 회원의 역할 전환 (작가 ↔ 고객)
      * 전환하려는 역할의 프로필이 이미 존재해야 전환 가능
-     * @param memberId 역할을 전환할 회원 ID
+     * @param memberId  역할을 전환할 회원 ID
      * @param targetRole 전환하려는 역할
+     * @param authHeader 현재 요청의 Authorization 헤더 (기존 토큰 무효화에 사용)
      * @return 새로운 JWT 토큰과 프로필 정보
      */
     @Transactional
-    public MemberDto.SwitchRoleResponse switchRole(Long memberId, Role targetRole) {
+    public MemberDto.SwitchRoleResponse switchRole(Long memberId, Role targetRole, String authHeader) {
         // 1. Member 조회
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> ExceptionFactory.of(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -238,13 +253,22 @@ public class MemberService {
             }
         }
 
-        // 3. Member의 role 업데이트
+        // 3. 역할 전환 시 기존 토큰 즉시 무효화
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String oldToken = authHeader.substring(7);
+            long remaining = jwtTokenProvider.getRemainingExpiration(oldToken);
+            if (remaining > 0) {
+                tokenBlacklistService.blacklistToken(oldToken, remaining);
+            }
+        }
+
+        // 4. Member의 role 업데이트
         member.updateRole(targetRole);
 
-        // 4. 새로운 JWT 토큰 발급
+        // 5. 새로운 JWT 토큰 발급
         JwtTokenResponseDto tokenDto = authService.generateTokens(member);
 
-        // 5. 응답 생성
+        // 6. 응답 생성
         return MemberDto.SwitchRoleResponse.builder()
             .accessToken(tokenDto.getAccessToken())
             .refreshToken(tokenDto.getRefreshToken())
