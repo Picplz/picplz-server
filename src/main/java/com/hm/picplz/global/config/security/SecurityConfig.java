@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,17 +20,20 @@ import com.hm.picplz.domain.auth.jwt.JwtAccessDeniedHandler;
 import com.hm.picplz.domain.auth.jwt.JwtAuthenticationEntryPoint;
 import com.hm.picplz.domain.auth.jwt.JwtFilter;
 import com.hm.picplz.domain.auth.jwt.JwtTokenProvider;
+import com.hm.picplz.domain.auth.service.TokenBlacklistService;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final TokenBlacklistService tokenBlacklistService;
 
 	/* 권한 제외 대상 */
 	private final List<String> permitAllUrls; // 주입
@@ -55,7 +59,7 @@ public class SecurityConfig {
 				.authenticationEntryPoint(jwtAuthenticationEntryPoint)
 				.accessDeniedHandler(jwtAccessDeniedHandler)
 			)
-			.addFilterBefore(new JwtFilter(jwtTokenProvider, permitAllUrls), UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(new JwtFilter(jwtTokenProvider, tokenBlacklistService, permitAllUrls), UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(authz -> authz
 				.requestMatchers(permitAllUrls.toArray(String[]::new)).permitAll()
 				.requestMatchers(permitAdminUrl).hasRole("ADMIN")

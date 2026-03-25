@@ -8,9 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +25,7 @@ public class ReviewController {
             "별점 1~2 : 리뷰 선택사항" + " / 별점 3~5 : 최소 10자 이상 필수입력" + "\n" +
             " / 사진 업로드 10초과 제한")
     @PostMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ReviewDetailResponse createReview(
             @AuthenticationPrincipal Long memberId,
             @Valid @RequestBody CreateReviewRequest request) {
@@ -43,6 +42,7 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 수정", description = "작성한 리뷰를 수정합니다. (작성자만 가능)")
     @PutMapping("/{reviewId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ReviewDetailResponse updateReview(
             @AuthenticationPrincipal Long memberId,
             @Parameter(description = "리뷰 ID", required = true)
@@ -53,6 +53,7 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 삭제", description = "작성한 리뷰를 삭제합니다. (작성자만 가능)")
     @DeleteMapping("/{reviewId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public void deleteReview(
             @AuthenticationPrincipal Long memberId,
             @Parameter(description = "리뷰 ID", required = true)

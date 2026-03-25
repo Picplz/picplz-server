@@ -171,4 +171,25 @@ public class JwtTokenProvider implements InitializingBean {
         return false;
     }
 
+    /**
+     * 토큰의 남은 만료 시간 반환
+     */
+    public long getRemainingExpiration(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            long remainingMs = claims.getExpiration().getTime() - System.currentTimeMillis();
+            return Math.max(remainingMs, 0);
+        } catch (ExpiredJwtException e) {
+            return 0;
+        } catch (Exception e) {
+            log.error("토큰 만료 시간 파싱 실패: {}", e.getMessage());
+            return 0;
+        }
+    }
+
 }

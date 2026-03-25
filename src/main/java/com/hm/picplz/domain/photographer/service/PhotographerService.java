@@ -1,13 +1,11 @@
 package com.hm.picplz.domain.photographer.service;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.global.common.service.WebClientService;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,10 +41,6 @@ public class PhotographerService {
 	private final FollowingRepository followingRepository;
 	private final ActiveAreaRepository activeAreaRepository;
 	private final AreaRepository areaRepository;
-
-	private final RedisTemplate<String, Object> redisTemplate;
-
-	private static final String PHOTOGRAPHER_REDIS_KEY = "photographer:";
 
 	/**
 	 * 작가 회원가입 메서드
@@ -93,42 +87,6 @@ public class PhotographerService {
 		int followersCount = getFollowers(photographer);
 		YesNo isFollowing = isFollowing(photographer, memberId);
 		return PhotographerDto.Detail.of(photographer, followersCount, isFollowing);
-	}
-
-	/**
-	 * 작가 권한 확인을 위해 캐시 확인
-	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
-	 * @return 작가의 권한 확인 결과가 redis에 존재하는지
-	 */
-	public Boolean getCachedPhotographerExistence(Long memberId) {
-		return (Boolean) redisTemplate.opsForValue().get(PHOTOGRAPHER_REDIS_KEY + memberId);
-	}
-
-	/**
-	 * 작가인 경우, redis에 캐시로 저장해 작가 권한을 빠르게 확인하도록 한다.
-	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
-	 * @return 작가인지 아닌지 반환 (작가라면 redis에 캐싱)
-	 */
-	public boolean cachePhotographerExistence(Long memberId) {
-		// 1. 픽플즈에 존재하는 회원인가?
-		memberService.getMemberById(memberId);
-		// 2. 작가인가?
-		boolean exists = photographerRepository.existsByMemberId(memberId);
-		redisTemplate.opsForValue().set(PHOTOGRAPHER_REDIS_KEY + memberId, exists, Duration.ofMinutes(30));
-		return exists;
-	}
-
-	/**
-	 * member Id로 작가인지 확인하고, 캐시가 없다면 작가 여부를 MySQL에서 확인하고 나서 반환한다.
-	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
-	 * @return 작가인가 아닌가
-	 */
-	public boolean checkAndCachePhotographer(Long memberId) {
-		Boolean cached = getCachedPhotographerExistence(memberId);
-		if (cached != null) {
-			return cached;
-		}
-		return cachePhotographerExistence(memberId);
 	}
 
 	/**

@@ -2,10 +2,10 @@ package com.hm.picplz.domain.photographer.controller;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.hm.picplz.domain.photographer.annotation.PhotographerOnly;
 import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.service.PhotographerService;
@@ -33,7 +33,7 @@ public class PhotographerController {
         return photographerService.createPhotographer(createPhotographerRequest);
     }
 
-    @PhotographerOnly
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "사진 감성 해시 태그 생성")
     @PostMapping("/photo-mood")
     public void addPhotoMood(
@@ -42,7 +42,7 @@ public class PhotographerController {
         photographerService.addPhotoMood(addPhotoMoodRequestDto, memberId);
     }
 
-    @PhotographerOnly
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "사진 감성 해시 태그 삭제")
     @DeleteMapping("/photo-mood")
     public void deletePhotoMood(@AuthenticationPrincipal Long memberId,
@@ -75,6 +75,7 @@ public class PhotographerController {
         return photographerService.getPhotographersByActiveArea(memberId);
     }
 
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "작가의 주 활동지역 변경")
     @PutMapping("/active-area")
     public PhotographerDto.UpdateActiveAreaResponse updateActiveArea(
