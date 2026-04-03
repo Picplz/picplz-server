@@ -10,7 +10,7 @@ import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
 import com.hm.picplz.domain.auth.service.AuthService;
 import com.hm.picplz.domain.auth.service.TokenBlacklistService;
 import com.hm.picplz.domain.member.domain.SocialProvider;
-import com.hm.picplz.domain.photographer.helper.PhotographerHelper;
+import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.GeoResult;
@@ -28,6 +28,7 @@ import com.hm.picplz.domain.member.domain.Role;
 import com.hm.picplz.domain.member.dto.MemberDto;
 import com.hm.picplz.domain.member.exception.MemberErrorCode;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
+import com.hm.picplz.global.common.entity.YesNo;
 import com.hm.picplz.global.error.ExceptionFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class MemberService {
     private static final String GEO_KEY = "members:locations";
 
     private final MemberRepository memberRepository;
-    private final PhotographerHelper photographerHelper;
+    private final PhotographerRepository photographerRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final AuthService authService;
     private final TokenBlacklistService tokenBlacklistService;
@@ -116,7 +117,7 @@ public class MemberService {
 
     public void updateLocation(MemberDto.UpdateMemberLocationRequest request) {
         redisTemplate.opsForGeo().add(GEO_KEY, new RedisGeoCommands.GeoLocation<>(
-                request.getMemberId(), new Point(request.getLongitude(), request.getLatitude())));
+                String.valueOf(request.getMemberId()), new Point(request.getLongitude(), request.getLatitude())));
 
         // TODO: role이 photographer인지 customer인지 파악 후 부가 정보로 추가 + 활동중 여부
     }
@@ -128,6 +129,7 @@ public class MemberService {
      * @param distance 반경 (단위: km)
      * @return 검색된 데이터 목록
      */
+    @Transactional
     public List<PhotographerDto.Card> findPhotographersWithinRadius(double longitude, double latitude, long distance) {
         Circle circle = new Circle(new Point(longitude, latitude), distance * 1000d);    // 반경 (단위: m)
 
@@ -145,8 +147,18 @@ public class MemberService {
             geoResults != null ? geoResults.getContent() : Collections.emptyList();
 
         // 현재 위치 반경 기준 활동중인 작가들
-        List<PhotographerDto.Card> list =
-                photographerHelper.getPhotographerCardByMemberGeoInfo(results);
+        List<PhotographerDto.Card> list = results.stream()
+                .filter(result -> result.getContent().getName() != null)
+                .map(result -> {
+                    Long memberId = Long.parseLong(result.getContent().getName().toString());
+                    return photographerRepository.findByMemberId(memberId)
+                            .filter(p -> p.getActive() == YesNo.Y)
+                            .map(p -> PhotographerDto.Card.of(p, (long) result.getDistance().getValue()))
+                            .orElse(null);
+                })
+                .filter(card -> card != null)
+                .limit(5)
+                .toList();
 
         if(list.isEmpty()) {
             //TODO: 관심 고객 많은 작가 return
