@@ -36,5 +36,11 @@ public class Following extends BaseEntity {
         this.following = following;
         this.follower = follower;
     }
-    // factory method
+
+    public static Following of(Member following, Member follower) {
+        return Following.builder()
+                .following(following)
+                .follower(follower)
+                .build();
+    }
 }

@@ -18,7 +18,7 @@ public enum MemberErrorCode implements BaseErrorCode {
 
     /* 중복 에러*/
     DUPLICATE_NICKNAME(BAD_REQUEST, "MEMBER_400_1", "이미 사용중인 닉네임입니다."),
-    NOT_VALID_NICKNAME(BAD_REQUEST, "MEMBER_400_2", "사용 불가능한 닉네임입니다."),
+    NOT_VALID_NICKNAME(BAD_REQUEST, "MEMBER_400_2", "닉네임은 한글,영문,숫자만 사용 가능하며, 2~15자여야 합니다."),
 
     /* 프로필 관련 */
     PHOTOGRAPHER_PROFILE_NOT_FOUND(NOT_FOUND, "MEMBER_404_3", "작가 프로필이 없습니다. 작가 등록을 먼저 진행해주세요."),

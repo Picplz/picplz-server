@@ -24,6 +24,8 @@ import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
 import com.hm.picplz.domain.photographer.repository.ActiveAreaRepository;
 import com.hm.picplz.domain.area.repository.AreaRepository;
+import com.hm.picplz.domain.photographer.dto.DefaultCameraDto;
+import com.hm.picplz.domain.photographer.repository.DefaultCameraRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.global.common.entity.YesNo;
 import com.hm.picplz.global.error.ExceptionFactory;
@@ -38,6 +40,7 @@ public class PhotographerService {
 	private final PhotoMoodService photoMoodService;
 	private final WebClientService webClientService;
 	private final PhotographerRepository photographerRepository;
+	private final DefaultCameraRepository defaultCameraRepository;
 	private final FollowingRepository followingRepository;
 	private final ActiveAreaRepository activeAreaRepository;
 	private final AreaRepository areaRepository;
@@ -82,6 +85,7 @@ public class PhotographerService {
 	 * @param memberId 조회를 시도하는 회원 정보(팔로우 여부를 위해)
 	 * @return 작가 상세 정보
 	 */
+	@Transactional(readOnly = true)
 	public PhotographerDto.Detail getPhotographerDetail(Long photographerId, Long memberId) {
 		Photographer photographer = getPhotographerByPhotographerId(photographerId);
 		int followersCount = getFollowers(photographer);
@@ -155,6 +159,10 @@ public class PhotographerService {
 	public Photographer getPhotographerByMemberId(Long memberId) {
 		return photographerRepository.findByMemberId(memberId)
 				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+	}
+
+	public List<DefaultCameraDto.CameraInfo> getCameras() {
+		return defaultCameraRepository.findAll().stream().map(DefaultCameraDto.CameraInfo::from).toList();
 	}
 
 	/**
