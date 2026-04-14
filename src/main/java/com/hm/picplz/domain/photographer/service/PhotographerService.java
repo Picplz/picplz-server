@@ -85,6 +85,7 @@ public class PhotographerService {
 	 * @param memberId 조회를 시도하는 회원 정보(팔로우 여부를 위해)
 	 * @return 작가 상세 정보
 	 */
+	@Transactional(readOnly = true)
 	public PhotographerDto.Detail getPhotographerDetail(Long photographerId, Long memberId) {
 		Photographer photographer = getPhotographerByPhotographerId(photographerId);
 		int followersCount = getFollowers(photographer);
