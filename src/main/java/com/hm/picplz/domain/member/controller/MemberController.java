@@ -2,6 +2,7 @@ package com.hm.picplz.domain.member.controller;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -54,6 +55,7 @@ public class MemberController {
     }
 
     @Operation(summary = "주변 작가 불러오기")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping(value = "/location/nearby")
     public List<PhotographerDto.Card> loadNearbyPhotographers(
             @RequestParam double longitude,
