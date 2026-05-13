@@ -8,6 +8,7 @@ import com.hm.picplz.domain.member.dto.MemberSignupInfo;
 import com.hm.picplz.domain.photographer.domain.ActiveArea;
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.domain.photographer.domain.Photographer;
+import com.hm.picplz.domain.photographer.domain.PhotographerCamera;
 import com.hm.picplz.global.common.entity.YesNo;
 
 import jakarta.validation.constraints.NotBlank;
@@ -58,6 +59,7 @@ public class PhotographerDto {
         private YesNo active;
         private String instagram;
         private List<String> photoMoods;
+        private List<CameraResponse> cameras;
         private int followers;
         private YesNo isFollowing;  // 팔로우 여부
 
@@ -78,10 +80,14 @@ public class PhotographerDto {
                     .map(ActiveAreaResponse::from)
                     .sorted(Comparator.comparingInt(ActiveAreaResponse::getPriority))
                     .toList();
+            detail.introduction = photographer.getMember().getIntroduction();
             detail.active = photographer.getActive();
             detail.instagram = photographer.getMember().getInstagram();
             detail.photoMoods = photographer.getPhotoMoods().stream()
                     .map(PhotoMood::getContent)
+                    .toList();
+            detail.cameras = photographer.getCameras().stream()
+                    .map(CameraResponse::from)
                     .toList();
 
             return detail;
@@ -95,7 +101,7 @@ public class PhotographerDto {
         private String nickname;
         private String socialEmail;
         private SocialProvider socialProvider;  // 카카오 or 애플
-        private String socialCode;
+        private String socialCode;  
         private String profileImage;
 
         private List<String> photoMoods;
@@ -149,6 +155,24 @@ public class PhotographerDto {
         private String brand; // 직접 입력 가능, 애플, 삼성, 소니
         private String name; // 직접 입력 가능, 모델명
         private String cameraType; // DSLR, 필름 등등...
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class CameraResponse {
+        private String type;
+        private String brand;
+        private String name;
+        private String cameraType;
+
+        public static CameraResponse from(PhotographerCamera camera) {
+            CameraResponse response = new CameraResponse();
+            response.type = camera.getType();
+            response.brand = camera.getBrand();
+            response.name = camera.getName();
+            response.cameraType = camera.getCameraType();
+            return response;
+        }
     }
 
     @Data
