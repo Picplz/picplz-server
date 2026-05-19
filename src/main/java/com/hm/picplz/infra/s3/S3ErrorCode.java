@@ -14,7 +14,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum S3ErrorCode implements BaseErrorCode {
 
-	WRONG_IMAGE_FILE_TYPE(BAD_REQUEST, "IMAGE_400_1", "png, jpeg 파일을 업로드 해주세요.")
+	WRONG_IMAGE_FILE_TYPE(BAD_REQUEST, "IMAGE_400_1", "png, jpeg 파일을 업로드 해주세요."),
+	TOO_MANY_IMAGES(BAD_REQUEST, "IMAGE_400_2", "이미지는 최대 5장까지 전송 가능합니다."),
+	EMPTY_IMAGE_LIST(BAD_REQUEST, "IMAGE_400_3", "파일명 목록이 비어있습니다.")
 
 	;
 
