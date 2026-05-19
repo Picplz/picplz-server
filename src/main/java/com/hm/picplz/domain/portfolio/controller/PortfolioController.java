@@ -26,6 +26,15 @@ public class PortfolioController {
         return portfolioService.createPortfolio(memberId, request);
     }
 
+    @Operation(summary = "작가별 포트폴리오 목록 조회", description = "default size=9")
+    @GetMapping
+    public PortfolioDto.PortfolioListResponse getPortfoliosByPhotographer(
+            @RequestParam Long photographerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "9") int size) {
+        return portfolioService.getPortfoliosByPhotographer(photographerId, page, size);
+    }
+
     @Operation(summary = "포트폴리오 단일 조회")
     @GetMapping("/{portfolioId}")
     public PortfolioDto.PortfolioResponse getPortfolio(
