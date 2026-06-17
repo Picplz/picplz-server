@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.hm.picplz.domain.reservation.dto.ReservationDto;
 import com.hm.picplz.domain.reservation.service.ReservationService;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +60,7 @@ public class PhotographerController {
         photographerService.deletePhotoMood(deletePhotoMoodRequestDto, memberId);
     }
 
+    @Schema(name = "PhotographerDetailResponse")
     @Operation(summary = "작가 한명 정보 불러오기")
     @GetMapping("/{photographerId}/info")
     public PhotographerDto.Detail getPhotographerInfo(
@@ -101,22 +103,4 @@ public class PhotographerController {
         return reservationService.findReservationsByPhotographerId(memberId);
     }
 
-    @Operation(summary = "작가의 예약 승인")
-    @PatchMapping("/reservations/{reservationId}/accept")
-    public void approveReservationsByPhotographerId(
-            @PathVariable(name = "reservationId") Long reservationId
-    ) {
-        log.info("작가의 예약 내역 승인");
-        reservationService.acceptReservationById(reservationId);
-    }
-
-    @Operation(summary = "작가의 예약 거절")
-    @PatchMapping("/reservations/{reservationId}/reject")
-    public ReservationDto.RejectReservationResponse declineReservationsByPhotographerId(
-            @PathVariable(name = "reservationId") Long reservationId,
-            @RequestBody ReservationDto.RejectReservationRequest rejectReservationRequest
-    ) {
-        log.info("작가의 예약 내역 거절");
-        return reservationService.rejectReservationById(reservationId, rejectReservationRequest);
-    }
 }

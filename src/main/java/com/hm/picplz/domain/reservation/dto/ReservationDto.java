@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,6 +60,7 @@ public class ReservationDto {
 
     @Data
     @NoArgsConstructor
+    @Schema(name = "ReservationDetailResponse")
     public static class Detail {
         private Long reservationId;
         private String packageName;
@@ -96,12 +98,47 @@ public class ReservationDto {
     @Data
     @NoArgsConstructor
     public static class RejectReservationResponse {
+        private Long reservationId;
+        private ReservationStatus status;
         private String rejectReason;
+        private LocalDateTime statusChangedAt;
 
-        public static RejectReservationResponse of(RejectReservationRequest rejectReservationRequest) {
+        public static RejectReservationResponse of(Reservation reservation) {
             RejectReservationResponse rejectReservationResponse = new RejectReservationResponse();
-            rejectReservationResponse.rejectReason = rejectReservationRequest.rejectReason;
+            rejectReservationResponse.reservationId = reservation.getId();
+            rejectReservationResponse.status = reservation.getStatus();
+            rejectReservationResponse.rejectReason = reservation.getRejectReason();
+            rejectReservationResponse.statusChangedAt = reservation.getStatusChangedAt();
             return rejectReservationResponse;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ConfirmReservationRequest {
+        @Schema(type = "string", example = "2026-01-27", format = "date")
+        private LocalDate reservedDate;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+        @Schema(type = "string", example = "15:30", pattern = "HH:mm")
+        private LocalTime reservedTime;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ConfirmReservationResponse {
+        private Long reservationId;
+        private ReservationStatus status;
+        private LocalDateTime reservedDateTime;
+        private LocalDateTime statusChangedAt;
+
+        public static ConfirmReservationResponse of(Reservation reservation) {
+            ConfirmReservationResponse confirmReservationResponse = new ConfirmReservationResponse();
+            confirmReservationResponse.reservationId = reservation.getId();
+            confirmReservationResponse.status = reservation.getStatus();
+            confirmReservationResponse.reservedDateTime = reservation.getReservationTime();
+            confirmReservationResponse.statusChangedAt = reservation.getStatusChangedAt();
+            return confirmReservationResponse;
         }
     }
 }

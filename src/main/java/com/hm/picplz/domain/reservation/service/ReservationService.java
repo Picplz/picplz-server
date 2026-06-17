@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -42,7 +43,10 @@ public class ReservationService {
         return ReservationDto.ReservationId.of(savedReservation.getId());
     }
 
-    public ReservationDto.Detail findReservationDetailById(Long reservationId) {
+    public ReservationDto.Detail findReservationDetailById(Long memberId, Long reservationId) {
+        photographerRepository.findByMemberId(memberId)
+                .orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> ExceptionFactory.of(ReservationErrorCode.RESERVATION_NOT_FOUND));
         return ReservationDto.Detail.of(reservation);
@@ -59,18 +63,34 @@ public class ReservationService {
     }
 
     @Transactional
-    public void acceptReservationById(Long reservationId) {
+    public void acceptReservationById(Long memberId, Long reservationId) {
+        photographerRepository.findByMemberId(memberId)
+                .orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> ExceptionFactory.of(ReservationErrorCode.RESERVATION_NOT_FOUND));
         reservation.accept();
     }
 
     @Transactional
-    public ReservationDto.RejectReservationResponse rejectReservationById(Long reservationId,
+    public ReservationDto.RejectReservationResponse rejectReservationById(Long memberId, Long reservationId,
                                                                           ReservationDto.RejectReservationRequest rejectReservationRequest) {
+        photographerRepository.findByMemberId(memberId)
+                .orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> ExceptionFactory.of(ReservationErrorCode.RESERVATION_NOT_FOUND));
-        reservation.reject();
-        return ReservationDto.RejectReservationResponse.of(rejectReservationRequest);
+        reservation.reject(rejectReservationRequest.getRejectReason());
+        return ReservationDto.RejectReservationResponse.of(reservation);
+    }
+
+    @Transactional
+    public ReservationDto.ConfirmReservationResponse confirmReservationById(Long memberId, Long reservationId,
+                                                                          ReservationDto.ConfirmReservationRequest confirmReservationRequest) {
+        customerRepository.findByMemberId(memberId)
+                .orElseThrow(() -> ExceptionFactory.of(CustomerErrorCode.CUSTOMER_NOT_FOUND));
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> ExceptionFactory.of(ReservationErrorCode.RESERVATION_NOT_FOUND));
+        reservation.confirm(LocalDateTime.of(confirmReservationRequest.getReservedDate(), confirmReservationRequest.getReservedTime()));
+        return ReservationDto.ConfirmReservationResponse.of(reservation);
     }
 }

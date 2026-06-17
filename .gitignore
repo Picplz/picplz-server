@@ -34,9 +34,7 @@ build/
 !**/src/main/**
 !**/src/test/**
 docker-compose.yml
-docker-compose.override.yml
 Dockerfile.dev
-src/main/java/Dockerfile.dev
 
 ### STS ###
 .apt_generated

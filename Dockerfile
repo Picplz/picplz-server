@@ -1,5 +1,5 @@
 # Step 1: Build the application
-FROM openjdk:17-jdk-slim AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -19,10 +19,10 @@ COPY src src
 RUN chmod +x ./gradlew
 
 # Build the Spring Boot application using Gradle
-RUN ./gradlew bootJar
+RUN sh ./gradlew bootJar -x test
 
 # Step 2: Create a minimal image with only the JAR file
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre
 
 # Set the working directory inside the container
 WORKDIR /picplz

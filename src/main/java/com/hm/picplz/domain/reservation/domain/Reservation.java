@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
 @Entity
 @Getter
@@ -29,7 +30,7 @@ public class Reservation extends BaseEntity {
     @Column(name = "reservation_id", updatable = false)
     private Long id;
 
-    private String packageName;   // enum
+    private String packageName;
 
     private int productPrice;   // 상품 금액
 
@@ -50,6 +51,11 @@ public class Reservation extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReservationStatus status;
+
+    private LocalDateTime statusChangedAt;
+
+    @Column(length = 500)
+    private String rejectReason;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -100,17 +106,31 @@ public class Reservation extends BaseEntity {
     }
 
     public void accept() {
-        if (this.status != ReservationStatus.PENDING) {
-            throw ExceptionFactory.of(ReservationErrorCode.RESERVATION_STATUS_INVALID);
-        }
+        validatePending();
+        this.statusChangedAt = LocalDateTime.now();
         this.status = ReservationStatus.ACCEPTED;
     }
 
-    public void reject() {
+    public void reject(String rejectReason) {
+        validatePending();
+        this.statusChangedAt = LocalDateTime.now();
+        this.status = ReservationStatus.REJECTED;
+        this.rejectReason = rejectReason;
+    }
+
+    public void confirm(LocalDateTime confirmedDateTime) {
+        if (this.status != ReservationStatus.ACCEPTED) {
+            throw ExceptionFactory.of(ReservationErrorCode.RESERVATION_STATUS_INVALID);
+        }
+        this.statusChangedAt = LocalDateTime.now();
+        this.reservationTime = confirmedDateTime;
+        this.status = ReservationStatus.CONFIRMED;
+    }
+
+    private void validatePending() {
         if (this.status != ReservationStatus.PENDING) {
             throw ExceptionFactory.of(ReservationErrorCode.RESERVATION_STATUS_INVALID);
         }
-        this.status = ReservationStatus.REJECTED;
     }
 
 

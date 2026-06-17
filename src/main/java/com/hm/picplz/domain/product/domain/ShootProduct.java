@@ -45,7 +45,7 @@ public class ShootProduct extends BaseEntity {
     private int amount;
 
     @NotNull
-    private YesNo editedYn;
+    private YesNo editedYn; // 보정 유무
 
     @Positive
     @NotNull
