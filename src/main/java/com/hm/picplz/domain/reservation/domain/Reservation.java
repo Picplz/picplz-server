@@ -130,7 +130,7 @@ public class Reservation extends BaseEntity {
     }
 
     private static String generateReservationNumber() {
-        return "N" + System.currentTimeMillis();
+        return "N" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
 
     public void accept() {
