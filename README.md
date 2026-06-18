@@ -125,7 +125,7 @@ services:
       - "8080:8080"
     build:
       context: .
-      dockerfile: src/main/java/Dockerfile.dev  # 개발용
+      dockerfile: Dockerfile.dev  # 개발용
     volumes:
       # 로컬에서 Gradle로 빌드한 jar 파일을 컨테이너의 app.jar에 덮어씌워서 변경 사항 반영
       - ./build/libs/picplz-0.0.1-SNAPSHOT.jar:/picplz/app.jar
