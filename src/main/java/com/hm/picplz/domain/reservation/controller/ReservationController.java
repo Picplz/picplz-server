@@ -30,9 +30,9 @@ public class ReservationController {
     }
 
 
-    @Operation(summary = "예약 내역 상세 조회")
+    @Operation(summary = "작가의 예약 내역 상세 조회")
     @GetMapping("/{reservationId}")
-    public ReservationDto.Detail loadReservationtDetailById(
+    public ReservationDto.Detail loadReservationtDetailByPhotographerId(
             @AuthenticationPrincipal Long memberId,
             @PathVariable(name = "reservationId") Long resrvationId
     ) {
@@ -57,19 +57,30 @@ public class ReservationController {
             @PathVariable(name = "reservationId") Long reservationId,
             @RequestBody ReservationDto.RejectReservationRequest rejectReservationRequest
     ) {
-        log.info("작가의 예약 내역 거절");
+        log.info("작가의 예약 거절");
         return reservationService.rejectReservationById(memberId, reservationId, rejectReservationRequest);
     }
 
     @Operation(summary = "고객의 예약 일자 변경 및 확정")
     @PatchMapping("/{reservationId}/confirm")
-    public ReservationDto.ConfirmReservationResponse confrimReservationsByPhotographerId(
+    public ReservationDto.ConfirmReservationResponse confrimReservationsByCustomerId(
             @AuthenticationPrincipal Long memberId,
             @PathVariable(name = "reservationId") Long reservationId,
             @RequestBody ReservationDto.ConfirmReservationRequest confirmReservationRequest
     ) {
         log.info("고객의 예약 일자 변경 및 확정");
         return reservationService.confirmReservationById(memberId, reservationId, confirmReservationRequest);
+    }
+
+    @Operation(summary = "고객, 작가의 예약 취소")
+    @PatchMapping("/{reservationId}/cancel")
+    public ReservationDto.CancelReservationResponse cancelReservationsById(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable(name = "reservationId") Long reservationId,
+            @RequestBody ReservationDto.CancelReservationRequest cancelReservationRequest
+    ) {
+        log.info("고객, 작가의 예약 취소");
+        return reservationService.cancelReservationById(memberId, reservationId, cancelReservationRequest);
     }
 
 }

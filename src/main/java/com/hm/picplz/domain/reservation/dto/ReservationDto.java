@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hm.picplz.domain.product.domain.ProductPhoto;
 import com.hm.picplz.domain.product.domain.ShootProduct;
 import com.hm.picplz.domain.product.dto.ProductDto;
+import com.hm.picplz.domain.reservation.domain.CancelReason;
+import com.hm.picplz.domain.reservation.domain.RejectReason;
 import com.hm.picplz.domain.reservation.domain.Reservation;
 import com.hm.picplz.domain.reservation.domain.ReservationStatus;
 import com.hm.picplz.global.common.entity.YesNo;
@@ -92,7 +94,8 @@ public class ReservationDto {
     @Data
     @NoArgsConstructor
     public static class RejectReservationRequest {
-        private String rejectReason;
+        private List<RejectReason> rejectReasons;
+        private String rejectReasonDetail;
     }
 
     @Data
@@ -100,14 +103,14 @@ public class ReservationDto {
     public static class RejectReservationResponse {
         private Long reservationId;
         private ReservationStatus status;
-        private String rejectReason;
+        private String rejectReasonDetail;
         private LocalDateTime statusChangedAt;
 
         public static RejectReservationResponse of(Reservation reservation) {
             RejectReservationResponse rejectReservationResponse = new RejectReservationResponse();
             rejectReservationResponse.reservationId = reservation.getId();
             rejectReservationResponse.status = reservation.getStatus();
-            rejectReservationResponse.rejectReason = reservation.getRejectReason();
+            rejectReservationResponse.rejectReasonDetail = reservation.getRejectReasonDetail();
             rejectReservationResponse.statusChangedAt = reservation.getStatusChangedAt();
             return rejectReservationResponse;
         }
@@ -141,4 +144,32 @@ public class ReservationDto {
             return confirmReservationResponse;
         }
     }
+
+    @Data
+    @NoArgsConstructor
+    public static class CancelReservationRequest {
+        private List<CancelReason> cancelReasons;
+        private String cancelReasonDetail;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class CancelReservationResponse {
+        private Long reservationId;
+        private ReservationStatus status;
+        private LocalDateTime statusChangedAt;
+        private List<CancelReason> cancelReasons;
+        private String cancelReasonDetail;
+
+        public static CancelReservationResponse of(Reservation reservation) {
+            CancelReservationResponse cancelReservationResponse = new CancelReservationResponse();
+            cancelReservationResponse.reservationId = reservation.getId();
+            cancelReservationResponse.status = reservation.getStatus();
+            cancelReservationResponse.cancelReasons = reservation.getCancelReasons();
+            cancelReservationResponse.cancelReasonDetail = reservation.getRejectReasonDetail();
+            cancelReservationResponse.statusChangedAt = reservation.getStatusChangedAt();
+            return cancelReservationResponse;
+        }
+    }
+
 }

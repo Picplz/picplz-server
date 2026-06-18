@@ -14,6 +14,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -54,8 +57,33 @@ public class Reservation extends BaseEntity {
 
     private LocalDateTime statusChangedAt;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "reservation_reject_reasons",
+            joinColumns = @JoinColumn(name = "reservation_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reject_reason")
+    private List<RejectReason> rejectReason = new ArrayList<>();
+
     @Column(length = 500)
-    private String rejectReason;
+    private String rejectReasonDetail;
+
+    @Enumerated(EnumType.STRING)
+    private CancelType cancelType;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "reservation_cancel_reasons",
+            joinColumns = @JoinColumn(name = "reservation_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cancel_reason")
+    private List<CancelReason> cancelReasons = new ArrayList<>();
+
+
+    @Column(length = 500)
+    private String cancelReasonDetail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -111,11 +139,12 @@ public class Reservation extends BaseEntity {
         this.status = ReservationStatus.ACCEPTED;
     }
 
-    public void reject(String rejectReason) {
+    public void reject(List<RejectReason> rejectReasons, String rejectReasonDetail) {
         validatePending();
+        this.rejectReason = rejectReasons;
         this.statusChangedAt = LocalDateTime.now();
         this.status = ReservationStatus.REJECTED;
-        this.rejectReason = rejectReason;
+        this.rejectReasonDetail = rejectReasonDetail;
     }
 
     public void confirm(LocalDateTime confirmedDateTime) {
@@ -125,6 +154,19 @@ public class Reservation extends BaseEntity {
         this.statusChangedAt = LocalDateTime.now();
         this.reservationTime = confirmedDateTime;
         this.status = ReservationStatus.CONFIRMED;
+    }
+
+    public void cancel(CancelType cancelType,
+                       List<CancelReason> cancelReasons,
+                       String cancelReasonDetail) {
+        if (this.status == ReservationStatus.REJECTED || this.status == ReservationStatus.CANCELED) {
+            throw ExceptionFactory.of(ReservationErrorCode.RESERVATION_STATUS_INVALID);
+        }
+        this.status = ReservationStatus.CANCELED;
+        this.cancelType = cancelType;
+        this.cancelReasons = cancelReasons;
+        this.cancelReasonDetail = cancelReasonDetail;
+        this.statusChangedAt = LocalDateTime.now();
     }
 
     private void validatePending() {
