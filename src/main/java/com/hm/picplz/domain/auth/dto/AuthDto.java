@@ -3,9 +3,11 @@ package com.hm.picplz.domain.auth.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
+import com.hm.picplz.domain.member.domain.Role;
 import com.hm.picplz.domain.member.domain.SocialProvider;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +19,13 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AuthDto {
+
+	@Data
+	@NoArgsConstructor
+	public static class RefreshRequest {
+		@NotBlank
+		private String refreshToken;
+	}
 
 	@Data
 	@NoArgsConstructor
@@ -43,14 +52,18 @@ public class AuthDto {
 		private SocialProvider socialProvider;
 		@Schema(description = "픽플즈 accessToken")
 		private JwtTokenResponseDto token;
+		@Schema(description = "현재 역할")
+		private Role currentRole;
 
 		@Builder
-		public LoginResponse(boolean isRegistered, String socialCode, String socialEmail, SocialProvider socialProvider, JwtTokenResponseDto token) {
+		public LoginResponse(boolean isRegistered, String socialCode, String socialEmail, SocialProvider socialProvider,
+				JwtTokenResponseDto token, Role currentRole) {
 			this.isRegistered = isRegistered;
 			this.socialCode = socialCode;
 			this.socialEmail = socialEmail;
 			this.socialProvider = socialProvider;
 			this.token = token;
+			this.currentRole = currentRole;
 		}
 
 	}

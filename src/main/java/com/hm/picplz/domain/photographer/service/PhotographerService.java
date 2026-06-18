@@ -1,13 +1,11 @@
 package com.hm.picplz.domain.photographer.service;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.global.common.service.WebClientService;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +24,8 @@ import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.exception.PhotographerErrorCode;
 import com.hm.picplz.domain.photographer.repository.ActiveAreaRepository;
 import com.hm.picplz.domain.area.repository.AreaRepository;
+import com.hm.picplz.domain.photographer.dto.DefaultCameraDto;
+import com.hm.picplz.domain.photographer.repository.DefaultCameraRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.global.common.entity.YesNo;
 import com.hm.picplz.global.error.ExceptionFactory;
@@ -40,13 +40,10 @@ public class PhotographerService {
 	private final PhotoMoodService photoMoodService;
 	private final WebClientService webClientService;
 	private final PhotographerRepository photographerRepository;
+	private final DefaultCameraRepository defaultCameraRepository;
 	private final FollowingRepository followingRepository;
 	private final ActiveAreaRepository activeAreaRepository;
 	private final AreaRepository areaRepository;
-
-	private final RedisTemplate<String, Object> redisTemplate;
-
-	private static final String PHOTOGRAPHER_REDIS_KEY = "photographer:";
 
 	/**
 	 * 작가 회원가입 메서드
@@ -56,13 +53,21 @@ public class PhotographerService {
 	public PhotographerDto.Detail createPhotographer(PhotographerDto.CreatePhotographerRequest createPhotographerRequest) {
 		// 마지막 닉네임 중복 확인
 		memberService.checkNickname(createPhotographerRequest.getNickname());
-		// 멤버 데이터 생성
-		Member member = memberService.createMember(MemberDto.CreateMemberRequest.of(createPhotographerRequest,
-			Role.PHOTOGRAPHER));
 
-		// 작가 정보 생성
+		// 1. social_code로 기존 Member 조회 또는 생성
+		Member member = memberService.findOrCreateMember(
+			MemberDto.CreateMemberRequest.of(createPhotographerRequest, Role.PHOTOGRAPHER)
+		);
+
+		// 2. 이미 Photographer 프로필이 있는지 확인
+		if (member.getPhotographer() != null) {
+			throw ExceptionFactory.of(PhotographerErrorCode.ALREADY_PHOTOGRAPHER);
+		}
+
+		// 3. Photographer 프로필 생성 (active = 'Y')
 		Photographer photographer = Photographer.from(member);
 		photographerRepository.save(photographer);
+		member.updateRole(Role.PHOTOGRAPHER);
 
 		// 작가 분위기 키워드
 		createPhotoMoods(createPhotographerRequest.getPhotoMoods(), photographer);
@@ -80,47 +85,12 @@ public class PhotographerService {
 	 * @param memberId 조회를 시도하는 회원 정보(팔로우 여부를 위해)
 	 * @return 작가 상세 정보
 	 */
+	@Transactional(readOnly = true)
 	public PhotographerDto.Detail getPhotographerDetail(Long photographerId, Long memberId) {
 		Photographer photographer = getPhotographerByPhotographerId(photographerId);
 		int followersCount = getFollowers(photographer);
 		YesNo isFollowing = isFollowing(photographer, memberId);
 		return PhotographerDto.Detail.of(photographer, followersCount, isFollowing);
-	}
-
-	/**
-	 * 작가 권한 확인을 위해 캐시 확인
-	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
-	 * @return 작가의 권한 확인 결과가 redis에 존재하는지
-	 */
-	public Boolean getCachedPhotographerExistence(Long memberId) {
-		return (Boolean) redisTemplate.opsForValue().get(PHOTOGRAPHER_REDIS_KEY + memberId);
-	}
-
-	/**
-	 * 작가인 경우, redis에 캐시로 저장해 작가 권한을 빠르게 확인하도록 한다.
-	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
-	 * @return 작가인지 아닌지 반환 (작가라면 redis에 캐싱)
-	 */
-	public boolean cachePhotographerExistence(Long memberId) {
-		// 1. 픽플즈에 존재하는 회원인가?
-		memberService.getMemberById(memberId);
-		// 2. 작가인가?
-		boolean exists = photographerRepository.existsByMemberId(memberId);
-		redisTemplate.opsForValue().set(PHOTOGRAPHER_REDIS_KEY + memberId, exists, Duration.ofMinutes(30));
-		return exists;
-	}
-
-	/**
-	 * member Id로 작가인지 확인하고, 캐시가 없다면 작가 여부를 MySQL에서 확인하고 나서 반환한다.
-	 * @param memberId 작가 권환 확인을 요청한 사용자의 pk
-	 * @return 작가인가 아닌가
-	 */
-	public boolean checkAndCachePhotographer(Long memberId) {
-		Boolean cached = getCachedPhotographerExistence(memberId);
-		if (cached != null) {
-			return cached;
-		}
-		return cachePhotographerExistence(memberId);
 	}
 
 	/**
@@ -189,6 +159,10 @@ public class PhotographerService {
 	public Photographer getPhotographerByMemberId(Long memberId) {
 		return photographerRepository.findByMemberId(memberId)
 				.orElseThrow(() -> ExceptionFactory.of(PhotographerErrorCode.PHOTOGRAPHER_NOT_FOUND));
+	}
+
+	public List<DefaultCameraDto.CameraInfo> getCameras() {
+		return defaultCameraRepository.findAll().stream().map(DefaultCameraDto.CameraInfo::from).toList();
 	}
 
 	/**

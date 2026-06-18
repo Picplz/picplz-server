@@ -5,10 +5,10 @@ import java.util.List;
 import com.hm.picplz.domain.reservation.dto.ReservationDto;
 import com.hm.picplz.domain.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.hm.picplz.domain.photographer.annotation.PhotographerOnly;
 import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.service.PhotographerService;
@@ -37,13 +37,7 @@ public class PhotographerController {
         return photographerService.createPhotographer(createPhotographerRequest);
     }
 
-    @Operation(summary = "작가 로그인")
-    @PostMapping("/login")
-    public void loginPhotographer(@AuthenticationPrincipal Long memberId) {
-        photographerService.cachePhotographerExistence(memberId);
-    }
-
-    @PhotographerOnly
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "사진 감성 해시 태그 생성")
     @PostMapping("/photo-mood")
     public void addPhotoMood(
@@ -52,7 +46,7 @@ public class PhotographerController {
         photographerService.addPhotoMood(addPhotoMoodRequestDto, memberId);
     }
 
-    @PhotographerOnly
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "사진 감성 해시 태그 삭제")
     @DeleteMapping("/photo-mood")
     public void deletePhotoMood(@AuthenticationPrincipal Long memberId,
@@ -86,6 +80,7 @@ public class PhotographerController {
         return photographerService.getPhotographersByActiveArea(memberId);
     }
 
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "작가의 주 활동지역 변경")
     @PutMapping("/active-area")
     public PhotographerDto.UpdateActiveAreaResponse updateActiveArea(

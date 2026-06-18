@@ -1,6 +1,8 @@
 package com.hm.picplz.domain.auth.controller;
 
+import com.hm.picplz.domain.auth.jwt.JwtTokenResponseDto;
 import com.hm.picplz.domain.member.domain.SocialProvider;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,5 +40,11 @@ public class AuthController {
 	@PostMapping("/test")
 	public AuthDto.LoginResponse testLogin(@RequestBody AuthDto.TestLogin request) {
 		return authService.testLogin(request);
+	}
+
+	@Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 액세스 토큰 및 리프레시 토큰을 재발급합니다.")
+	@PostMapping("/refresh")
+	public JwtTokenResponseDto refresh(@RequestBody @Valid AuthDto.RefreshRequest request) {
+		return authService.refreshToken(request.getRefreshToken());
 	}
 }

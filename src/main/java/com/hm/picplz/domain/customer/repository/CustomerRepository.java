@@ -1,7 +1,11 @@
 package com.hm.picplz.domain.customer.repository;
 
 import com.hm.picplz.domain.photographer.domain.Photographer;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.hm.picplz.domain.customer.domain.Customer;
 import org.springframework.data.jpa.repository.Query;

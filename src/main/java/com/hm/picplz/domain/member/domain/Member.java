@@ -18,6 +18,9 @@ import org.springframework.util.StringUtils;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name = "member", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"social_code", "social_provider"})
+})
 public class Member extends BaseEntity {
 
     @Id
@@ -45,10 +48,11 @@ public class Member extends BaseEntity {
     private String profileImage;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "social_provider", nullable = false)
     private SocialProvider socialProvider; // 카카오 or 애플
 
     @NotNull
+    @Column(name = "social_code")
     private String socialCode;
 
     private String instagram; // 인스타그램 아이디
@@ -89,5 +93,30 @@ public class Member extends BaseEntity {
     public void updateInstagram(String instagram) { if (StringUtils.hasText(instagram)) this.instagram = instagram; }
 
     public void updateIntroduction(String introduction) {
-        if (StringUtils.hasText(introduction)) this.introduction = introduction; }
+        if (StringUtils.hasText(introduction)) this.introduction = introduction;
+    }
+
+    /**
+     * Photographer 프로필 존재 여부 확인
+     * @return Photographer 프로필이 있으면 true
+     */
+    public boolean hasPhotographerProfile() {
+        return photographer != null;
+    }
+
+    /**
+     * Customer 프로필 존재 여부 확인
+     * @return Customer 프로필이 있으면 true
+     */
+    public boolean hasCustomerProfile() {
+        return customer != null;
+    }
+
+    /**
+     * 회원의 역할 업데이트
+     * @param newRole 새로운 역할
+     */
+    public void updateRole(Role newRole) {
+        this.role = newRole;
+    }
 }
