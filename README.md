@@ -120,36 +120,36 @@ cloud:
 ```yaml
 version: '3.8'
 services:
-   spring-app:
-      container_name: picplz-dev-server
-      ports:
-         - "8080:8080"
-      build:
-         context: .
-         dockerfile: Dockerfile.dev  # 개발용
-      volumes:
-         # 로컬에서 Gradle로 빌드한 jar 파일을 컨테이너의 app.jar에 덮어씌워서 변경 사항 반영
-         - ./build/libs/picplz-0.0.1-SNAPSHOT.jar:/picplz/app.jar
-      depends_on:
-         - redis
-   redis:
-      image: redis:7.0
-      container_name: redis
-      ports:
-         - "6379:6379"
-      volumes:
-         - redis-data:/data
-      environment:
-         REDIS_PASSWORD: picplz2025!!
-      networks:
-         - default
+  spring-app:
+    container_name: picplz-dev-server
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+      dockerfile: Dockerfile.dev  # 개발용
+    volumes:
+      # 로컬에서 Gradle로 빌드한 jar 파일을 컨테이너의 app.jar에 덮어씌워서 변경 사항 반영
+      - ./build/libs/picplz-0.0.1-SNAPSHOT.jar:/picplz/app.jar
+    depends_on:
+      - redis
+  redis:
+    image: redis:7.0
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    environment:
+      REDIS_PASSWORD: picplz2025!!
+    networks:
+      - default
 
 volumes:
-   redis-data:
+  redis-data:
 
 networks:
-   default:
-      driver: host
+  default:
+    driver: host
 ```
 
 ```bash

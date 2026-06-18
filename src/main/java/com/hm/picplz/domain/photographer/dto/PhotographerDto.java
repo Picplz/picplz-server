@@ -11,6 +11,7 @@ import com.hm.picplz.domain.photographer.domain.Photographer;
 import com.hm.picplz.domain.photographer.domain.PhotographerCamera;
 import com.hm.picplz.global.common.entity.YesNo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -49,6 +50,7 @@ public class PhotographerDto {
 
     @Data
     @NoArgsConstructor
+    @Schema(name = "PhotographerDetailResponse")
     public static class Detail {
 
         private Long photographerId;

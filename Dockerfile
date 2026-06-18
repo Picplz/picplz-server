@@ -19,7 +19,7 @@ COPY src src
 RUN chmod +x ./gradlew
 
 # Build the Spring Boot application using Gradle
-RUN ./gradlew bootJar
+RUN sh ./gradlew bootJar -x test
 
 # Step 2: Create a minimal image with only the JAR file
 FROM eclipse-temurin:17-jre
