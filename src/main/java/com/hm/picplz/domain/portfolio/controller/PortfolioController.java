@@ -5,6 +5,7 @@ import com.hm.picplz.domain.portfolio.service.PortfolioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +19,20 @@ public class PortfolioController {
 
     @Operation(summary = "포트폴리오 생성")
     @PostMapping
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     public PortfolioDto.PortfolioResponse createPortfolio(
             @AuthenticationPrincipal Long memberId,
             @RequestBody PortfolioDto.CreatePortfolioRequest request) {
         return portfolioService.createPortfolio(memberId, request);
+    }
+
+    @Operation(summary = "작가별 포트폴리오 목록 조회", description = "default size=9")
+    @GetMapping
+    public PortfolioDto.PortfolioListResponse getPortfoliosByPhotographer(
+            @RequestParam Long photographerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "9") int size) {
+        return portfolioService.getPortfoliosByPhotographer(photographerId, page, size);
     }
 
     @Operation(summary = "포트폴리오 단일 조회")

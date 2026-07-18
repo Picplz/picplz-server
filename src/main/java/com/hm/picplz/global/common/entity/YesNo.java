@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum YesNo {
 
-    Y("Y"), N("N");
+    N("N"), Y("Y");
 
     @JsonValue
     private final String value;

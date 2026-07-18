@@ -73,9 +73,28 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_PEM_KEY }}
-          envs: GITHUB_SHA
+          envs: DOCKER_USERNAME,DOCKER_TOKEN,DOCKER_REPO
           script: |
-                  sudo docker rm -f $(docker ps -qa)
-                  sudo docker pull ${{ secrets.DOCKER_REPO }}/picplz-server-dev
-                  docker compose up -d
+                  echo "=== Docker Login ==="
+                  echo "$DOCKER_TOKEN" | docker login -u $DOCKER_USERNAME --password-stdin
+
+                  echo "=== Stop & Remove Containers ==="
+                  docker stop $(docker ps -q) 2>/dev/null || echo "No running containers"
+                  docker rm $(docker ps -aq) 2>/dev/null || echo "No containers to remove"
+
+                  echo "=== Pull Image ==="
+                  docker pull $DOCKER_REPO/picplz-server-dev
+
+                  echo "=== Start Containers ==="
+                  cd ~
+                  docker-compose up -d
+
+                  echo "=== Cleanup ==="
                   docker image prune -f
+
+                  echo "=== Verify ==="
+                  docker ps
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          DOCKER_REPO: ${{ secrets.DOCKER_REPO }}

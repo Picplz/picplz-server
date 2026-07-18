@@ -1,6 +1,8 @@
 package com.hm.picplz.infra.s3;
 
+import java.util.List;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,24 @@ public class S3Dto {
 			UploadUrlResponse response = new UploadUrlResponse();
 			response.uploadUrl = uploadUrl;
 			response.objectKey = objectKey;
+			return response;
+		}
+	}
+
+	@Data
+	@AllArgsConstructor
+	public static class BatchUploadUrlResponse {
+		private List<UploadUrlResponse> files;
+	}
+
+	@Data
+	@NoArgsConstructor
+	public static class DownloadUrlResponse {
+		private String downloadUrl;
+
+		public static DownloadUrlResponse of(String downloadUrl) {
+			DownloadUrlResponse response = new DownloadUrlResponse();
+			response.downloadUrl = downloadUrl;
 			return response;
 		}
 	}

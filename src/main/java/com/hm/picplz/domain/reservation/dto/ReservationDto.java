@@ -166,7 +166,7 @@ public class ReservationDto {
             cancelReservationResponse.reservationId = reservation.getId();
             cancelReservationResponse.status = reservation.getStatus();
             cancelReservationResponse.cancelReasons = reservation.getCancelReasons();
-            cancelReservationResponse.cancelReasonDetail = reservation.getRejectReasonDetail();
+            cancelReservationResponse.cancelReasonDetail = reservation.getCancelReasonDetail();
             cancelReservationResponse.statusChangedAt = reservation.getStatusChangedAt();
             return cancelReservationResponse;
         }

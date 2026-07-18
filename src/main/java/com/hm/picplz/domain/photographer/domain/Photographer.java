@@ -63,7 +63,7 @@ public class Photographer extends BaseEntity {
 	public static Photographer from (Member member) {
 		Photographer photographer = new Photographer();
 		photographer.member = member;
-		photographer.active = YesNo.N;
+		photographer.active = YesNo.Y;  // 회원가입 완료 시 바로 활동 가능 상태
 		return photographer;
 	}
 

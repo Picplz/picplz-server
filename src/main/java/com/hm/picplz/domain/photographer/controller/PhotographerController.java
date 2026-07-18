@@ -62,7 +62,7 @@ public class PhotographerController {
         photographerService.addPhotoMood(addPhotoMoodRequestDto, memberId);
     }
 
-    @PhotographerOnly
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "사진 감성 해시 태그 삭제")
     @DeleteMapping("/photo-mood")
     public void deletePhotoMood(@AuthenticationPrincipal Long memberId,
@@ -96,6 +96,7 @@ public class PhotographerController {
         return photographerService.getPhotographersByActiveArea(memberId);
     }
 
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "작가의 주 활동지역 변경")
     @PutMapping("/active-area")
     public PhotographerDto.UpdateActiveAreaResponse updateActiveArea(

@@ -9,11 +9,16 @@ import com.hm.picplz.domain.portfolio.exception.PortfolioErrorCode;
 import com.hm.picplz.domain.portfolio.repository.PortfolioRepository;
 import com.hm.picplz.domain.portfolio.repository.ScrapRepository;
 import com.hm.picplz.global.error.ExceptionFactory;
+import com.hm.picplz.infra.s3.S3PresignedUrlService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -23,6 +28,7 @@ public class PortfolioService {
     private final PhotographerService photographerService;
     private final PortfolioRepository portfolioRepository;
     private final ScrapRepository scrapRepository;
+    private final S3PresignedUrlService s3PresignedUrlService;
 
     /**
      * 포트폴리오 생성
@@ -59,6 +65,24 @@ public class PortfolioService {
         boolean scrapYN = scrapRepository.existsByMemberIdAndPortfolioId(memberId, portfolioId);
 
         return PortfolioDto.PortfolioResponse.of(portfolio, scrapCount, scrapYN);
+    }
+
+    @Transactional(readOnly = true)
+    public PortfolioDto.PortfolioListResponse getPortfoliosByPhotographer(Long photographerId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Portfolio> portfolioPage = portfolioRepository.findByPhotographerIdOrderByUploadDateDesc(photographerId, pageable);
+
+        List<PortfolioDto.PortfolioSummaryResponse> summaries = portfolioPage.getContent().stream()
+                .map(portfolio -> {
+                    String representativeImage = portfolio.getPortfolioPhotos().stream()
+                            .min(Comparator.comparingInt(PortfolioPhoto::getPhotoOrder))
+                            .map(photo -> s3PresignedUrlService.generateDownloadUrl(photo.getImage()).toString())
+                            .orElse(null);
+                    return PortfolioDto.PortfolioSummaryResponse.of(portfolio, representativeImage);
+                })
+                .toList();
+
+        return PortfolioDto.PortfolioListResponse.of(summaries, portfolioPage.getTotalElements(), portfolioPage.getTotalPages(), page);
     }
 
     /**
