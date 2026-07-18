@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
+import com.hm.picplz.domain.photographer.dto.PhotographerSearchDto;
 import com.hm.picplz.global.common.service.WebClientService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +30,9 @@ import com.hm.picplz.domain.photographer.repository.DefaultCameraRepository;
 import com.hm.picplz.domain.photographer.repository.PhotographerRepository;
 import com.hm.picplz.global.common.entity.YesNo;
 import com.hm.picplz.global.error.ExceptionFactory;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +79,21 @@ public class PhotographerService {
 		createPhotographerCameras(createPhotographerRequest.getCameras(), photographer);
 
 		return PhotographerDto.Detail.of(photographer);
+	}
+
+	/**
+	 * 닉네임으로 작가 검색
+	 *
+	 * @param keyword 검색창에 입력한 단어
+	 * @return 검색된 작가 정보 리스트
+	 */
+	@Transactional(readOnly = true)
+	public Page<PhotographerSearchDto> searchPhotographers(String keyword, Pageable pageable) {
+
+		Page<Photographer> photographerPage =
+				photographerRepository.findByMember_NicknameContaining(keyword, pageable);
+
+		return photographerPage.map(PhotographerSearchDto::of);
 	}
 
 	/**
