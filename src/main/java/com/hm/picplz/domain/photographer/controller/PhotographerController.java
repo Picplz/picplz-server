@@ -6,17 +6,19 @@ import com.hm.picplz.domain.photographer.dto.PhotographerSearchDto;
 import com.hm.picplz.domain.reservation.dto.ReservationDto;
 import com.hm.picplz.domain.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.springframework.data.domain.Page;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import com.hm.picplz.domain.photographer.annotation.PhotographerOnly;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.hm.picplz.domain.photographer.dto.PhotoMoodDto;
 import com.hm.picplz.domain.photographer.dto.PhotographerDto;
 import com.hm.picplz.domain.photographer.service.PhotographerService;
 import com.hm.picplz.domain.product.dto.ProductDto.Detail;
 import com.hm.picplz.domain.product.service.ProductService;
-import org.springframework.data.domain.Pageable;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -39,26 +41,12 @@ public class PhotographerController {
         return photographerService.createPhotographer(createPhotographerRequest);
     }
 
-    @Operation(summary = "작가 로그인")
-    @PostMapping("/login")
-    public void loginPhotographer(@AuthenticationPrincipal Long memberId) {
-        photographerService.cachePhotographerExistence(memberId);
-    }
-
-    @Operation(summary = "홈 화면 작가 서칭")
-    @GetMapping("/search")
-    public Page<PhotographerSearchDto> searchPhtographers(@RequestParam String keyword, @PageableDefault(size = 10) Pageable pageable) {
-
-        return photographerService.searchPhotographers(keyword, pageable);
-    }
-
-
-    @PhotographerOnly
+    @PreAuthorize("hasRole('PHOTOGRAPHER')")
     @Operation(summary = "사진 감성 해시 태그 생성")
     @PostMapping("/photo-mood")
     public void addPhotoMood(
-        @AuthenticationPrincipal Long memberId,
-        @RequestBody PhotoMoodDto.PhotoMoodRequest addPhotoMoodRequestDto) {
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody PhotoMoodDto.PhotoMoodRequest addPhotoMoodRequestDto) {
         photographerService.addPhotoMood(addPhotoMoodRequestDto, memberId);
     }
 
@@ -66,16 +54,22 @@ public class PhotographerController {
     @Operation(summary = "사진 감성 해시 태그 삭제")
     @DeleteMapping("/photo-mood")
     public void deletePhotoMood(@AuthenticationPrincipal Long memberId,
-        @RequestBody PhotoMoodDto.PhotoMoodRequest deletePhotoMoodRequestDto) {
+                                @RequestBody PhotoMoodDto.PhotoMoodRequest deletePhotoMoodRequestDto) {
         photographerService.deletePhotoMood(deletePhotoMoodRequestDto, memberId);
+    }
+
+    @Operation(summary = "홈 화면 작가 서칭")
+    @GetMapping("/search")
+    public Page<PhotographerSearchDto> searchPhtographers(@RequestParam String keyword, @PageableDefault(size = 10) Pageable pageable) {
+        return photographerService.searchPhotographers(keyword, pageable);
     }
 
     @Schema(name = "PhotographerDetailResponse")
     @Operation(summary = "작가 한명 정보 불러오기")
     @GetMapping("/{photographerId}/info")
     public PhotographerDto.Detail getPhotographerInfo(
-        @AuthenticationPrincipal Long memberId,
-        @PathVariable Long photographerId) {
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long photographerId) {
         return photographerService.getPhotographerDetail(photographerId, memberId);
     }
 
