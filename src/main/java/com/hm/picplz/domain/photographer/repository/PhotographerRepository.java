@@ -15,7 +15,57 @@ public interface PhotographerRepository extends JpaRepository<Photographer, Long
     @Query("SELECT p FROM Photographer p JOIN FETCH p.member WHERE p.member.id = :memberId")
     Optional<Photographer> findByMemberId(@Param("memberId") Long memberId);
 
-    Page<Photographer> findByMember_NicknameContaining(String keyword, Pageable pageable);
+    @Query("""
+    SELECT p
+    FROM Photographer p
+    LEFT JOIN p.reviews r
+    WHERE p.member.nickname LIKE CONCAT('%', :keyword, '%')
+    GROUP BY p
+    ORDER BY
+        COALESCE(AVG(r.starPoint), 0) DESC,
+        COUNT(r) DESC,
+        p.id DESC
+        """)
+    Page<Photographer> searchPhotographersByRating(
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+
+    @Query("""
+    SELECT p
+    FROM Photographer p
+    LEFT JOIN p.reviews r
+    WHERE p.member.nickname LIKE CONCAT('%', :keyword, '%')
+    GROUP BY p
+    ORDER BY
+        COUNT(r) DESC,
+        COALESCE(AVG(r.starPoint), 0) DESC,
+        p.id DESC
+    """)
+    Page<Photographer> searchPhotographersByReviewCount(
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query("""
+    SELECT p
+    FROM Photographer p
+    LEFT JOIN p.reviews r
+    LEFT JOIN Following f
+        ON f.following = p.member
+    WHERE p.member.nickname LIKE CONCAT('%', :keyword, '%')
+    GROUP BY p
+    ORDER BY
+        COUNT(DISTINCT f) DESC,
+        COALESCE(AVG(r.starPoint), 0) DESC,
+        COUNT(DISTINCT r) DESC,
+        p.id DESC
+    """)
+    Page<Photographer> searchPhotographersByFollowerCount(
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 
     @Query("SELECT p FROM Photographer p JOIN FETCH p.member LEFT JOIN FETCH p.photoMoods WHERE p.id = :photographerId")
     Optional<Photographer> findPhotographerWithMoods(@Param("photographerId") Long photographerId);

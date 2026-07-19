@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.hm.picplz.domain.photographer.PhotographerSortType;
 import com.hm.picplz.domain.photographer.domain.PhotoMood;
 import com.hm.picplz.domain.photographer.dto.PhotographerSearchDto;
 import com.hm.picplz.global.common.service.WebClientService;
@@ -81,19 +82,37 @@ public class PhotographerService {
 		return PhotographerDto.Detail.of(photographer);
 	}
 
+
 	/**
 	 * 닉네임으로 작가 검색
 	 *
-	 * @param keyword 검색창에 입력한 단어
-	 * @return 검색된 작가 정보 리스트
+	 * @param keyword 검색어
+	 * @param sortType 정렬 기준
+	 * @param pageable 페이지 정보
+	 * @return 검색된 작가 정보
 	 */
 	@Transactional(readOnly = true)
-	public Page<PhotographerSearchDto> searchPhotographers(String keyword, Pageable pageable) {
+	public Page<PhotographerSearchDto> searchPhotographers(
+			String keyword,
+			PhotographerSortType sortType,
+			Pageable pageable
+	) {
+		Page<Photographer> photographers;
 
-		Page<Photographer> photographerPage =
-				photographerRepository.findByMember_NicknameContaining(keyword, pageable);
+		switch (sortType) {
+			case REVIEW -> photographers =
+					photographerRepository.searchPhotographersByReviewCount(keyword, pageable);
 
-		return photographerPage.map(PhotographerSearchDto::of);
+			case FOLLOWER -> photographers =
+					photographerRepository.searchPhotographersByFollowerCount(keyword, pageable);
+
+			case RATING -> photographers =
+					photographerRepository.searchPhotographersByRating(keyword, pageable);
+
+			default -> throw new IllegalArgumentException("지원하지 않는 정렬 기준입니다.");
+		}
+
+		return photographers.map(PhotographerSearchDto::of);
 	}
 
 	/**

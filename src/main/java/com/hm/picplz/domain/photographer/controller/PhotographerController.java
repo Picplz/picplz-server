@@ -2,6 +2,7 @@ package com.hm.picplz.domain.photographer.controller;
 
 import java.util.List;
 
+import com.hm.picplz.domain.photographer.PhotographerSortType;
 import com.hm.picplz.domain.photographer.dto.PhotographerSearchDto;
 import com.hm.picplz.domain.reservation.dto.ReservationDto;
 import com.hm.picplz.domain.reservation.service.ReservationService;
@@ -58,10 +59,13 @@ public class PhotographerController {
         photographerService.deletePhotoMood(deletePhotoMoodRequestDto, memberId);
     }
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "홈 화면 작가 서칭")
     @GetMapping("/search")
-    public Page<PhotographerSearchDto> searchPhtographers(@RequestParam String keyword, @PageableDefault(size = 10) Pageable pageable) {
-        return photographerService.searchPhotographers(keyword, pageable);
+    public Page<PhotographerSearchDto> searchPhtographers(@RequestParam String keyword,
+                                                          @RequestParam(defaultValue = "RATING") PhotographerSortType sortType,
+                                                          @PageableDefault(size = 10) Pageable pageable) {
+        return photographerService.searchPhotographers(keyword, sortType, pageable);
     }
 
     @Schema(name = "PhotographerDetailResponse")
